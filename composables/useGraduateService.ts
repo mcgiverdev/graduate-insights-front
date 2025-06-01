@@ -116,10 +116,18 @@ async function addGraduate(graduate: any) {
       },
     )
 
-    return { data: response.data }
+    return {
+      success: true,
+      message: 'Graduado creado exitosamente',
+      data: response.data,
+    }
   }
   catch (error: any) {
-    return { error: error.data || error }
+    return {
+      success: false,
+      message: error.data?.message || 'Error al crear el graduado',
+      error: error.data || error,
+    }
   }
   finally {
     loadingSave.value = false
@@ -130,7 +138,7 @@ async function updateGraduate(id: number, graduate: any) {
   loadingSave.value = true
 
   try {
-    const response = await useApi<{ data: Graduate }>(
+    await useApi<{ data: Graduate }>(
       `/graduate-insights/v1/api/graduate/${id}`,
       {
         method: 'PUT',
@@ -138,10 +146,17 @@ async function updateGraduate(id: number, graduate: any) {
       },
     )
 
-    return { data: response.data }
+    return {
+      success: true,
+      message: 'Graduado actualizado exitosamente',
+    }
   }
   catch (error: any) {
-    return { error: error.data || error }
+    return {
+      success: false,
+      message: error.data?.message || 'Error al actualizar el graduado',
+      error: error.data || error,
+    }
   }
   finally {
     loadingSave.value = false

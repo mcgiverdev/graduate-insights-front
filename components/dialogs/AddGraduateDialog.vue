@@ -218,6 +218,7 @@ const handleDialogModelValueUpdate = (val: boolean) => {
                 >
                   <AppSelect
                     v-bind="field"
+                    :model-value="field.value"
                     :items="[{ title: 'Masculino', value: 'M' }, { title: 'Femenino', value: 'F' }]"
                     label="Género"
                     :error-messages="errorMessage"
