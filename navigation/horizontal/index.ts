@@ -14,4 +14,9 @@ export default [
     to: { name: 'users' },
     icon: { icon: 'tabler-users' },
   },
+  {
+    title: 'Graduates',
+    to: { name: 'graduates' },
+    icon: { icon: 'tabler-graduation-cap' },
+  },
 ]

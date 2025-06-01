@@ -32,7 +32,6 @@ const updatePage = (value: number) => {
         active-color="primary"
         :length="Math.ceil(totalItems / itemsPerPage)"
         :total-visible="$vuetify.display.xs ? 1 : Math.min(Math.ceil(totalItems / itemsPerPage), 5)"
-        :disabled="Math.ceil(totalItems / itemsPerPage) === 0"
         @update:model-value="updatePage"
       />
     </div>

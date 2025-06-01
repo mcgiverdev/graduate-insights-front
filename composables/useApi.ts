@@ -1,18 +1,16 @@
 import { defu } from 'defu'
-import type { UseFetchOptions } from 'nuxt/app'
+import type { NitroFetchOptions } from 'nitropack'
 
-export const useApi: typeof useFetch = <T>(url: MaybeRefOrGetter<string>, options: UseFetchOptions<T> = {}) => {
+export const useApi = <T>(url: string, options: NitroFetchOptions<T> = {}) => {
   const config = useRuntimeConfig()
   const accessToken = useCookie('accessToken')
 
-  const defaults: UseFetchOptions<T> = {
+  const defaults: NitroFetchOptions<T> = {
     baseURL: config.public.apiBaseUrl,
-    key: toValue(url),
     headers: accessToken.value ? { Authorization: `Bearer ${accessToken.value}` } : {},
   }
 
-  // for nice deep defaults, please use unjs/defu
   const params = defu(options, defaults)
 
-  return useFetch(url, params)
+  return $fetch<T>(url, params)
 }
