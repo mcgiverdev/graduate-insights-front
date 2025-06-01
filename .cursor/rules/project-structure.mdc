@@ -1,0 +1,24 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Guía de Estructura del Proyecto
+
+El proyecto está organizado en los siguientes directorios principales:
+
+- `components/`: Componentes reutilizables de Vue.
+- `pages/`: Vistas principales y rutas de la aplicación.
+- `layouts/`: Plantillas de diseño para las páginas.
+- `plugins/`: Plugins personalizados de Nuxt.
+- `composables/`: Funciones reutilizables (composition API).
+- `assets/`: Archivos estáticos como imágenes y estilos globales.
+- `public/`: Archivos públicos accesibles directamente.
+- `utils/`: Utilidades y funciones auxiliares.
+- `server/`: Lógica del backend o endpoints API.
+- `@core/`, `@layouts/`, `iconify/`, `vuetify/`, `navigation/`, `views/`: Directorios personalizados para organización interna.
+
+El punto de entrada de configuración es [`nuxt.config.ts`](mdc:nuxt.config.ts).
+
+Para más detalles sobre cada carpeta, consulta la documentación interna o los archivos README si existen.
+
