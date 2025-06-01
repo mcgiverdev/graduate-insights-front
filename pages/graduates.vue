@@ -105,84 +105,90 @@ const handleDeleteGraduate = async () => {
         </div>
       </VCardText>
       <VDivider />
-      <VTable class="mb-4">
-        <thead>
-          <tr>
-            <th>DNI</th>
-            <th>Nombre</th>
-            <th>Correo</th>
-            <th>Género</th>
-            <th>Fecha de nacimiento</th>
-            <th>Celular</th>
-            <th>Fecha inicio</th>
-            <th>Fecha fin</th>
-            <th>CV</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="loadingList">
-            <td
-              colspan="11"
-              class="text-center"
-            >
-              <VProgressCircular
-                indeterminate
-                color="primary"
-                size="32"
-                class="my-4"
-              />
-              <div class="mt-2">
-                Cargando graduados...
-              </div>
-            </td>
-          </tr>
-          <tr
-            v-for="graduate in paginatedGraduates"
-            v-else
-            :key="graduate.graduate_id"
-          >
-            <td>{{ graduate.dni }}</td>
-            <td>{{ graduate.nombres }} {{ graduate.apellidos }}</td>
-            <td>{{ graduate.correo }}</td>
-            <td>{{ graduate.genero === 'M' ? 'Masculino' : graduate.genero === 'F' ? 'Femenino' : graduate.genero }}</td>
-            <td>{{ graduate.fecha_nacimiento }}</td>
-            <td>{{ graduate.celular }}</td>
-            <td>{{ graduate.fecha_inicio }}</td>
-            <td>{{ graduate.fecha_fin }}</td>
-            <td>{{ graduate.cv }}</td>
-            <td>{{ graduate.estado === '1' ? 'Activo' : 'Inactivo' }}</td>
-            <td>
-              <VBtn
-                icon
-                size="small"
-                color="primary"
-                @click="openEditGraduateDialog(graduate.graduate_id)"
+      <div class="table-container">
+        <VTable class="mb-4">
+          <thead>
+            <tr>
+              <th>DNI</th>
+              <th>Nombre</th>
+              <th>Correo</th>
+              <th>Género</th>
+              <th>Fecha de nacimiento</th>
+              <th>Celular</th>
+              <th>Fecha inicio</th>
+              <th>Fecha fin</th>
+              <th>CV</th>
+              <th>Estado</th>
+              <th class="text-right fixed-column">
+                Acciones
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="loadingList">
+              <td
+                colspan="11"
+                class="text-center"
               >
-                <VIcon icon="tabler-edit" />
-              </VBtn>
-              <VBtn
-                icon
-                size="small"
-                color="error"
-                class="ms-2"
-                @click="confirmDelete(graduate.graduate_id)"
-              >
-                <VIcon icon="tabler-trash" />
-              </VBtn>
-            </td>
-          </tr>
-          <tr v-if="!loadingList && paginatedGraduates.length === 0">
-            <td
-              colspan="11"
-              class="text-center"
+                <VProgressCircular
+                  indeterminate
+                  color="primary"
+                  size="32"
+                  class="my-4"
+                />
+                <div class="mt-2">
+                  Cargando graduados...
+                </div>
+              </td>
+            </tr>
+            <tr
+              v-for="graduate in paginatedGraduates"
+              v-else
+              :key="graduate.graduate_id"
             >
-              No hay graduados para mostrar.
-            </td>
-          </tr>
-        </tbody>
-      </VTable>
+              <td>{{ graduate.dni }}</td>
+              <td>{{ graduate.nombres }} {{ graduate.apellidos }}</td>
+              <td>{{ graduate.correo }}</td>
+              <td>{{ graduate.genero === 'M' ? 'Masculino' : graduate.genero === 'F' ? 'Femenino' : graduate.genero }}</td>
+              <td>{{ graduate.fecha_nacimiento }}</td>
+              <td>{{ graduate.celular }}</td>
+              <td>{{ graduate.fecha_inicio }}</td>
+              <td>{{ graduate.fecha_fin }}</td>
+              <td>{{ graduate.cv }}</td>
+              <td>{{ graduate.estado === '1' ? 'Activo' : 'Inactivo' }}</td>
+              <td class="text-right fixed-column">
+                <div class="d-flex align-center justify-end">
+                  <VBtn
+                    icon
+                    size="small"
+                    color="primary"
+                    @click="openEditGraduateDialog(graduate.graduate_id)"
+                  >
+                    <VIcon icon="tabler-edit" />
+                  </VBtn>
+                  <VBtn
+                    icon
+                    size="small"
+                    color="error"
+                    class="ms-2"
+                    @click="confirmDelete(graduate.graduate_id)"
+                  >
+                    <VIcon icon="tabler-trash" />
+                  </VBtn>
+                </div>
+              </td>
+            </tr>
+            <tr v-if="!loadingList && paginatedGraduates.length === 0">
+              <td
+                colspan="11"
+                class="text-center"
+              >
+                No hay graduados para mostrar.
+              </td>
+            </tr>
+          </tbody>
+        </VTable>
+      </div>
       <TablePagination
         :page="page"
         :items-per-page="itemsPerPage"
@@ -210,3 +216,32 @@ const handleDeleteGraduate = async () => {
     </VCard>
   </section>
 </template>
+
+<style scoped>
+.table-container {
+  position: relative;
+  overflow-x: auto;
+}
+
+.fixed-column {
+  position: sticky !important;
+  z-index: 1;
+  background: rgb(var(--v-theme-surface));
+  box-shadow: -2px 0 4px rgba(0, 0, 0, 10%);
+  inset-inline-end: 0;
+}
+
+:deep(.v-table) {
+  inline-size: 100%;
+}
+
+:deep(.v-table .v-table__wrapper) {
+  overflow-x: auto;
+}
+
+:deep(.v-table th),
+:deep(.v-table td) {
+  padding-block: 0;
+  padding-inline: 16px;
+}
+</style>
