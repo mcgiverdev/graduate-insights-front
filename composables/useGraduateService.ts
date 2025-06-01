@@ -163,6 +163,34 @@ async function updateGraduate(id: number, graduate: any) {
   }
 }
 
+async function deleteGraduate(id: number) {
+  loadingSave.value = true
+
+  try {
+    await useApi<{ data: Graduate }>(
+      `/graduate-insights/v1/api/graduate/${id}`,
+      {
+        method: 'DELETE',
+      },
+    )
+
+    return {
+      success: true,
+      message: 'Graduado eliminado exitosamente',
+    }
+  }
+  catch (error: any) {
+    return {
+      success: false,
+      message: error.data?.message || 'Error al eliminar el graduado',
+      error: error.data || error,
+    }
+  }
+  finally {
+    loadingSave.value = false
+  }
+}
+
 export function useGraduateService() {
   return {
     graduates,
@@ -174,5 +202,6 @@ export function useGraduateService() {
     getGraduate,
     addGraduate,
     updateGraduate,
+    deleteGraduate,
   }
 }

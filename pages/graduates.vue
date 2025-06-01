@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import AddGraduateDialog from '@/components/dialogs/AddGraduateDialog.vue'
+import VConfirmDialog from '@/components/dialogs/VConfirmDialog.vue'
 import { useGraduateService } from '@/composables/useGraduateService'
 import TablePagination from '@core/components/TablePagination.vue'
 
 const itemsPerPage = ref(10)
 const page = ref(1)
 
-const { graduates, totalGraduates, loadingList, loadingForm, loadingSave, fetchGraduates, addGraduate, getGraduate, updateGraduate } = useGraduateService()
+const { graduates, totalGraduates, loadingList, loadingForm, loadingSave, fetchGraduates, addGraduate, getGraduate, updateGraduate, deleteGraduate } = useGraduateService()
 
 const paginatedGraduates = computed(() => graduates.value)
 
@@ -16,6 +17,9 @@ const graduateToEdit = ref<any>(null)
 
 const isSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
+
+const isConfirmDialogVisible = ref(false)
+const graduateToDelete = ref<number | null>(null)
 
 const handlePageChange = (newPage: number) => {
   page.value = newPage
@@ -39,6 +43,31 @@ const openEditGraduateDialog = async (id: number) => {
 
   graduateToEdit.value = graduate
   isAddGraduateDialogVisible.value = true
+}
+
+const confirmDelete = (id: number) => {
+  graduateToDelete.value = id
+  isConfirmDialogVisible.value = true
+}
+
+const handleDeleteGraduate = async () => {
+  if (!graduateToDelete.value)
+    return
+
+  const result = await deleteGraduate(graduateToDelete.value)
+
+  if (result.success) {
+    snackbarMessage.value = result.message
+    isSnackbarVisible.value = true
+    fetchGraduates(page.value, itemsPerPage.value)
+  }
+  else {
+    snackbarMessage.value = result.message
+    isSnackbarVisible.value = true
+  }
+
+  isConfirmDialogVisible.value = false
+  graduateToDelete.value = null
 }
 </script>
 
@@ -133,6 +162,15 @@ const openEditGraduateDialog = async (id: number) => {
               >
                 <VIcon icon="tabler-edit" />
               </VBtn>
+              <VBtn
+                icon
+                size="small"
+                color="error"
+                class="ms-2"
+                @click="confirmDelete(graduate.graduate_id)"
+              >
+                <VIcon icon="tabler-trash" />
+              </VBtn>
             </td>
           </tr>
           <tr v-if="!loadingList && paginatedGraduates.length === 0">
@@ -160,6 +198,15 @@ const openEditGraduateDialog = async (id: number) => {
       <VSnackbar v-model="isSnackbarVisible">
         {{ snackbarMessage }}
       </VSnackbar>
+
+      <VConfirmDialog
+        v-model="isConfirmDialogVisible"
+        title="Confirmar eliminación"
+        text="¿Estás seguro que deseas eliminar este graduado? Esta acción no se puede deshacer."
+        confirm-text="Eliminar"
+        cancel-text="Cancelar"
+        @confirm="handleDeleteGraduate"
+      />
     </VCard>
   </section>
 </template>
