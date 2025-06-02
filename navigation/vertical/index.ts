@@ -19,4 +19,9 @@ export default [
     to: { name: 'graduates' },
     icon: { icon: 'tabler-graduation-cap' },
   },
+  {
+    title: 'Employers',
+    to: { name: 'employers' },
+    icon: { icon: 'tabler-briefcase' },
+  },
 ]
