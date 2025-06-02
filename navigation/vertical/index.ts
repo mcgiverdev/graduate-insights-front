@@ -24,4 +24,14 @@ export default [
     to: { name: 'employers' },
     icon: { icon: 'tabler-briefcase' },
   },
+  {
+    title: 'Directors',
+    to: { name: 'directors' },
+    icon: { icon: 'tabler-briefcase' },
+  },
+  {
+    title: 'Education Centers',
+    to: { name: 'education-centers' },
+    icon: { icon: 'tabler-briefcase' },
+  },
 ]
