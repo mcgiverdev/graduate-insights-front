@@ -7,7 +7,7 @@ export default [
   {
     title: 'Graduates',
     to: { name: 'graduates' },
-    icon: { icon: 'tabler-graduation-cap' },
+    icon: { icon: 'tabler-users' },
   },
   {
     title: 'Employers',

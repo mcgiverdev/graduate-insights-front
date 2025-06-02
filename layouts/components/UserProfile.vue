@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import avatar1 from '@images/avatars/avatar-1.png'
+import { onMounted } from 'vue'
+import { useAuthService } from '@/composables/useAuthService'
+import { useUser } from '@/composables/useUser'
+
+const { user, fetchUser, initials } = useUser()
+const { logout } = useAuthService()
+
+onMounted(() => {
+  fetchUser()
+})
 </script>
 
 <template>
@@ -16,7 +25,14 @@ import avatar1 from '@images/avatars/avatar-1.png'
       color="primary"
       variant="tonal"
     >
-      <VImg :src="avatar1" />
+      <span
+        v-if="!user?.avatar && initials"
+        style=" font-size: 1.2rem;font-weight: bold;"
+      >{{ initials }}</span>
+      <VImg
+        v-else
+        :src="user?.avatar"
+      />
 
       <!-- SECTION Menu -->
       <VMenu
@@ -41,16 +57,23 @@ import avatar1 from '@images/avatars/avatar-1.png'
                     color="primary"
                     variant="tonal"
                   >
-                    <VImg :src="avatar1" />
+                    <span
+                      v-if="!user?.avatar && initials"
+                      style=" font-size: 1.2rem;font-weight: bold;"
+                    >{{ initials }}</span>
+                    <VImg
+                      v-else
+                      :src="user?.avatar"
+                    />
                   </VAvatar>
                 </VBadge>
               </VListItemAction>
             </template>
 
             <VListItemTitle class="font-weight-semibold">
-              John Doe
+              {{ user?.name || 'Usuario' }}
             </VListItemTitle>
-            <VListItemSubtitle>Admin</VListItemSubtitle>
+            <VListItemSubtitle>{{ user?.email || '' }}</VListItemSubtitle>
           </VListItem>
 
           <VDivider class="my-2" />
@@ -68,50 +91,50 @@ import avatar1 from '@images/avatars/avatar-1.png'
             <VListItemTitle>Profile</VListItemTitle>
           </VListItem>
 
-          <!-- 👉 Settings -->
-          <VListItem link>
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="tabler-settings"
-                size="22"
-              />
-            </template>
+<!--          &lt;!&ndash; 👉 Settings &ndash;&gt;-->
+<!--          <VListItem link>-->
+<!--            <template #prepend>-->
+<!--              <VIcon-->
+<!--                class="me-2"-->
+<!--                icon="tabler-settings"-->
+<!--                size="22"-->
+<!--              />-->
+<!--            </template>-->
 
-            <VListItemTitle>Settings</VListItemTitle>
-          </VListItem>
+<!--            <VListItemTitle>Settings</VListItemTitle>-->
+<!--          </VListItem>-->
 
-          <!-- 👉 Pricing -->
-          <VListItem link>
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="tabler-currency-dollar"
-                size="22"
-              />
-            </template>
+<!--          &lt;!&ndash; 👉 Pricing &ndash;&gt;-->
+<!--          <VListItem link>-->
+<!--            <template #prepend>-->
+<!--              <VIcon-->
+<!--                class="me-2"-->
+<!--                icon="tabler-currency-dollar"-->
+<!--                size="22"-->
+<!--              />-->
+<!--            </template>-->
 
-            <VListItemTitle>Pricing</VListItemTitle>
-          </VListItem>
+<!--            <VListItemTitle>Pricing</VListItemTitle>-->
+<!--          </VListItem>-->
 
-          <!-- 👉 FAQ -->
-          <VListItem link>
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="tabler-help"
-                size="22"
-              />
-            </template>
+<!--          &lt;!&ndash; 👉 FAQ &ndash;&gt;-->
+<!--          <VListItem link>-->
+<!--            <template #prepend>-->
+<!--              <VIcon-->
+<!--                class="me-2"-->
+<!--                icon="tabler-help"-->
+<!--                size="22"-->
+<!--              />-->
+<!--            </template>-->
 
-            <VListItemTitle>FAQ</VListItemTitle>
-          </VListItem>
+<!--            <VListItemTitle>FAQ</VListItemTitle>-->
+<!--          </VListItem>-->
 
           <!-- Divider -->
           <VDivider class="my-2" />
 
           <!-- 👉 Logout -->
-          <VListItem to="/login">
+          <VListItem @click="logout">
             <template #prepend>
               <VIcon
                 class="me-2"
