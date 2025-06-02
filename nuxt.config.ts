@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url'
-import svgLoader from 'vite-svg-loader'
 import vuetify from 'vite-plugin-vuetify'
+import svgLoader from 'vite-svg-loader'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -72,6 +72,7 @@ export default defineNuxtConfig({
           '@validators': ['../@core/utils/validators'],
           '@db/*': ['../server/fake-db/*'],
           '@api-utils/*': ['../server/utils/*'],
+          '@/composables/*': ['../composables/*'],
         },
       },
     },
@@ -103,6 +104,7 @@ export default defineNuxtConfig({
         '@configured-variables': fileURLToPath(new URL('./assets/styles/variables/_template.scss', import.meta.url)),
         '@db': fileURLToPath(new URL('./server/fake-db/', import.meta.url)),
         '@api-utils': fileURLToPath(new URL('./server/utils/', import.meta.url)),
+        '@/composables': fileURLToPath(new URL('./composables', import.meta.url)),
       },
     },
 
@@ -132,4 +134,8 @@ export default defineNuxtConfig({
   },
 
   modules: ['@vueuse/nuxt', '@nuxtjs/i18n', '@nuxtjs/device', '@pinia/nuxt'],
+
+  router: {
+    middleware: ['auth'],
+  },
 })

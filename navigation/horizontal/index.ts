@@ -5,16 +5,6 @@ export default [
     icon: { icon: 'tabler-smart-home' },
   },
   {
-    title: 'Second page',
-    to: { name: 'second-page' },
-    icon: { icon: 'tabler-file' },
-  },
-  {
-    title: 'Users',
-    to: { name: 'users' },
-    icon: { icon: 'tabler-users' },
-  },
-  {
     title: 'Graduates',
     to: { name: 'graduates' },
     icon: { icon: 'tabler-graduation-cap' },

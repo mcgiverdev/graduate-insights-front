@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useAuthService } from '@/composables/useAuthService'
+import { useSnackbar } from '@/composables/useSnackbar'
 import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
@@ -13,7 +15,7 @@ import { themeConfig } from '@themeConfig'
 definePageMeta({
   layout: 'blank',
   public: true,
-
+  middleware: ['guest'],
 })
 
 const form = ref({
@@ -23,6 +25,8 @@ const form = ref({
 })
 
 const isPasswordVisible = ref(false)
+const { loading, login } = useAuthService()
+const { showSnackbar, snackbar } = useSnackbar()
 
 const authThemeImg = useGenerateImageVariant(
   authV2LoginIllustrationLight,
@@ -32,9 +36,44 @@ const authThemeImg = useGenerateImageVariant(
   true)
 
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
+
+const handleLogin = async () => {
+  const result = await login(form.value.email, form.value.password)
+
+  showSnackbar({
+    text: result.message,
+    color: result.success ? 'success' : 'error',
+  })
+
+  if (result.success) {
+    // Obtener la ruta guardada o redirigir al dashboard
+    const returnTo = useCookie('returnTo', {
+      path: '/',
+      secure: true,
+      sameSite: 'strict',
+    })
+
+    const redirectPath = returnTo.value || '/'
+
+    // Limpiar la cookie de retorno
+    returnTo.value = null
+
+    // Redirigir a la ruta guardada o al dashboard
+    navigateTo(redirectPath)
+  }
+}
 </script>
 
 <template>
+  <VSnackbar
+    v-model="snackbar.show"
+    :color="snackbar.color"
+    :timeout="snackbar.timeout"
+    location="top"
+  >
+    {{ snackbar.text }}
+  </VSnackbar>
+
   <a href="javascript:void(0)">
     <div class="auth-logo d-flex align-center gap-x-3">
       <VNodeRenderer :nodes="themeConfig.app.logo" />
@@ -93,7 +132,7 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
           </p>
         </VCardText>
         <VCardText>
-          <VForm @submit.prevent="() => {}">
+          <VForm @submit.prevent="handleLogin">
             <VRow>
               <!-- email -->
               <VCol cols="12">
@@ -134,6 +173,7 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
                 <VBtn
                   block
                   type="submit"
+                  :loading="loading"
                 >
                   Login
                 </VBtn>

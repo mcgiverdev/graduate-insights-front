@@ -15,6 +15,11 @@ const configStore = useConfigStore()
 const { isMobile } = useDevice()
 if (isMobile)
   configStore.appContentLayoutNav = 'vertical'
+
+// Middleware global
+definePageMeta({
+  middleware: ['auth'],
+})
 </script>
 
 <template>
