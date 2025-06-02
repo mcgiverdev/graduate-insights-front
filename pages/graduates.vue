@@ -2,13 +2,14 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import AddGraduateDialog from '@/components/dialogs/AddGraduateDialog.vue'
 import VConfirmDialog from '@/components/dialogs/VConfirmDialog.vue'
+import DataTable from '@/components/tables/DataTable.vue'
 import { useGraduateService } from '@/composables/useGraduateService'
 import TablePagination from '@core/components/TablePagination.vue'
 
 const itemsPerPage = ref(10)
 const page = ref(1)
 
-const { graduates, totalGraduates, loadingList, loadingForm, loadingSave, fetchGraduates, addGraduate, getGraduate, updateGraduate, deleteGraduate } = useGraduateService()
+const { graduates, totalGraduates, loadingList, fetchGraduates, getGraduate, deleteGraduate } = useGraduateService()
 
 const paginatedGraduates = computed(() => graduates.value)
 
@@ -20,6 +21,27 @@ const snackbarMessage = ref('')
 
 const isConfirmDialogVisible = ref(false)
 const graduateToDelete = ref<number | null>(null)
+
+const columns = [
+  { key: 'dni', label: 'DNI' },
+  { key: 'nombres', label: 'Nombre', formatter: (item: any) => `${item.nombres} ${item.apellidos}`, width: '150px' },
+  { key: 'correo', label: 'Correo' },
+  {
+    key: 'genero',
+    label: 'Género',
+    formatter: (item: any) => item.genero === 'M' ? 'Masculino' : item.genero === 'F' ? 'Femenino' : item.genero,
+  },
+  { key: 'fecha_nacimiento', label: 'Fecha de nacimiento', width: '100px' },
+  { key: 'celular', label: 'Celular' },
+  { key: 'fecha_inicio', label: 'Fecha inicio', width: '120px' },
+  { key: 'fecha_fin', label: 'Fecha fin', width: '120px' },
+  { key: 'cv', label: 'CV' },
+  {
+    key: 'estado',
+    label: 'Estado',
+    formatter: (item: any) => item.estado === '1' ? 'Activo' : 'Inactivo',
+  },
+]
 
 const handlePageChange = (newPage: number) => {
   page.value = newPage
@@ -45,8 +67,8 @@ const openEditGraduateDialog = async (id: number) => {
   isAddGraduateDialogVisible.value = true
 }
 
-const confirmDelete = (id: number) => {
-  graduateToDelete.value = id
+const confirmDelete = (item: any) => {
+  graduateToDelete.value = item.graduate_id
   isConfirmDialogVisible.value = true
 }
 
@@ -105,90 +127,15 @@ const handleDeleteGraduate = async () => {
         </div>
       </VCardText>
       <VDivider />
-      <div class="table-container">
-        <VTable class="mb-4">
-          <thead>
-            <tr>
-              <th>DNI</th>
-              <th>Nombre</th>
-              <th>Correo</th>
-              <th>Género</th>
-              <th>Fecha de nacimiento</th>
-              <th>Celular</th>
-              <th>Fecha inicio</th>
-              <th>Fecha fin</th>
-              <th>CV</th>
-              <th>Estado</th>
-              <th class="text-right fixed-column">
-                Acciones
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="loadingList">
-              <td
-                colspan="11"
-                class="text-center"
-              >
-                <VProgressCircular
-                  indeterminate
-                  color="primary"
-                  size="32"
-                  class="my-4"
-                />
-                <div class="mt-2">
-                  Cargando graduados...
-                </div>
-              </td>
-            </tr>
-            <tr
-              v-for="graduate in paginatedGraduates"
-              v-else
-              :key="graduate.graduate_id"
-            >
-              <td>{{ graduate.dni }}</td>
-              <td>{{ graduate.nombres }} {{ graduate.apellidos }}</td>
-              <td>{{ graduate.correo }}</td>
-              <td>{{ graduate.genero === 'M' ? 'Masculino' : graduate.genero === 'F' ? 'Femenino' : graduate.genero }}</td>
-              <td>{{ graduate.fecha_nacimiento }}</td>
-              <td>{{ graduate.celular }}</td>
-              <td>{{ graduate.fecha_inicio }}</td>
-              <td>{{ graduate.fecha_fin }}</td>
-              <td>{{ graduate.cv }}</td>
-              <td>{{ graduate.estado === '1' ? 'Activo' : 'Inactivo' }}</td>
-              <td class="text-right fixed-column">
-                <div class="d-flex align-center justify-end">
-                  <VBtn
-                    icon
-                    size="small"
-                    color="primary"
-                    @click="openEditGraduateDialog(graduate.graduate_id)"
-                  >
-                    <VIcon icon="tabler-edit" />
-                  </VBtn>
-                  <VBtn
-                    icon
-                    size="small"
-                    color="error"
-                    class="ms-2"
-                    @click="confirmDelete(graduate.graduate_id)"
-                  >
-                    <VIcon icon="tabler-trash" />
-                  </VBtn>
-                </div>
-              </td>
-            </tr>
-            <tr v-if="!loadingList && paginatedGraduates.length === 0">
-              <td
-                colspan="11"
-                class="text-center"
-              >
-                No hay graduados para mostrar.
-              </td>
-            </tr>
-          </tbody>
-        </VTable>
-      </div>
+      <DataTable
+        :columns="columns"
+        :items="paginatedGraduates"
+        :loading="loadingList"
+        :actions="{
+          edit: (item) => openEditGraduateDialog(item.graduate_id),
+          delete: confirmDelete,
+        }"
+      />
       <TablePagination
         :page="page"
         :items-per-page="itemsPerPage"
