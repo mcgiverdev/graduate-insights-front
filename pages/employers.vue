@@ -2,8 +2,8 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import AddEmployerDialog from '@/components/dialogs/AddEmployerDialog.vue'
 import VConfirmDialog from '@/components/dialogs/VConfirmDialog.vue'
-import DataTable from '@/components/tables/DataTable.vue'
 import { useEmployerService } from '@/composables/useEmployerService'
+import { DataTable } from '@/librerias/tables'
 import TablePagination from '@core/components/TablePagination.vue'
 
 const itemsPerPage = ref(10)

@@ -3,22 +3,89 @@ description:
 globs: 
 alwaysApply: false
 ---
-# Guía de Estructura del Proyecto
+# Guía de Estructura del Proyecto - Graduate Insights Frontend
 
-El proyecto está organizado en los siguientes directorios principales:
+## Estructura Principal del Proyecto
 
-- `components/`: Componentes reutilizables de Vue.
-- `pages/`: Vistas principales y rutas de la aplicación.
-- `layouts/`: Plantillas de diseño para las páginas.
-- `plugins/`: Plugins personalizados de Nuxt.
-- `composables/`: Funciones reutilizables (composition API).
-- `assets/`: Archivos estáticos como imágenes y estilos globales.
-- `public/`: Archivos públicos accesibles directamente.
-- `utils/`: Utilidades y funciones auxiliares.
-- `server/`: Lógica del backend o endpoints API.
-- `@core/`, `@layouts/`, `iconify/`, `vuetify/`, `navigation/`, `views/`: Directorios personalizados para organización interna.
+Este es un proyecto **Nuxt 3** con **Vuetify** y **TypeScript**. La estructura está organizada de la siguiente manera:
 
-El punto de entrada de configuración es [`nuxt.config.ts`](mdc:nuxt.config.ts).
+### Directorios Core
+- `components/`: Componentes reutilizables de Vue con TypeScript
+- `pages/`: Rutas automáticas de Nuxt (file-based routing)
+- `layouts/`: Plantillas de diseño base para las páginas
+- `plugins/`: Plugins de Nuxt (client/server side)
+- `composables/`: Funciones composition API reutilizables
+- `middleware/`: Middlewares de ruta de Nuxt
 
-Para más detalles sobre cada carpeta, consulta la documentación interna o los archivos README si existen.
+### Directorios de Assets y Recursos
+- `assets/`: Archivos procesados por Vite (SCSS, imágenes que necesitan optimización)
+- `public/`: Archivos estáticos servidos directamente
+- `@core/`: Componentes y utilidades del core del sistema
+- `@layouts/`: Layouts personalizados y componentes de layout
+
+### Directorios de Configuración y Utilidades
+- `utils/`: Funciones auxiliares y utilidades generales
+- `server/`: API endpoints del lado servidor (Nitro)
+- `navigation/`: Configuración de navegación y menús
+- `vuetify/`: Configuración y personalización de Vuetify
+- `iconify/`: Configuración de iconos
+
+### Archivos de Configuración Importantes
+- `nuxt.config.ts`: Configuración principal de Nuxt
+- `tsconfig.json`: Configuración de TypeScript
+- `package.json`: Dependencias y scripts del proyecto
+- `themeConfig.ts`: Configuración del tema de la aplicación
+
+### Convenciones de Nomenclatura
+- **Componentes**: PascalCase (ej: `UserProfile.vue`)
+- **Páginas**: kebab-case (ej: `user-profile.vue`)
+- **Composables**: camelCase iniciando con `use` (ej: `useAuth.ts`)
+- **Utilidades**: camelCase (ej: `formatDate.ts`)
+- **Tipos**: PascalCase (ej: `UserType`, `ApiResponse`)
+
+### Buenas Prácticas
+1. Usar TypeScript en todos los archivos
+2. Implementar composables para lógica reutilizable
+3. Mantener componentes pequeños y enfocados
+4. Usar Vuetify components cuando sea posible
+5. Seguir la estructura de carpetas establecida
+6. Usar auto-imports de Nuxt para composables y utilidades
+7. Implementar proper error handling en las páginas
+8. Mantener la configuración centralizada en los archivos correspondientes
+
+### Scripts Disponibles
+- `npm run dev`: Servidor de desarrollo
+- `npm run build`: Build de producción
+- `npm run preview`: Preview del build
+- `npm run lint`: Ejecutar linter
+- `npm run typecheck`: Verificar tipos de TypeScript
+
+### Componentes para Extracción a Librerías
+Algunos componentes están diseñados para ser eventualmente extraídos a librerías externas. Estos componentes deben seguir estas convenciones:
+
+1. **Estructura de Componentes**:
+   - Mantener una interfaz clara y documentada
+   - Implementar props tipadas con TypeScript
+   - Incluir eventos emitidos documentados
+   - Proporcionar slots personalizables cuando sea necesario
+
+2. **Ejemplos de Componentes para Extracción**:
+   - `data-table`: Componente de tabla reutilizable actualmente en uso en el directorio `directors/`
+     - Este componente eventualmente será publicado como una librería externa
+     - Se instalará mediante `pnpm install`
+     - Mantener la compatibilidad con Vuetify y TypeScript
+
+3. **Consideraciones para Componentes Extraíbles**:
+   - Minimizar dependencias externas
+   - Documentar claramente la API del componente
+   - Incluir ejemplos de uso
+   - Mantener la lógica de negocio separada de la presentación
+   - Implementar tests unitarios
+   - Seguir las mejores prácticas de versionado semántico
+
+4. **Proceso de Extracción**:
+   - Mantener los componentes en el proyecto hasta que estén listos para extracción
+   - Documentar el plan de extracción en el código
+   - Asegurar que los componentes sean lo más genéricos posible
+   - Considerar la retrocompatibilidad al extraer
 

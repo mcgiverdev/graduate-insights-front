@@ -2,8 +2,8 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import AddDirectorDialog from '@/components/dialogs/AddDirectorDialog.vue'
 import VConfirmDialog from '@/components/dialogs/VConfirmDialog.vue'
-import DataTable from '@/components/tables/DataTable.vue'
 import { useDirectorService } from '@/composables/useDirectorService'
+import { DataTable } from '@/librerias/tables'
 import TablePagination from '@core/components/TablePagination.vue'
 
 const itemsPerPage = ref(10)

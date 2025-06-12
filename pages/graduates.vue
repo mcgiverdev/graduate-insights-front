@@ -2,8 +2,8 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import AddGraduateDialog from '@/components/dialogs/AddGraduateDialog.vue'
 import VConfirmDialog from '@/components/dialogs/VConfirmDialog.vue'
-import DataTable from '@/components/tables/DataTable.vue'
 import { useGraduateService } from '@/composables/useGraduateService'
+import { DataTable } from '@/librerias/tables'
 import TablePagination from '@core/components/TablePagination.vue'
 
 const itemsPerPage = ref(10)
