@@ -30,6 +30,7 @@ export default defineNuxtConfig({
     '@core/scss/template/index.scss',
     '@styles/styles.scss',
     '@/plugins/iconify/icons.css',
+    'vuetify/lib/styles/main.sass',
   ],
 
   components: {
@@ -122,18 +123,33 @@ export default defineNuxtConfig({
     plugins: [
       svgLoader(),
       vuetify({
+        autoImport: true,
         styles: {
           configFile: 'assets/styles/variables/_vuetify.scss',
         },
       }),
     ],
+
+    ssr: {
+      noExternal: ['vuetify'],
+    },
   },
 
   build: {
     transpile: ['vuetify'],
   },
 
-  modules: ['@vueuse/nuxt', '@nuxtjs/i18n', '@nuxtjs/device', '@pinia/nuxt'],
+  modules: [
+    '@vueuse/nuxt',
+    '@nuxtjs/i18n',
+    '@nuxtjs/device',
+    '@pinia/nuxt',
+    async (options, nuxt) => {
+      nuxt.hooks.hook('vite:extendConfig', config => config.plugins.push(
+        vuetify(),
+      ))
+    },
+  ],
 
   router: {
     middleware: ['auth'],
