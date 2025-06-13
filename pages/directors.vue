@@ -1,20 +1,29 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import AddDirectorDialog from '@/components/dialogs/AddDirectorDialog.vue'
+import { ref, watch } from 'vue'
 import VConfirmDialog from '@/components/dialogs/VConfirmDialog.vue'
-import { useDirectorService } from '@/composables/useDirectorService'
-import { DataTable } from '@/librerias/tables'
-import TablePagination from '@core/components/TablePagination.vue'
+import type { Director } from '@/composables/useDirectorService'
+import FormGenerator from '@/library/components/FormGenerator.vue'
+import TableGenerator from '@/library/components/TableGenerator.vue'
+import { DirectorModel } from '@/library/models/DirectorModel'
+import { useGenericRepository } from '@/library/repository/GenericRepository'
 
 const itemsPerPage = ref(10)
 const page = ref(1)
+const hasMorePages = ref(false)
 
-const { directors, totalDirectors, loadingList, fetchDirectors, getDirector, deleteDirector } = useDirectorService()
+const {
+  items: directors,
+  totalItems: totalDirectors,
+  loadingList,
+  fetchItems,
+  getItem,
+  addItem,
+  updateItem,
+  deleteItem,
+} = useGenericRepository<Director>(DirectorModel)
 
-const paginatedDirectors = computed(() => directors.value)
-
-const isAddDirectorDialogVisible = ref(false)
-const directorToEdit = ref<any>(null)
+const isFormVisible = ref(false)
+const directorToEdit = ref<Director | null>(null)
 
 const isSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
@@ -22,49 +31,30 @@ const snackbarMessage = ref('')
 const isConfirmDialogVisible = ref(false)
 const directorToDelete = ref<number | null>(null)
 
-const columns = [
-  { key: 'dni', label: 'DNI' },
-  { key: 'nombres', label: 'Nombre', formatter: (item: any) => `${item.nombres} ${item.apellidos}`, width: '300px' },
-  { key: 'correo', label: 'Correo' },
-  {
-    key: 'genero',
-    label: 'Género',
-    formatter: (item: any) => item.genero === 'M' ? 'Masculino' : item.genero === 'F' ? 'Femenino' : item.genero,
-  },
-  { key: 'fecha_nacimiento', label: 'Fecha de nacimiento', width: '300px' },
-  { key: 'celular', label: 'Celular' },
-  {
-    key: 'estado',
-    label: 'Estado',
-    formatter: (item: any) => item.estado === '1' ? 'Activo' : 'Inactivo',
-  },
-]
-
-const handlePageChange = (newPage: number) => {
-  page.value = newPage
-}
-
 watch([page, itemsPerPage], () => {
-  fetchDirectors(page.value, itemsPerPage.value)
+  fetchItems({ page: page.value, size: itemsPerPage.value })
+  hasMorePages.value = totalDirectors.value > page.value * itemsPerPage.value
 }, { immediate: true })
 
-onMounted(() => {
-  fetchDirectors(page.value, itemsPerPage.value)
-})
-
-const openAddDirectorDialog = () => {
+const openAddForm = () => {
   directorToEdit.value = null
-  isAddDirectorDialogVisible.value = true
+  isFormVisible.value = true
 }
 
-const openEditDirectorDialog = async (id: number) => {
-  const director = await getDirector(id)
+const openEditForm = async (id: number) => {
+  try {
+    const director = await getItem(id)
 
-  directorToEdit.value = director
-  isAddDirectorDialogVisible.value = true
+    directorToEdit.value = director || null
+    isFormVisible.value = true
+  }
+  catch (error) {
+    snackbarMessage.value = 'Error al cargar el director'
+    isSnackbarVisible.value = true
+  }
 }
 
-const confirmDelete = (item: any) => {
+const confirmDelete = (item: Director) => {
   directorToDelete.value = item.director_id
   isConfirmDialogVisible.value = true
 }
@@ -73,20 +63,40 @@ const handleDeleteDirector = async () => {
   if (!directorToDelete.value)
     return
 
-  const result = await deleteDirector(directorToDelete.value)
+  const result = await deleteItem(directorToDelete.value)
 
-  if (result.success) {
-    snackbarMessage.value = result.message
-    isSnackbarVisible.value = true
-    fetchDirectors(page.value, itemsPerPage.value)
-  }
-  else {
-    snackbarMessage.value = result.message
-    isSnackbarVisible.value = true
-  }
+  snackbarMessage.value = result.message
+  isSnackbarVisible.value = true
+
+  if (result.success)
+    fetchItems({ page: page.value, size: itemsPerPage.value })
 
   isConfirmDialogVisible.value = false
   directorToDelete.value = null
+}
+
+const handleSubmit = async (data: Partial<Director>) => {
+  try {
+    if (directorToEdit.value) {
+      // Actualización
+      await updateItem(directorToEdit.value.director_id, data)
+      snackbarMessage.value = `${DirectorModel.name} actualizado exitosamente`
+    }
+    else {
+      // Creación
+      await addItem(data)
+      snackbarMessage.value = `${DirectorModel.name} creado exitosamente`
+    }
+
+    // Si llegamos aquí, la operación fue exitosa
+    isSnackbarVisible.value = true
+    isFormVisible.value = false
+    fetchItems({ page: page.value, size: itemsPerPage.value })
+  }
+  catch (error: any) {
+    snackbarMessage.value = error.message || 'Error al procesar la operación'
+    isSnackbarVisible.value = true
+  }
 }
 </script>
 
@@ -117,34 +127,47 @@ const handleDeleteDirector = async () => {
           <VBtn
             prepend-icon="tabler-plus"
             color="primary"
-            @click="openAddDirectorDialog"
+            @click="openAddForm"
           >
             Nuevo director
           </VBtn>
         </div>
       </VCardText>
       <VDivider />
-      <DataTable
-        :columns="columns"
-        :items="paginatedDirectors"
+
+      <!-- Tabla usando nuestro generador -->
+      <TableGenerator
+        :model-definition="DirectorModel"
+        :items="directors"
         :loading="loadingList"
-        :actions="{
-          edit: (item) => openEditDirectorDialog(item.director_id),
-          delete: confirmDelete,
-        }"
+        :current-page="page"
+        :has-more-pages="hasMorePages"
+        @edit="openEditForm"
+        @delete="confirmDelete"
+        @page-change="page = $event"
       />
-      <TablePagination
-        :page="page"
-        :items-per-page="itemsPerPage"
-        :total-items="totalDirectors"
-        @update:page="handlePageChange"
-      />
-      <AddDirectorDialog
-        v-model:is-dialog-open="isAddDirectorDialogVisible"
-        :director-to-edit="directorToEdit"
-        @success="() => { fetchDirectors(page, itemsPerPage); isAddDirectorDialogVisible = false }"
-        @update:is-dialog-open="val => isAddDirectorDialogVisible = val"
-      />
+
+      <!-- Formulario usando nuestro generador -->
+      <VDialog
+        v-model="isFormVisible"
+        max-width="600px"
+      >
+        <VCard>
+          <VCardTitle>
+            {{ directorToEdit ? 'Editar' : 'Nuevo' }} Director
+          </VCardTitle>
+          <VCardText>
+            <FormGenerator
+              :model-definition="DirectorModel"
+              :initial-data="directorToEdit"
+              :mode="directorToEdit ? 'edit' : 'create'"
+              @submit="handleSubmit"
+              @cancel="isFormVisible = false"
+            />
+          </VCardText>
+        </VCard>
+      </VDialog>
+
       <VSnackbar v-model="isSnackbarVisible">
         {{ snackbarMessage }}
       </VSnackbar>
@@ -162,6 +185,7 @@ const handleDeleteDirector = async () => {
 </template>
 
 <style scoped>
+/* Los errores de :deep son falsos positivos del linter, es una característica válida de Vue */
 .table-container {
   position: relative;
   overflow-x: auto;

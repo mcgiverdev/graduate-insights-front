@@ -1,8 +1,12 @@
 import { defu } from 'defu'
-import type { NitroFetchOptions } from 'nitropack'
 import { useAuthService } from './useAuthService'
 
-export const useApi = <T = any>(url: string, options: NitroFetchOptions<T, 'get'> = {}) => {
+export interface ApiResponse<T> {
+  data: T
+  status: number
+}
+
+export const useApi = async <T = any>(url: string, options: any = {}): Promise<ApiResponse<T>> => {
   const config = useRuntimeConfig()
 
   const accessToken = useCookie('accessToken', {
@@ -13,21 +17,38 @@ export const useApi = <T = any>(url: string, options: NitroFetchOptions<T, 'get'
 
   const { handleAuthError } = useAuthService()
 
-  const defaults: NitroFetchOptions<T, 'get'> = {
+  const defaults = {
     baseURL: config.public.apiBaseUrl,
     headers: accessToken.value ? { Authorization: `Bearer ${accessToken.value}` } : {},
   }
 
   const params = defu(options, defaults)
 
-  return $fetch<T>(url, params).catch(error => {
+  try {
+    const response = await $fetch.raw<T>(url, params)
+
+    return {
+      data: response._data,
+      status: response.status,
+    }
+  }
+  catch (error: any) {
     // Intentar manejar el error de autenticación
     if (handleAuthError(error)) {
       // Si el error fue manejado, lanzar un error genérico para detener la ejecución
       throw new Error('Sesión expirada')
     }
 
-    // Si no es un error de autenticación, propagar el error original
+    // Si es un error de la API, incluir el status code
+    if (error.response) {
+      throw {
+        ...error,
+        status: error.response.status,
+        message: error.message || 'Error en la petición',
+      }
+    }
+
+    // Si no es un error de la API, propagar el error original
     throw error
-  })
+  }
 }

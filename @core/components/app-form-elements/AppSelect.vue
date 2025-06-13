@@ -1,4 +1,7 @@
 <script lang="ts" setup>
+import { computed, useAttrs } from 'vue'
+import { useId } from '@/composables/useId'
+
 defineOptions({
   name: 'AppSelect',
   inheritAttrs: false,
