@@ -6,7 +6,7 @@ export interface BaseFieldType {
   parse?: (value: any) => any
 }
 
-export type FieldType = 'text' | 'email' | 'password' | 'date' | 'enum' | 'number' | 'tel'
+export type FieldType = 'text' | 'email' | 'password' | 'date' | 'time' | 'date-time' | 'enum' | 'number' | 'tel'
 
 export interface BaseFieldConfig {
   validate?: (value: any) => true | string
@@ -27,7 +27,12 @@ export interface PasswordFieldConfig extends BaseFieldConfig {
 }
 
 export interface DateFieldConfig extends BaseFieldConfig {
-  type: 'date'
+  type: 'date' | 'time' | 'date-time'
+  config?: {
+    enableTime?: boolean
+    noCalendar?: boolean
+    dateFormat?: string
+  }
 }
 
 export interface EnumFieldConfig extends BaseFieldConfig {
@@ -82,6 +87,8 @@ export class FieldTypeRegistry {
     ['date', {
       type: 'date',
       validate: (value: any) => {
+        if (!value)
+          return true
         if (typeof value !== 'string')
           return 'Debe ser una fecha'
         if (!/^\d{4}-\d{2}-\d{2}$/.test(value))
@@ -94,6 +101,38 @@ export class FieldTypeRegistry {
           return ''
 
         return new Date(value).toISOString().split('T')[0]
+      },
+    }],
+    ['time', {
+      type: 'time',
+      validate: (value: any) => {
+        if (!value)
+          return true
+        if (typeof value !== 'string')
+          return 'Debe ser una hora'
+        if (!/^([01]?\d|2[0-3]):[0-5]\d$/.test(value))
+          return 'Formato de hora inválido (HH:mm)'
+
+        return true
+      },
+    }],
+    ['date-time', {
+      type: 'date-time',
+      validate: (value: any) => {
+        if (!value)
+          return true
+        if (typeof value !== 'string')
+          return 'Debe ser una fecha y hora'
+        if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(value))
+          return 'Formato de fecha y hora inválido (YYYY-MM-DD HH:mm)'
+
+        return true
+      },
+      format: (value: any) => {
+        if (!value)
+          return ''
+
+        return new Date(value).toISOString().replace('T', ' ').slice(0, 16)
       },
     }],
     ['enum', {

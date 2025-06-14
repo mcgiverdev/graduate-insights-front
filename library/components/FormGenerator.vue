@@ -3,15 +3,18 @@ import { useForm } from 'vee-validate'
 import type { PropType } from 'vue'
 import { computed, defineComponent, ref, watch } from 'vue'
 import * as yup from 'yup'
+import type { FieldType } from '../types/FieldType'
 import type { FieldDefinition, ModelDefinition } from '../types/ModelDefinition'
 import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
+import AppDateTimePicker from '@/@core/components/app-form-elements/AppDateTimePicker.vue'
 
 export default defineComponent({
   name: 'FormGenerator',
   components: {
     AppTextField,
     AppSelect,
+    AppDateTimePicker,
   },
 
   props: {
@@ -48,27 +51,52 @@ export default defineComponent({
       visibleFields.value.forEach(([name, field]) => {
         const config = props.mode === 'create' ? field.create : field.edit
         if (config?.rules) {
-          let fieldSchema = yup.mixed()
+          let fieldSchema: any
+
+          switch (field.type) {
+            case 'date':
+            case 'date-time':
+              fieldSchema = yup.date()
+              break
+            case 'time':
+              fieldSchema = yup.string()
+              break
+            case 'number':
+            case 'numeric':
+              fieldSchema = yup.number()
+              break
+            default:
+              fieldSchema = yup.string()
+          }
 
           config.rules.forEach(rule => {
             if (rule === 'required') {
-              fieldSchema = yup.string().required('Este campo es requerido')
+              fieldSchema = fieldSchema.required('Este campo es requerido')
             }
             else if (rule === 'email') {
-              fieldSchema = (fieldSchema as any).email('Ingrese un correo electrónico válido')
+              if (fieldSchema instanceof yup.StringSchema)
+                fieldSchema = fieldSchema.email('Ingrese un correo electrónico válido')
             }
             else if (rule === 'numeric') {
-              fieldSchema = yup.number().typeError('Este campo debe ser numérico')
+              if (!(fieldSchema instanceof yup.NumberSchema))
+                fieldSchema = yup.number().typeError('Este campo debe ser numérico')
             }
-            else if (rule === 'date') {
-              fieldSchema = yup.date().typeError('Ingrese una fecha válida')
+            else if (rule === 'time') {
+              if (fieldSchema instanceof yup.StringSchema)
+                fieldSchema = fieldSchema.matches(/^([01]?\d|2[0-3]):[0-5]\d$/, 'Ingrese una hora válida (HH:mm)')
             }
             else if (rule.startsWith('min:')) {
               const minLength = Number.parseInt(rule.split(':')[1])
+              if (fieldSchema instanceof yup.StringSchema)
+                fieldSchema = fieldSchema.min(minLength, `Mínimo ${minLength} caracteres`)
 
-              fieldSchema = (fieldSchema as any).min(minLength, `Mínimo ${minLength} caracteres`)
+              else if (fieldSchema instanceof yup.NumberSchema)
+                fieldSchema = fieldSchema.min(minLength, `El valor mínimo es ${minLength}`)
             }
           })
+
+          if (fieldSchema instanceof yup.DateSchema)
+            fieldSchema = fieldSchema.typeError('Ingrese una fecha válida')
 
           schema[name] = fieldSchema
         }
@@ -77,7 +105,7 @@ export default defineComponent({
       return yup.object().shape(schema)
     }
 
-    const { handleSubmit, values, errors, setFieldValue, validate, validateField } = useForm({
+    const { values, errors, setFieldValue, validate, validateField } = useForm({
       validationSchema: generateValidationSchema(),
       initialValues: props.initialData || {},
       validateOnMount: false,
@@ -91,13 +119,16 @@ export default defineComponent({
       }
     })
 
-    const getFieldComponent = (type: string) => {
+    const getFieldComponent = (type: FieldType) => {
       switch (type) {
         case 'enum':
           return 'AppSelect'
         case 'text':
-        case 'date':
           return 'AppTextField'
+        case 'date':
+        case 'time':
+        case 'date-time':
+          return 'AppDateTimePicker'
         default:
           return 'AppTextField'
       }
@@ -106,7 +137,7 @@ export default defineComponent({
     const getFieldProps = (field: FieldDefinition) => {
       const fieldProps: Record<string, any> = {
         label: field.label,
-        placeholder: field.placeholder,
+        placeholder: field.placeholder || `Seleccione ${field.label.toLowerCase()}`,
       }
 
       if (field.type === 'enum' && field.options?.items)
@@ -115,8 +146,19 @@ export default defineComponent({
       if (field.type === 'text' && field.label.toLowerCase().includes('contraseña'))
         fieldProps.type = 'password'
 
-      if (field.type === 'date')
-        fieldProps.type = 'date'
+      if (field.type === 'time') {
+        fieldProps.config = {
+          enableTime: true,
+          noCalendar: true,
+          dateFormat: 'H:i',
+        }
+      }
+      else if (field.type === 'date-time') {
+        fieldProps.config = {
+          enableTime: true,
+          dateFormat: 'Y-m-d H:i',
+        }
+      }
 
       return fieldProps
     }
