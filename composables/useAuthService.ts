@@ -30,7 +30,10 @@ export const useAuthService = () => {
         },
       })
 
-      if (response.success) {
+      // Acceder a los datos de la respuesta correctamente
+      const loginData = response.data
+
+      if (loginData.success) {
         // Guardar el token en una cookie
         const token = useCookie('accessToken', {
           maxAge: 60 * 60 * 24, // 24 horas
@@ -39,7 +42,7 @@ export const useAuthService = () => {
           sameSite: 'strict',
         })
 
-        token.value = response.data
+        token.value = loginData.data
 
         // Obtener la ruta guardada o redirigir al dashboard
         const returnTo = useCookie('returnTo', {
@@ -56,12 +59,14 @@ export const useAuthService = () => {
         // Redirigir a la ruta guardada o al dashboard
         await navigateTo(redirectPath)
 
-        return { success: true, message: response.message }
+        return { success: true, message: loginData.message }
       }
 
-      return { success: false, message: 'Error al iniciar sesión' }
+      return { success: false, message: loginData.message || 'Error al iniciar sesión' }
     }
     catch (error: any) {
+      console.error('Error en login:', error)
+
       const errorData = error.data as LoginError
 
       return { success: false, message: errorData?.error || 'Error al iniciar sesión' }

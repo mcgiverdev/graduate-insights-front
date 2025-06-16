@@ -6,6 +6,11 @@ export interface ApiResponse<T> {
   status: number
 }
 
+export interface ApiError extends Error {
+  data?: any
+  status?: number
+}
+
 export const useApi = async <T = any>(url: string, options: any = {}): Promise<ApiResponse<T>> => {
   const config = useRuntimeConfig()
 
@@ -28,24 +33,26 @@ export const useApi = async <T = any>(url: string, options: any = {}): Promise<A
     const response = await $fetch.raw<T>(url, params)
 
     return {
-      data: response._data,
+      data: response._data as T,
       status: response.status,
     }
   }
   catch (error: any) {
     // Intentar manejar el error de autenticación
-    if (handleAuthError(error)) {
-      // Si el error fue manejado, lanzar un error genérico para detener la ejecución
-      throw new Error('Sesión expirada')
+    if (error.response?.status === 401 && handleAuthError(error)) {
+      const authError = new Error('Sesión expirada') as ApiError
+
+      authError.status = 401
+      throw authError
     }
 
-    // Si es un error de la API, incluir el status code
+    // Si es un error de la API, incluir el status code y los datos de error
     if (error.response) {
-      throw {
-        ...error,
-        status: error.response.status,
-        message: error.message || 'Error en la petición',
-      }
+      const apiError = new Error(error.message || 'Error en la petición') as ApiError
+
+      apiError.data = error.response._data
+      apiError.status = error.response.status
+      throw apiError
     }
 
     // Si no es un error de la API, propagar el error original

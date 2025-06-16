@@ -3,3 +3,94 @@ description:
 globs:
 alwaysApply: false
 ---
+# Model Definition Guide
+
+## Structure
+
+A model definition consists of:
+
+1. Field definitions
+2. API configuration
+3. Display options
+
+Example in [DirectorModel.ts](mdc:library/models/DirectorModel.ts)
+
+## Field Configuration
+
+Each field requires:
+
+```typescript
+{
+  type: 'text' | 'date' | 'enum',
+  label: string,
+  required?: boolean,
+  placeholder?: string,
+  options?: {  // For enum type
+    items: Array<{
+      title: string,
+      value: string | number
+    }>
+  },
+  list?: {
+    visible: boolean
+  },
+  create?: {
+    visible: boolean,
+    rules?: string[],
+    defaultValue?: any
+  },
+  edit?: {
+    visible: boolean,
+    rules?: string[]
+  }
+}
+```
+
+## Display Modes
+
+Fields can be configured differently for each mode:
+
+1. **List Mode**
+   - Controls visibility in table view
+   - Set via `list.visible`
+
+2. **Create Mode**
+   - Controls visibility in create form
+   - Set validation rules
+   - Can specify default values
+   - Configure via `create` property
+
+3. **Edit Mode**
+   - Controls visibility in edit form
+   - Set validation rules
+   - Configure via `edit` property
+
+## API Configuration
+
+Required API settings:
+
+```typescript
+api: {
+  baseURL: string,
+  resourcePath: string,
+  headers?: Record<string, string>,
+  mapResponse?: (data: any) => any,
+  mapRequest?: (data: any) => any,
+  successCodes?: {
+    list?: number[],
+    create?: number[],
+    update?: number[],
+    delete?: number[],
+    get?: number[]
+  }
+}
+```
+
+## Best Practices
+
+1. Group related fields together
+2. Use consistent naming conventions
+3. Document special field behaviors
+4. Set appropriate validation rules
+5. Configure proper success codes for API responses
+6. Implement data mapping when API format differs from frontend model

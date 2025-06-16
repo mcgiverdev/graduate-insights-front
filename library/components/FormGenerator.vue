@@ -30,12 +30,17 @@ export default defineComponent({
       type: String as PropType<'create' | 'edit'>,
       default: 'create',
     },
+    serverErrors: {
+      type: Object as PropType<Record<string, string>>,
+      default: () => ({}),
+    },
   },
 
   emits: ['submit', 'cancel'],
 
   setup(props, { emit }) {
     const hasAttemptedSubmit = ref(false)
+    const externalErrors = ref<Record<string, string | undefined>>({})
 
     const visibleFields = computed(() =>
       Object.entries(props.modelDefinition.fields).filter(([_, field]) => {
@@ -62,7 +67,6 @@ export default defineComponent({
               fieldSchema = yup.string()
               break
             case 'number':
-            case 'numeric':
               fieldSchema = yup.number()
               break
             default:
@@ -105,19 +109,51 @@ export default defineComponent({
       return yup.object().shape(schema)
     }
 
-    const { values, errors, setFieldValue, validate, validateField } = useForm({
+    const { values, errors, setFieldValue, validate, validateField, setFieldError } = useForm({
       validationSchema: generateValidationSchema(),
       initialValues: props.initialData || {},
       validateOnMount: false,
     })
 
-    watch(() => props.initialData, newData => {
-      if (newData) {
-        Object.entries(newData).forEach(([key, value]) => {
-          setFieldValue(key, value)
+    // Observar cambios en los errores del servidor
+    watch(() => props.serverErrors, newErrors => {
+      if (newErrors && Object.keys(newErrors).length > 0) {
+        hasAttemptedSubmit.value = true
+
+        // Actualizar los errores en el formulario usando setFieldError
+        Object.entries(newErrors).forEach(([field, message]) => {
+          setFieldError(field, message)
         })
       }
-    })
+    }, { immediate: true, deep: true })
+
+    const onFieldInput = async (name: string, value: any) => {
+      setFieldValue(name, value)
+      if (hasAttemptedSubmit.value) {
+        // Limpiar el error cuando el usuario modifica el campo
+        setFieldError(name, undefined)
+        await validateField(name)
+      }
+    }
+
+    const onFieldBlur = async (name: string) => {
+      if (hasAttemptedSubmit.value)
+        await validateField(name)
+    }
+
+    const onSubmit = async (e: Event) => {
+      e.preventDefault()
+      hasAttemptedSubmit.value = true
+
+      // Limpiar errores anteriores
+      Object.keys(errors.value).forEach(field => {
+        setFieldError(field, undefined)
+      })
+
+      const validationResult = await validate()
+      if (validationResult.valid)
+        emit('submit', values)
+    }
 
     const getFieldComponent = (type: FieldType) => {
       switch (type) {
@@ -163,25 +199,11 @@ export default defineComponent({
       return fieldProps
     }
 
-    const onFieldBlur = async (name: string) => {
-      if (hasAttemptedSubmit.value)
-        await validateField(name)
-    }
-
-    const onSubmit = async (e: Event) => {
-      e.preventDefault()
-      hasAttemptedSubmit.value = true
-
-      const validationResult = await validate()
-      if (validationResult.valid)
-        emit('submit', values)
-    }
-
     const displayError = (fieldName: string): string | undefined => {
       if (!hasAttemptedSubmit.value)
         return undefined
 
-      return typeof errors.value === 'object' ? errors.value[fieldName] : undefined
+      return errors.value[fieldName]
     }
 
     return {
@@ -191,7 +213,7 @@ export default defineComponent({
       getFieldComponent,
       getFieldProps,
       onSubmit,
-      setFieldValue,
+      onFieldInput,
       onFieldBlur,
     }
   },
@@ -214,7 +236,8 @@ export default defineComponent({
           :model-value="values[name]"
           v-bind="getFieldProps(field)"
           :error-messages="displayError(name)"
-          @update:model-value="setFieldValue(name, $event)"
+          :error="!!displayError(name)"
+          @update:model-value="onFieldInput(name, $event)"
           @blur="onFieldBlur(name)"
         />
       </VCol>
@@ -256,5 +279,15 @@ export default defineComponent({
   display: flex;
   gap: 1rem;
   margin-block-start: 1rem;
+}
+
+:deep(.v-field--error) {
+  --v-field-border-width: 2px;
+  --v-field-border-opacity: 1;
+}
+
+:deep(.v-input__details) {
+  color: rgb(var(--v-theme-error));
+  padding-inline-start: 16px;
 }
 </style>

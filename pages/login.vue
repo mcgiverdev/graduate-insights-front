@@ -19,8 +19,8 @@ definePageMeta({
 })
 
 const form = ref({
-  email: '',
-  password: '',
+  email: 'xmcgiver12@gmail.com',
+  password: '123456abC',
   remember: false,
 })
 
@@ -38,8 +38,10 @@ const authThemeImg = useGenerateImageVariant(
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 
 const handleLogin = async () => {
+  console.log('handleLogin')
   const result = await login(form.value.email, form.value.password)
 
+  console.log('postLogin', result)
   showSnackbar({
     text: result.message,
     color: result.success ? 'success' : 'error',
