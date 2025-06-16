@@ -1,20 +1,16 @@
 <script setup lang="ts">
 import ResourceManager from '@/library/components/ResourceManager.vue'
-import { DirectorModel } from '@/library/models/DirectorModel'
+import { DirectorResource } from '@/library/resources/DirectorResource'
 
 definePageMeta({
   layout: 'default',
 })
+
+const resource = new DirectorResource()
 </script>
 
 <template>
-  <ResourceManager
-    :model-definition="DirectorModel"
-    title="Administración de Directores"
-    create-button-text="Nuevo director"
-    delete-confirm-title="Confirmar eliminación"
-    delete-confirm-text="¿Estás seguro que deseas eliminar este director? Esta acción no se puede deshacer."
-  />
+  <ResourceManager :resource="resource" />
 </template>
 
 <style scoped>

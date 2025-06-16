@@ -3,27 +3,19 @@ import { ref, watch } from 'vue'
 import VConfirmDialog from '@/components/dialogs/VConfirmDialog.vue'
 import FormGenerator from '@/library/components/FormGenerator.vue'
 import TableGenerator from '@/library/components/TableGenerator.vue'
-import type { BaseModel } from '@/library/models/BaseModel'
 import { useGenericRepository } from '@/library/repository/GenericRepository'
+import type { Resource } from '@/library/resources/Resource'
 
 interface Props {
-  modelDefinition: BaseModel
-  title?: string
-  createButtonText?: string
-  deleteConfirmTitle?: string
-  deleteConfirmText?: string
+  resource: Resource
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  title: '',
-  createButtonText: 'Nuevo registro',
-  deleteConfirmTitle: 'Confirmar eliminación',
-  deleteConfirmText: '¿Estás seguro que deseas eliminar este registro? Esta acción no se puede deshacer.',
-})
+const props = defineProps<Props>()
 
-const itemsPerPage = ref(10)
+const itemsPerPage = ref(props.resource.getDefaultPerPage())
 const page = ref(1)
 const hasMorePages = ref(false)
+const searchQuery = ref('')
 
 const {
   items,
@@ -34,7 +26,7 @@ const {
   addItem,
   updateItem,
   deleteItem,
-} = useGenericRepository(props.modelDefinition)
+} = useGenericRepository(props.resource.getModel())
 
 const isFormVisible = ref(false)
 const itemToEdit = ref<any>(null)
@@ -44,10 +36,19 @@ const snackbarMessage = ref('')
 
 const isConfirmDialogVisible = ref(false)
 const itemToDelete = ref<number | null>(null)
+const currentAction = ref<any>(null)
 
-// Observar cambios en la paginación
-watch([page, itemsPerPage], () => {
-  fetchItems({ page: page.value, size: itemsPerPage.value })
+// Observar cambios en la paginación y búsqueda
+watch([page, itemsPerPage, searchQuery], () => {
+  const params: any = {
+    page: page.value,
+    size: itemsPerPage.value,
+  }
+
+  if (searchQuery.value)
+    params.search = searchQuery.value
+
+  fetchItems(params)
   hasMorePages.value = totalItems.value > page.value * itemsPerPage.value
 }, { immediate: true })
 
@@ -64,7 +65,7 @@ const openEditForm = async (id: number) => {
     isFormVisible.value = true
   }
   catch (error) {
-    snackbarMessage.value = 'Error al cargar el registro'
+    snackbarMessage.value = `Error al cargar el ${props.resource.getSingularLabel().toLowerCase()}`
     isSnackbarVisible.value = true
   }
 }
@@ -101,12 +102,12 @@ const handleSubmit = async (data: any) => {
       const idKey = Object.keys(itemToEdit.value).find(key => key.endsWith('_id'))
       if (idKey) {
         await updateItem(itemToEdit.value[idKey], data)
-        snackbarMessage.value = `${props.modelDefinition.name} actualizado exitosamente`
+        snackbarMessage.value = `${props.resource.getSingularLabel()} actualizado exitosamente`
       }
     }
     else {
       await addItem(data)
-      snackbarMessage.value = `${props.modelDefinition.name} creado exitosamente`
+      snackbarMessage.value = `${props.resource.getSingularLabel()} creado exitosamente`
     }
 
     isSnackbarVisible.value = true
@@ -118,38 +119,81 @@ const handleSubmit = async (data: any) => {
     isSnackbarVisible.value = true
   }
 }
+
+const handleAction = async (action: any, selectedItems: any[]) => {
+  if (action.confirmationRequired) {
+    currentAction.value = action
+    isConfirmDialogVisible.value = true
+
+    return
+  }
+
+  try {
+    await action.handler(selectedItems)
+    fetchItems({ page: page.value, size: itemsPerPage.value })
+  }
+  catch (error: any) {
+    snackbarMessage.value = error.message || 'Error al ejecutar la acción'
+    isSnackbarVisible.value = true
+  }
+}
+
+const executeAction = async () => {
+  if (!currentAction.value)
+    return
+
+  try {
+    await currentAction.value.handler(itemToDelete.value ? [itemToDelete.value] : [])
+    fetchItems({ page: page.value, size: itemsPerPage.value })
+  }
+  catch (error: any) {
+    snackbarMessage.value = error.message || 'Error al ejecutar la acción'
+    isSnackbarVisible.value = true
+  }
+  finally {
+    isConfirmDialogVisible.value = false
+    currentAction.value = null
+  }
+}
 </script>
 
 <template>
   <section>
     <VCard class="mb-6">
       <VCardItem class="pb-4">
-        <VCardTitle>{{ title || `Administración de ${modelDefinition.name}` }}</VCardTitle>
+        <VCardTitle>{{ resource.getTitle() }}</VCardTitle>
       </VCardItem>
       <VDivider />
       <VCardText class="d-flex flex-wrap gap-4">
         <div class="me-3 d-flex gap-3">
           <AppSelect
             :model-value="itemsPerPage"
-            :items="[
-              { value: 10, title: '10' },
-              { value: 25, title: '25' },
-              { value: 50, title: '50' },
-              { value: 100, title: '100' },
-              { value: -1, title: 'Todos' },
-            ]"
+            :items="resource.getPerPageOptions().map(value => ({ value, title: String(value) }))"
             style="inline-size: 6.25rem;"
             @update:model-value="itemsPerPage = parseInt($event, 10)"
           />
         </div>
+
         <VSpacer />
+
         <div class="app-user-search-filter d-flex align-center flex-wrap gap-4">
+          <div style="inline-size: 15.625rem;">
+            <!-- Campo de búsqueda -->
+            <AppTextField
+              v-if="resource.isSearchable()"
+              v-model="searchQuery"
+              placeholder="Buscar..."
+              prepend-inner-icon="tabler-search"
+              hide-details
+            />
+          </div>
+
           <VBtn
             prepend-icon="tabler-plus"
             color="primary"
             @click="openAddForm"
           >
-            {{ createButtonText }}
+            Nuevo {{ resource.getSingularLabel().toLowerCase() }}
           </VBtn>
         </div>
       </VCardText>
@@ -157,13 +201,16 @@ const handleSubmit = async (data: any) => {
 
       <!-- Tabla usando nuestro generador -->
       <TableGenerator
-        :model-definition="modelDefinition"
+        :model-definition="resource.getModel()"
         :items="items"
         :loading="loadingList"
         :current-page="page"
         :has-more-pages="hasMorePages"
+        :fields="resource.getIndexFields()"
+        :actions="resource.getActions().filter(a => a.showOnTableRow)"
         @edit="openEditForm"
         @delete="confirmDelete"
+        @action="handleAction"
         @page-change="page = $event"
       />
 
@@ -174,13 +221,14 @@ const handleSubmit = async (data: any) => {
       >
         <VCard>
           <VCardTitle>
-            {{ itemToEdit ? 'Editar' : 'Nuevo' }} {{ modelDefinition.name }}
+            {{ itemToEdit ? 'Editar' : 'Nuevo' }} {{ resource.getSingularLabel() }}
           </VCardTitle>
           <VCardText>
             <FormGenerator
-              :model-definition="modelDefinition"
+              :model-definition="resource.getModel()"
               :initial-data="itemToEdit"
               :mode="itemToEdit ? 'edit' : 'create'"
+              :fields="itemToEdit ? resource.getUpdateFields() : resource.getCreateFields()"
               @submit="handleSubmit"
               @cancel="isFormVisible = false"
             />
@@ -194,11 +242,11 @@ const handleSubmit = async (data: any) => {
 
       <VConfirmDialog
         v-model="isConfirmDialogVisible"
-        :title="deleteConfirmTitle"
-        :text="deleteConfirmText"
-        confirm-text="Eliminar"
+        :title="currentAction?.confirmationTitle || 'Confirmar eliminación'"
+        :text="currentAction?.confirmationText || `¿Estás seguro que deseas eliminar este ${resource.getSingularLabel().toLowerCase()}? Esta acción no se puede deshacer.`"
+        confirm-text="Confirmar"
         cancel-text="Cancelar"
-        @confirm="handleDelete"
+        @confirm="currentAction ? executeAction() : handleDelete()"
       />
     </VCard>
   </section>

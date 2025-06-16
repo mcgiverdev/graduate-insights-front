@@ -95,7 +95,7 @@ export const DirectorModel: ModelDefinition = {
           { title: 'Inactivo', value: '0' },
         ],
       },
-      list: { visible: true },
+      list: { visible: false },
       create: { visible: false, defaultValue: '1', rules: ['required'] },
       edit: { visible: false, rules: ['required'] },
     },

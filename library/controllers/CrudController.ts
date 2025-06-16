@@ -1,6 +1,12 @@
 import type { ModelDefinition } from '../types/ModelDefinition'
 import { type ApiResponse, useApi } from '@/composables/useApi'
 
+interface ListParams {
+  page: number
+  size: number
+  search?: string
+}
+
 export class CrudController {
   private modelDefinition: ModelDefinition
   private baseUrl: string
@@ -31,6 +37,13 @@ export class CrudController {
       case 'get':
         return '/:id'
     }
+  }
+
+  private buildQueryString(params: Record<string, any>): string {
+    return Object.entries(params)
+      .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+      .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+      .join('&')
   }
 
   private isSuccessCode(type: 'list' | 'create' | 'update' | 'delete' | 'get', statusCode: number): boolean {
@@ -66,12 +79,20 @@ export class CrudController {
     }
   }
 
-  async list(page: number = 1, size: number = 10): Promise<{ data: any[]; total: number }> {
+  async list({ page = 1, size = 10, search }: ListParams): Promise<{ data: any[]; total: number }> {
     const perPage = size || this.modelDefinition.options?.perPage || 10
+
+    const queryParams = {
+      page,
+      size: perPage,
+      ...(search ? { search } : {}),
+    }
+
+    const queryString = this.buildQueryString(queryParams)
 
     return await this.handleApiResponse('list', async () => {
       const apiResponse = await useApi<any>(
-        `${this.getEndpoint('list')}?page=${page}&size=${perPage}`,
+        `${this.getEndpoint('list')}${queryString ? `?${queryString}` : ''}`,
         {
           method: 'get',
           headers: this.modelDefinition.api.headers,

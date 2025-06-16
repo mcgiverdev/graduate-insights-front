@@ -8,7 +8,7 @@ export interface RepositoryState<T> {
   loadingList: Ref<boolean>
   loadingForm: Ref<boolean>
   loadingSave: Ref<boolean>
-  fetchItems: (options: { page: number; size: number }) => Promise<void>
+  fetchItems: (options: { page: number; size: number; search?: string }) => Promise<void>
   getItem: (id: number) => Promise<T | null>
   addItem: (item: Partial<T>) => Promise<any>
   updateItem: (id: number, item: Partial<T>) => Promise<any>
@@ -30,10 +30,10 @@ export class GenericRepository<T> {
     )
   }
 
-  async fetchItems({ page, size }: { page: number; size: number }) {
+  async fetchItems({ page, size, search }: { page: number; size: number; search?: string }) {
     this.loadingList.value = true
     try {
-      const response = await this.crudController.list(page, size)
+      const response = await this.crudController.list({ page, size, search })
 
       console.log('Response from API:', response)
 
