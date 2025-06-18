@@ -3,8 +3,8 @@ import { ref, watch } from 'vue'
 import VConfirmDialog from '@/components/dialogs/VConfirmDialog.vue'
 import FormGenerator from '@/library/components/FormGenerator.vue'
 import TableGenerator from '@/library/components/TableGenerator.vue'
+import type { Resource } from '@/library/core/Resource'
 import { useGenericRepository } from '@/library/repository/GenericRepository'
-import type { Resource } from '@/library/resources/Resource'
 
 interface Props {
   resource: Resource

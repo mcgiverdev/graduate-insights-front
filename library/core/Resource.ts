@@ -1,5 +1,5 @@
+import type { FormField } from '../fields/FormField'
 import type { ModelDefinition } from '../types/ModelDefinition'
-import type { FormField } from './components/FormField'
 
 export interface ResourceConfig {
   name: string
@@ -8,22 +8,6 @@ export interface ResourceConfig {
   perPage?: number
   sortable?: boolean
   filterable?: boolean
-}
-
-export interface Field {
-  name: string
-  label: string
-  component: string
-  sortable?: boolean
-  searchable?: boolean
-  filterable?: boolean
-  hidden?: boolean
-  showOnIndex?: boolean
-  showOnDetail?: boolean
-  showOnCreate?: boolean
-  showOnUpdate?: boolean
-  rules?: any[]
-  props?: Record<string, any>
 }
 
 export interface Action {
@@ -60,111 +44,101 @@ export interface ApiConfig {
 }
 
 export abstract class Resource {
-  protected config: ResourceConfig
+  protected config: Required<ResourceConfig>
   protected title: string
   protected singularLabel: string
   protected pluralLabel: string
-  protected fields: any[] = []
+  protected fields: FormField[] = []
   protected actions: Action[] = []
   protected filters: Filter[] = []
   protected perPageOptions = [10, 25, 50, 100]
   protected defaultPerPage = 10
   protected searchable = true
   protected sortable = true
-  protected apiConfig: ApiConfig = {
-    baseURL: '',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    successCodes: {
-      create: [201],
-      update: [204],
-      delete: [204],
-      list: [200],
-      get: [200],
-    },
-  }
+  protected apiConfig: Required<ApiConfig>
 
   constructor(config: ResourceConfig) {
+    // Aseguramos que config tenga todos los campos requeridos
     this.config = {
       ...config,
-      perPage: config.perPage || 10,
-      sortable: config.sortable !== false,
-      filterable: config.filterable !== false,
+      perPage: config.perPage ?? 10,
+      sortable: config.sortable ?? true,
+      filterable: config.filterable ?? true,
     }
 
     this.title = `Administración de ${config.name}`
     this.singularLabel = config.name
     this.pluralLabel = `${config.name}s`
 
-    // Permitir que las subclases configuren la API
-    if (typeof this.configureApi === 'function') {
-      this.apiConfig = {
-        ...this.apiConfig,
-        ...this.configureApi(),
-      }
-    }
+    // Inicializamos la configuración de la API usando el template method
+    this.apiConfig = this.initializeApiConfig()
 
+    // Inicializamos los campos
     this.fields = this.form()
   }
 
   // Método abstracto que las subclases deben implementar para definir sus campos
   protected abstract form(): FormField[]
 
-  // Métodos para configurar el recurso
-  public setTitle(title: string): this {
-    this.title = title
+  // Template method para inicializar la configuración de la API
+  protected initializeApiConfig(): Required<ApiConfig> {
+    const defaultConfig: Required<ApiConfig> = {
+      baseURL: '',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      mapResponse: (data: any) => data,
+      mapRequest: (data: any) => data,
+      successCodes: {
+        create: [201],
+        update: [204],
+        delete: [204],
+        list: [200],
+        get: [200],
+      },
+    }
 
-    return this
+    // Llamamos al hook que las subclases pueden sobrescribir
+    const customConfig = this.configureApi()
+
+    return {
+      ...defaultConfig,
+      ...customConfig,
+
+      // Aseguramos que los códigos de éxito siempre tengan valores por defecto
+      successCodes: {
+        ...defaultConfig.successCodes,
+        ...customConfig?.successCodes,
+      },
+    }
   }
 
-  public setLabels(singular: string, plural: string): this {
-    this.singularLabel = singular
-    this.pluralLabel = plural
+  // Hook que las subclases pueden sobrescribir para personalizar la configuración de la API
+  public configureApi(): Partial<ApiConfig> {
+    return {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      mapResponse: (data: any): any => {
+        // Creamos un objeto con todas las propiedades de la interfaz generica
+        const mappedData: Partial<any> = {}
 
-    return this
+        // Iteramos sobre las propiedades de la interfaz generica
+        const genericKeys = Object.keys(this.getModel().fields) as Array<keyof any>
+
+        genericKeys.forEach(key => {
+          if (key in data)
+            mappedData[key as string] = data[key as string]
+        })
+
+        return mappedData
+      },
+    }
   }
 
-  public addField(field: Field): this {
-    this.fields.push(field)
-
-    return this
-  }
-
-  public addAction(action: Action): this {
-    this.actions.push(action)
-
-    return this
-  }
-
-  public addFilter(filter: Filter): this {
-    this.filters.push(filter)
-
-    return this
-  }
-
-  public setDefaultPerPage(value: number): this {
-    this.defaultPerPage = value
-
-    return this
-  }
-
-  public setSearchable(searchable: boolean): this {
-    this.searchable = searchable
-
-    return this
-  }
-
-  public setSortable(sortable: boolean): this {
-    this.sortable = sortable
-
-    return this
-  }
-
-  // Getters para acceder a la configuración
   public getModel(): ModelDefinition {
-    // Convertimos los fields de array a objeto para mantener compatibilidad
     const fieldsObject: Record<string, any> = {}
 
     this.fields.forEach(field => {
@@ -195,7 +169,7 @@ export abstract class Resource {
       name: this.config.name,
       fields: fieldsObject,
       api: {
-        baseURL: this.apiConfig.baseURL || '',
+        baseURL: this.apiConfig.baseURL,
         resourcePath: this.config.resourcePath,
         headers: this.apiConfig.headers,
         mapResponse: this.apiConfig.mapResponse,
@@ -235,24 +209,19 @@ export abstract class Resource {
     return this.pluralLabel
   }
 
-  public getFields(): Field[] {
-    return this.fields
-  }
+  public setLabels(singular: string, plural: string): this {
+    this.singularLabel = singular
+    this.pluralLabel = plural
 
-  public getActions(): Action[] {
-    return this.actions
-  }
-
-  public getFilters(): Filter[] {
-    return this.filters
-  }
-
-  public getPerPageOptions(): number[] {
-    return this.perPageOptions
+    return this
   }
 
   public getDefaultPerPage(): number {
     return this.defaultPerPage
+  }
+
+  public getPerPageOptions(): number[] {
+    return this.perPageOptions
   }
 
   public isSearchable(): boolean {
@@ -263,20 +232,43 @@ export abstract class Resource {
     return this.sortable
   }
 
-  // Helpers para obtener campos según el contexto
-  public getIndexFields(): Field[] {
-    return this.fields.filter(field => field.showOnIndex !== false)
+  public getActions(): Action[] {
+    return this.actions
   }
 
-  public getDetailFields(): Field[] {
-    return this.fields.filter(field => field.showOnDetail !== false)
+  public getFilters(): Filter[] {
+    return this.filters
   }
 
-  public getCreateFields(): Field[] {
-    return this.fields.filter(field => field.showOnCreate !== false)
+  public getIndexFields(): FormField[] {
+    return this.fields.filter(field => {
+      const fieldData = field.toField()
+
+      return fieldData.showOnIndex !== false
+    })
   }
 
-  public getUpdateFields(): Field[] {
-    return this.fields.filter(field => field.showOnUpdate !== false)
+  public getDetailFields(): FormField[] {
+    return this.fields.filter(field => {
+      const fieldData = field.toField()
+
+      return fieldData.showOnDetail !== false
+    })
+  }
+
+  public getCreateFields(): FormField[] {
+    return this.fields.filter(field => {
+      const fieldData = field.toField()
+
+      return fieldData.showOnCreate !== false
+    })
+  }
+
+  public getUpdateFields(): FormField[] {
+    return this.fields.filter(field => {
+      const fieldData = field.toField()
+
+      return fieldData.showOnUpdate !== false
+    })
   }
 }

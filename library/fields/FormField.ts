@@ -1,7 +1,7 @@
 export class FormField {
   protected _name: string
   protected _label: string
-  protected _component: string
+  protected _component: string = ''
   protected _showOnCreate = true
   protected _showOnUpdate = true
   protected _showOnIndex = true

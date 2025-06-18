@@ -42,19 +42,45 @@ export interface ApiSuccessCodes {
 
 export interface ModelDefinition {
   name: string
-  fields: Record<string, FieldDefinition>
+  fields: Record<string, {
+    type: string
+    label: string
+    required?: boolean
+    placeholder?: string
+    options?: {
+      items: Array<{ value: any; title: string }>
+    }
+    list: {
+      visible: boolean
+    }
+    create: {
+      visible: boolean
+      rules?: string[]
+      defaultValue?: any
+    }
+    edit: {
+      visible: boolean
+      rules?: string[]
+    }
+  }>
   api: {
     baseURL: string
     resourcePath: string
     headers?: Record<string, string>
     mapResponse?: (data: any) => any
     mapRequest?: (data: any) => any
-    successCodes?: ApiSuccessCodes
+    successCodes?: {
+      create?: number[]
+      update?: number[]
+      delete?: number[]
+      list?: number[]
+      get?: number[]
+    }
   }
-  options?: {
-    perPage?: number
-    sortable?: boolean
-    filterable?: boolean
-    idField?: string
+  options: {
+    perPage: number
+    sortable: boolean
+    filterable: boolean
+    idField: string
   }
 }

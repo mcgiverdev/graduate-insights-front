@@ -1,6 +1,6 @@
-import { Fields } from './components/fields'
-import type { FormField } from './components/FormField'
-import { type ApiConfig, Resource } from './Resource'
+import { type ApiConfig, Resource } from '../core/Resource'
+import { Fields } from '../fields'
+import type { FormField } from '../fields/FormField'
 
 export interface Director {
   director_id: number
@@ -22,12 +22,15 @@ export class DirectorResource extends Resource {
       name: 'directors',
       resourcePath: '/graduate-insights/v1/api/director',
       idField: 'director_id',
+      perPage: 10,
+      sortable: true,
+      filterable: true,
     })
 
     this.setLabels('Director', 'Directores')
   }
 
-  protected form(): FormField[] {
+  protected override form(): FormField[] {
     return [
       Fields.text('director_id')
         .label('ID')
@@ -114,7 +117,7 @@ export class DirectorResource extends Resource {
     ]
   }
 
-  protected configureApi(): Partial<ApiConfig> {
+  public override configureApi(): Partial<ApiConfig> {
     return {
       headers: {
         'Accept': 'application/json',
