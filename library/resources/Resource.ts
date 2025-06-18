@@ -1,4 +1,5 @@
 import type { ModelDefinition } from '../types/ModelDefinition'
+import type { FormField } from './components/FormField'
 
 export interface ResourceConfig {
   name: string
@@ -58,12 +59,12 @@ export interface ApiConfig {
   }
 }
 
-export class Resource {
+export abstract class Resource {
   protected config: ResourceConfig
   protected title: string
   protected singularLabel: string
   protected pluralLabel: string
-  protected fields: Field[] = []
+  protected fields: any[] = []
   protected actions: Action[] = []
   protected filters: Filter[] = []
   protected perPageOptions = [10, 25, 50, 100]
@@ -104,10 +105,12 @@ export class Resource {
         ...this.configureApi(),
       }
     }
+
+    this.fields = this.form()
   }
 
-  // Método que las subclases pueden sobrescribir para configurar la API
-  protected configureApi?(): Partial<ApiConfig>
+  // Método abstracto que las subclases deben implementar para definir sus campos
+  protected abstract form(): FormField[]
 
   // Métodos para configurar el recurso
   public setTitle(title: string): this {
@@ -165,23 +168,25 @@ export class Resource {
     const fieldsObject: Record<string, any> = {}
 
     this.fields.forEach(field => {
-      fieldsObject[field.name] = {
-        type: this.getFieldType(field.component),
-        label: field.label,
-        required: field.rules?.includes('required'),
-        placeholder: field.props?.placeholder,
-        options: field.props?.items ? { items: field.props.items } : undefined,
+      const fieldData = field.toField()
+
+      fieldsObject[fieldData.name] = {
+        type: this.getFieldType(fieldData.component),
+        label: fieldData.label,
+        required: fieldData.rules?.includes('required'),
+        placeholder: fieldData.props?.placeholder,
+        options: fieldData.props?.items ? { items: fieldData.props.items } : undefined,
         list: {
-          visible: field.showOnIndex !== false,
+          visible: fieldData.showOnIndex !== false,
         },
         create: {
-          visible: field.showOnCreate !== false,
-          rules: field.rules,
-          defaultValue: field.props?.defaultValue,
+          visible: fieldData.showOnCreate !== false,
+          rules: fieldData.rules,
+          defaultValue: fieldData.props?.defaultValue,
         },
         edit: {
-          visible: field.showOnUpdate !== false,
-          rules: field.rules,
+          visible: fieldData.showOnUpdate !== false,
+          rules: fieldData.rules,
         },
       }
     })
@@ -206,17 +211,16 @@ export class Resource {
     }
   }
 
-  private getFieldType(component: string): string {
-    switch (component) {
-      case 'text-field':
-        return 'text'
-      case 'select-field':
-        return 'enum'
-      case 'date-field':
-        return 'date'
-      default:
-        return 'text'
+  protected getFieldType(component: string): string {
+    const typeMap: Record<string, string> = {
+      'text-field': 'text',
+      'select-field': 'enum',
+      'date-field': 'date',
+      'textarea-field': 'text',
+      'file-field': 'file',
     }
+
+    return typeMap[component] || 'text'
   }
 
   public getTitle(): string {
