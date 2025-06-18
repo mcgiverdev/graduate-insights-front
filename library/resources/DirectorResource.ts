@@ -18,45 +18,12 @@ export class DirectorResource extends Resource {
   constructor() {
     super({
       name: 'directors',
-      api: {
-        baseURL: '',
-        resourcePath: '/graduate-insights/v1/api/director',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        mapResponse: (d: any): Director => ({
-          director_id: d.director_id,
-          user_id: d.user_id,
-          nombres: d.nombres,
-          apellidos: d.apellidos,
-          fecha_nacimiento: d.fecha_nacimiento,
-          genero: d.genero,
-          correo: d.correo,
-          estado: d.estado,
-          dni: d.dni,
-          celular: d.celular,
-          contrasena: d.contrasena,
-        }),
-        successCodes: {
-          create: [201],
-          update: [204],
-          delete: [204],
-          list: [200],
-          get: [200],
-        },
-      },
-      options: {
-        perPage: 10,
-        sortable: true,
-        filterable: true,
-        idField: 'director_id',
-      },
+      resourcePath: '/graduate-insights/v1/api/director',
+      idField: 'director_id',
     })
 
     this
       .setLabels('Director', 'Directores')
-      .setSearchable(true)
       .addField({
         name: 'director_id',
         label: 'ID',
@@ -198,5 +165,28 @@ export class DirectorResource extends Resource {
           type: 'password',
         },
       })
+  }
+
+  // Ejemplo de personalización de la configuración de API cuando sea necesaria
+  protected configureApi() {
+    return {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      mapResponse: (d: any): Director => ({
+        director_id: d.director_id,
+        user_id: d.user_id,
+        nombres: d.nombres,
+        apellidos: d.apellidos,
+        fecha_nacimiento: d.fecha_nacimiento,
+        genero: d.genero,
+        correo: d.correo,
+        estado: d.estado,
+        dni: d.dni,
+        celular: d.celular,
+        contrasena: d.contrasena,
+      }),
+    }
   }
 }

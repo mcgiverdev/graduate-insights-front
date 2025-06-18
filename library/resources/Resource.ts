@@ -1,5 +1,14 @@
 import type { ModelDefinition } from '../types/ModelDefinition'
 
+export interface ResourceConfig {
+  name: string
+  resourcePath: string
+  idField: string
+  perPage?: number
+  sortable?: boolean
+  filterable?: boolean
+}
+
 export interface Field {
   name: string
   label: string
@@ -35,8 +44,22 @@ export interface Filter {
   options?: any[]
 }
 
+export interface ApiConfig {
+  baseURL?: string
+  headers?: Record<string, string>
+  mapResponse?: (data: any) => any
+  mapRequest?: (data: any) => any
+  successCodes?: {
+    create?: number[]
+    update?: number[]
+    delete?: number[]
+    list?: number[]
+    get?: number[]
+  }
+}
+
 export class Resource {
-  protected model: ModelDefinition
+  protected config: ResourceConfig
   protected title: string
   protected singularLabel: string
   protected pluralLabel: string
@@ -47,13 +70,44 @@ export class Resource {
   protected defaultPerPage = 10
   protected searchable = true
   protected sortable = true
-
-  constructor(model: ModelDefinition) {
-    this.model = model
-    this.title = `Administración de ${model.name}`
-    this.singularLabel = model.name
-    this.pluralLabel = `${model.name}s`
+  protected apiConfig: ApiConfig = {
+    baseURL: '',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    successCodes: {
+      create: [201],
+      update: [204],
+      delete: [204],
+      list: [200],
+      get: [200],
+    },
   }
+
+  constructor(config: ResourceConfig) {
+    this.config = {
+      ...config,
+      perPage: config.perPage || 10,
+      sortable: config.sortable !== false,
+      filterable: config.filterable !== false,
+    }
+
+    this.title = `Administración de ${config.name}`
+    this.singularLabel = config.name
+    this.pluralLabel = `${config.name}s`
+
+    // Permitir que las subclases configuren la API
+    if (typeof this.configureApi === 'function') {
+      this.apiConfig = {
+        ...this.apiConfig,
+        ...this.configureApi(),
+      }
+    }
+  }
+
+  // Método que las subclases pueden sobrescribir para configurar la API
+  protected configureApi?(): Partial<ApiConfig>
 
   // Métodos para configurar el recurso
   public setTitle(title: string): this {
@@ -133,8 +187,22 @@ export class Resource {
     })
 
     return {
-      ...this.model,
+      name: this.config.name,
       fields: fieldsObject,
+      api: {
+        baseURL: this.apiConfig.baseURL || '',
+        resourcePath: this.config.resourcePath,
+        headers: this.apiConfig.headers,
+        mapResponse: this.apiConfig.mapResponse,
+        mapRequest: this.apiConfig.mapRequest,
+        successCodes: this.apiConfig.successCodes,
+      },
+      options: {
+        perPage: this.config.perPage,
+        sortable: this.config.sortable,
+        filterable: this.config.filterable,
+        idField: this.config.idField,
+      },
     }
   }
 
