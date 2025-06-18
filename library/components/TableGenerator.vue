@@ -37,11 +37,13 @@ export default defineComponent({
   emits: ['edit', 'delete', 'pageChange'],
 
   setup(props) {
-    const visibleFields = computed(() =>
-      Object.entries(props.modelDefinition.fields).filter(([_, field]) =>
+    const visibleFields = computed(() => {
+      const fields = props.modelDefinition.fields
+
+      return Object.entries(fields).filter(([_, field]) =>
         field.list?.visible !== false,
-      ),
-    )
+      )
+    })
 
     const formatValue = (value: any, field: FieldDefinition) => {
       const fieldType = FieldTypeRegistry.get(field.type)
