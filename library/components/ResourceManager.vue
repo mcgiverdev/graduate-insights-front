@@ -89,7 +89,7 @@ const handleDelete = async () => {
   isSnackbarVisible.value = true
 
   if (result.success)
-    fetchItems({ page: page.value, size: itemsPerPage.value })
+    await fetchItems({ page: page.value, size: itemsPerPage.value })
 
   isConfirmDialogVisible.value = false
   itemToDelete.value = null

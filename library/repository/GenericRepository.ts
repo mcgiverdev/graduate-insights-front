@@ -124,11 +124,18 @@ export class GenericRepository<T> {
     try {
       await this.crudController.delete(id)
 
-      return true
+      return {
+        success: true,
+        message: `${this.modelDefinition.name} eliminado exitosamente`,
+      }
     }
     catch (error: any) {
       console.error('Error al eliminar el item:', error)
-      throw new Error(error.message || `Error al eliminar ${this.modelDefinition.name}`)
+
+      return {
+        success: false,
+        message: error.message || `Error al eliminar ${this.modelDefinition.name}`,
+      }
     }
     finally {
       this.loadingSave.value = false
