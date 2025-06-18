@@ -3,3 +3,46 @@ description:
 globs:
 alwaysApply: false
 ---
+# Sistema de Recursos
+
+El sistema de recursos proporciona una forma estructurada de definir y manejar entidades CRUD en la aplicación.
+
+## Estructura de un Recurso
+Cada recurso debe extender la clase base [Resource.ts](library/resources/Resource.ts) y definir sus campos y comportamiento. Por ejemplo:
+
+```typescript
+export class MiRecurso extends Resource {
+  constructor() {
+    super(MiModelo)
+    
+    this
+      .setLabels('Singular', 'Plural')
+      .setSearchable(true)
+      .addField({
+        name: 'campo',
+        label: 'Etiqueta',
+        component: 'text-field'
+      })
+  }
+}
+```
+
+## Campos Disponibles
+Los campos pueden ser de varios tipos:
+- text-field: Campo de texto simple
+- select-field: Selector de opciones
+- date-field: Campo de fecha
+- number-field: Campo numérico
+
+## Propiedades de Campo
+Cada campo puede tener las siguientes propiedades:
+- name: Identificador único del campo
+- label: Etiqueta visible
+- component: Tipo de componente a usar
+- sortable: Si el campo puede ordenarse
+- searchable: Si el campo puede buscarse
+- rules: Reglas de validación
+- props: Propiedades adicionales del componente
+
+## Ejemplo de Implementación
+Ver [DirectorResource.ts](library/resources/DirectorResource.ts) para un ejemplo completo de implementación de un recurso.

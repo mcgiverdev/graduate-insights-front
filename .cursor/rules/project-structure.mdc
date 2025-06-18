@@ -3,6 +3,44 @@ description:
 globs: 
 alwaysApply: false
 ---
+# Estructura del Proyecto Graduate Insights Frontend
+
+Este proyecto es una aplicación frontend construida con Nuxt.js y Vuetify. La estructura del proyecto sigue una organización modular con los siguientes componentes principales:
+
+## Componentes Core (@core)
+El directorio [@core](@core) contiene componentes base, utilidades y configuraciones fundamentales:
+- Components: Componentes Vue reutilizables
+- Composables: Funciones composables de Vue 3
+- SCSS: Estilos base y configuraciones
+- Stores: Estado global de la aplicación
+- Utils: Funciones utilitarias
+
+## Layouts (@layouts)
+El directorio [@layouts](@layouts) maneja los diferentes layouts de la aplicación:
+- Layouts verticales y horizontales
+- Componentes de navegación
+- Configuraciones de tema
+
+## Biblioteca (library)
+El directorio [library](library) implementa un sistema de recursos y CRUD:
+- Resources: Definiciones de recursos como [DirectorResource.ts](library/resources/DirectorResource.ts)
+- Models: Modelos de datos
+- Controllers: Lógica de control CRUD
+- Components: Componentes genéricos para manejo de recursos
+
+## Páginas (pages)
+El directorio [pages](pages) contiene las vistas principales de la aplicación:
+- Gestión de directores
+- Centros educativos
+- Empleadores
+- Graduados
+
+## Convenciones Importantes
+1. Los recursos deben extender de la clase base Resource
+2. Los componentes deben seguir la convención de nombres Vue (PascalCase)
+3. Los servicios deben implementarse como composables Vue
+4. Los estilos deben seguir la estructura SCSS definida en @core
+
 # Guía de Estructura del Proyecto - Graduate Insights Frontend
 
 ## Estructura Principal del Proyecto
