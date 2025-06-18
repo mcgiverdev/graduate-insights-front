@@ -25,11 +25,26 @@ export interface FieldDefinition {
 }
 
 export interface ApiConfig {
-  baseURL?: string
+  baseURL: string
   resourcePath: string
-  mapResponse?: (item: any) => any
-  mapRequest?: (item: any) => any
   headers?: Record<string, string>
+  mapResponse?: (data: any) => any
+  mapRequest?: (data: any) => any
+  successCodes?: {
+    list?: number[]
+    create?: number[]
+    update?: number[]
+    delete?: number[]
+    get?: number[]
+  }
+  endpoints?: {
+    list?: string
+    create?: string
+    update?: string
+    delete?: string
+    get?: string
+  }
+  extraParams?: Record<string, any>
 }
 
 export interface ApiSuccessCodes {

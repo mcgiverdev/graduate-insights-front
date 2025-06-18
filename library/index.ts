@@ -1,11 +1,17 @@
-// Core
-export { Repository } from './core/Repository'
+// Core exports
 export { Resource } from './core/Resource'
 
-// Fields
+// Field exports
 export { Fields } from './fields'
 export type { FormField } from './fields/FormField'
 
-// Types
-export type { Action, ApiConfig, Filter, ResourceConfig } from './core/Resource'
-export type { ModelDefinition } from './types/ModelDefinition'
+// Resource exports
+export { DirectorResource } from './resources/DirectorResource'
+export { EducationCenterResource } from './resources/education-centers/EducationCenterResource'
+export { EmployerResource } from './resources/employers/EmployerResource'
+export { GraduateResource } from './resources/graduates/GraduateResource'
+
+// Component exports
+export { default as FormGenerator } from './components/FormGenerator.vue'
+export { default as ResourceManager } from './components/ResourceManager.vue'
+export { default as TableGenerator } from './components/TableGenerator.vue'

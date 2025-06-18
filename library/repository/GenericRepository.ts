@@ -37,12 +37,16 @@ export class GenericRepository<T> {
 
       console.log('Response from API:', response)
 
-      this.items.value = response.data.map(item =>
+      const items = Array.isArray(response.data) ? response.data : []
+
+      this.items.value = items.map(item =>
         this.modelDefinition.api.mapResponse
           ? this.modelDefinition.api.mapResponse(item)
           : item,
       )
-      this.totalItems.value = response.total
+
+      this.totalItems.value = typeof response.total === 'number' ? response.total : items.length
+
       console.log('Updated state:', this.getState())
     }
     catch (error) {

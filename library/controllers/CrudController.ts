@@ -83,66 +83,64 @@ export class CrudController {
     const perPage = size || this.modelDefinition.options?.perPage || 10
 
     const queryParams = {
-      page,
+      page: page + 1,
       size: perPage,
       ...(search ? { search } : {}),
+      ...(this.modelDefinition.api.extraParams || {}),
     }
 
     const queryString = this.buildQueryString(queryParams)
+    const endpoint = this.getEndpoint('list')
+    const url = `${endpoint}${endpoint.includes('?') ? '&' : '?'}${queryString}`
 
-    return await this.handleApiResponse('list', async () => {
-      const apiResponse = await useApi<any>(
-        `${this.getEndpoint('list')}${queryString ? `?${queryString}` : ''}`,
-        {
-          method: 'get',
-          headers: this.modelDefinition.api.headers,
-        },
-      )
+    try {
+      const apiResponse = await useApi<any>(url, {
+        method: 'get',
+        headers: this.modelDefinition.api.headers,
+      })
 
-      // Si la respuesta viene en el formato { data: [], paginate: { totalElements, totalPages, currentPage } }
+      if (!this.isSuccessCode('list', apiResponse.status))
+        throw new Error(`Código de estado inesperado: ${apiResponse.status}`)
+
+      // Extraer datos y total de manera segura
+      let data: any[] = []
+      let total = 0
+
       if (apiResponse.data.data && apiResponse.data.paginate) {
-        return {
-          data: {
-            data: apiResponse.data.data,
-            total: apiResponse.data.paginate.totalElements,
-          },
-          status: apiResponse.status,
-        }
+        data = apiResponse.data.data
+        total = apiResponse.data.paginate.totalElements
+      }
+      else if (Array.isArray(apiResponse.data)) {
+        data = apiResponse.data
+        total = apiResponse.data.length
+      }
+      else if (apiResponse.data.data && Array.isArray(apiResponse.data.data)) {
+        data = apiResponse.data.data
+        total = apiResponse.data.data.length
+      }
+      else {
+        console.warn('Formato de respuesta no estándar:', apiResponse)
+        data = Array.isArray(apiResponse.data)
+          ? apiResponse.data
+          : apiResponse.data?.data && Array.isArray(apiResponse.data.data)
+            ? apiResponse.data.data
+            : []
+        total = typeof apiResponse.data?.total === 'number'
+          ? apiResponse.data.total
+          : typeof apiResponse.data?.paginate?.totalElements === 'number'
+            ? apiResponse.data.paginate.totalElements
+            : data.length
       }
 
-      // Si la respuesta es un array directo
-      if (Array.isArray(apiResponse.data)) {
-        return {
-          data: {
-            data: apiResponse.data,
-            total: apiResponse.data.length,
-          },
-          status: apiResponse.status,
-        }
-      }
+      console.log('Datos procesados:', { data, total, page: queryParams.page })
 
-      // Si la respuesta es { data: [] } sin paginación
-      if (apiResponse.data.data && Array.isArray(apiResponse.data.data)) {
-        return {
-          data: {
-            data: apiResponse.data.data,
-            total: apiResponse.data.data.length,
-          },
-          status: apiResponse.status,
-        }
-      }
+      return { data, total }
+    }
+    catch (error) {
+      console.error('Error en list:', error)
 
-      // Si no reconocemos el formato, devolvemos un array vacío
-      console.warn('Formato de respuesta no reconocido:', apiResponse)
-
-      return {
-        data: {
-          data: [],
-          total: 0,
-        },
-        status: apiResponse.status,
-      }
-    })
+      return { data: [], total: 0 }
+    }
   }
 
   async create(data: Record<string, any>): Promise<any> {

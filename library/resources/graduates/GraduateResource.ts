@@ -1,45 +1,42 @@
-import { type ApiConfig, Resource } from '../core/Resource'
-import { Fields } from '../fields'
-import type { FormField } from '../fields/FormField'
+import { type ApiConfig, Resource } from '../../core/Resource'
+import { Fields } from '../../fields'
+import type { FormField } from '../../fields/FormField'
 
-export interface Director {
-  director_id: number
+export interface Graduate {
+  graduate_id: number
   user_id: number
   nombres: string
-    apellidos: string
-    fecha_nacimiento: string
+  apellidos: string
+  fecha_nacimiento: string
   genero: string
   correo: string
   estado: string
   dni: string
   celular: string
+  fecha_inicio: string
+  fecha_fin: string
+  cv: string
   contrasena?: string
 }
 
-export class DirectorResource extends Resource {
+export class GraduateResource extends Resource {
   constructor() {
     super({
-      name: 'directors',
-      resourcePath: '/graduate-insights/v1/api/director',
-      idField: 'director_id',
+      name: 'graduates',
+      resourcePath: '/graduate-insights/v1/api/graduate',
+      idField: 'graduate_id',
       perPage: 10,
       sortable: true,
       filterable: true,
     })
 
-    this.setLabels('Director', 'Directores')
+    this.setLabels('Graduado', 'Graduados')
   }
 
   protected override form(): FormField[] {
     return [
-      Fields.text('director_id')
+      Fields.text('graduate_id')
         .label('ID')
-        .hideOnCreate()
-        .hideOnUpdate()
-        .sortable(),
-
-      Fields.text('user_id')
-        .label('ID Usuario')
         .hideOnCreate()
         .hideOnUpdate()
         .sortable(),
@@ -94,6 +91,16 @@ export class DirectorResource extends Resource {
         .sortable()
         .placeholder('Ingrese el número de celular'),
 
+      Fields.date('fecha_inicio')
+        .label('Fecha de inicio')
+        .required()
+        .sortable(),
+
+      Fields.date('fecha_fin')
+        .label('Fecha de fin')
+        .required()
+        .sortable(),
+
       Fields.select('estado')
         .label('Estado')
         .hideOnCreate()
@@ -106,6 +113,12 @@ export class DirectorResource extends Resource {
           { value: '0', title: 'Inactivo' },
         ])
         .default('1'),
+
+      Fields.text('cv')
+        .label('cv')
+        .required()
+        .hideOnIndex()
+        .placeholder('Ingrese CV'),
 
       Fields.text('contrasena')
         .label('Contraseña')
@@ -123,8 +136,8 @@ export class DirectorResource extends Resource {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
-      mapResponse: (d: any): Director => ({
-        director_id: d.director_id,
+      mapResponse: (d: any): Graduate => ({
+        graduate_id: d.graduate_id,
         user_id: d.user_id,
         nombres: d.nombres,
         apellidos: d.apellidos,
@@ -134,7 +147,10 @@ export class DirectorResource extends Resource {
         estado: d.estado,
         dni: d.dni,
         celular: d.celular,
+        fecha_inicio: d.fecha_inicio,
+        fecha_fin: d.fecha_fin,
         contrasena: d.contrasena,
+        cv: d.cv,
       }),
     }
   }

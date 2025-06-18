@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import VConfirmDialog from '@/components/dialogs/VConfirmDialog.vue'
 import FormGenerator from '@/library/components/FormGenerator.vue'
 import TableGenerator from '@/library/components/TableGenerator.vue'
@@ -14,7 +14,6 @@ const props = defineProps<Props>()
 
 const itemsPerPage = ref(props.resource.getDefaultPerPage())
 const page = ref(1)
-const hasMorePages = ref(false)
 const searchQuery = ref('')
 
 const {
@@ -38,18 +37,23 @@ const isConfirmDialogVisible = ref(false)
 const itemToDelete = ref<number | null>(null)
 const currentAction = ref<any>(null)
 
+const hasMorePages = computed(() => {
+  return totalItems.value > (page.value * itemsPerPage.value)
+})
+
+const handlePageChange = (newPage: number) => {
+  page.value = newPage
+}
+
 // Observar cambios en la paginación y búsqueda
 watch([page, itemsPerPage, searchQuery], () => {
-  const params: any = {
-    page: page.value,
+  const params = {
+    page: page.value - 1,
     size: itemsPerPage.value,
+    ...(searchQuery.value ? { search: searchQuery.value } : {}),
   }
 
-  if (searchQuery.value)
-    params.search = searchQuery.value
-
   fetchItems(params)
-  hasMorePages.value = totalItems.value > page.value * itemsPerPage.value
 }, { immediate: true })
 
 const openAddForm = () => {
@@ -88,8 +92,17 @@ const handleDelete = async () => {
   snackbarMessage.value = result.message
   isSnackbarVisible.value = true
 
-  if (result.success)
-    await fetchItems({ page: page.value, size: itemsPerPage.value })
+  if (result.success) {
+    // Si estamos en una página vacía después de eliminar, retroceder una página
+    if (items.value.length === 1 && page.value > 1)
+      page.value--
+
+    await fetchItems({
+      page: page.value - 1,
+      size: itemsPerPage.value,
+      ...(searchQuery.value ? { search: searchQuery.value } : {}),
+    })
+  }
 
   isConfirmDialogVisible.value = false
   itemToDelete.value = null
@@ -108,11 +121,22 @@ const handleSubmit = async (data: any) => {
     else {
       await addItem(data)
       snackbarMessage.value = `${props.resource.getSingularLabel()} creado exitosamente`
+
+      // Volver a la primera página después de crear
+      page.value = 1
     }
 
-    isSnackbarVisible.value = true
     isFormVisible.value = false
-    fetchItems({ page: page.value, size: itemsPerPage.value })
+
+    // Asegurarnos de que la página es válida
+    const params = {
+      page: page.value - 1,
+      size: itemsPerPage.value,
+      ...(searchQuery.value ? { search: searchQuery.value } : {}),
+    }
+
+    await fetchItems(params)
+    isSnackbarVisible.value = true
   }
   catch (error: any) {
     snackbarMessage.value = error.message || 'Error al procesar la operación'
@@ -211,7 +235,7 @@ const executeAction = async () => {
         @edit="openEditForm"
         @delete="confirmDelete"
         @action="handleAction"
-        @page-change="page = $event"
+        @page-change="handlePageChange"
       />
 
       <!-- Formulario usando nuestro generador -->

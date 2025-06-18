@@ -1,45 +1,41 @@
-import { type ApiConfig, Resource } from '../core/Resource'
-import { Fields } from '../fields'
-import type { FormField } from '../fields/FormField'
+import { type ApiConfig, Resource } from '../../core/Resource'
+import { Fields } from '../../fields'
+import type { FormField } from '../../fields/FormField'
 
-export interface Director {
-  director_id: number
+export interface Employer {
+  employer_id: number
   user_id: number
   nombres: string
-    apellidos: string
-    fecha_nacimiento: string
+  apellidos: string
+  fecha_nacimiento: string
   genero: string
   correo: string
   estado: string
   dni: string
   celular: string
+  ruc: string
+  razon_social: string
   contrasena?: string
 }
 
-export class DirectorResource extends Resource {
+export class EmployerResource extends Resource {
   constructor() {
     super({
-      name: 'directors',
-      resourcePath: '/graduate-insights/v1/api/director',
-      idField: 'director_id',
+      name: 'employers',
+      resourcePath: '/graduate-insights/v1/api/employer',
+      idField: 'employer_id',
       perPage: 10,
       sortable: true,
       filterable: true,
     })
 
-    this.setLabels('Director', 'Directores')
+    this.setLabels('Empleador', 'Empleadores')
   }
 
   protected override form(): FormField[] {
     return [
-      Fields.text('director_id')
+      Fields.text('employer_id')
         .label('ID')
-        .hideOnCreate()
-        .hideOnUpdate()
-        .sortable(),
-
-      Fields.text('user_id')
-        .label('ID Usuario')
         .hideOnCreate()
         .hideOnUpdate()
         .sortable(),
@@ -94,6 +90,21 @@ export class DirectorResource extends Resource {
         .sortable()
         .placeholder('Ingrese el número de celular'),
 
+      Fields.text('ruc')
+        .label('RUC')
+        .required()
+        .numeric()
+        .sortable()
+        .searchable()
+        .placeholder('Ingrese el RUC de la empresa'),
+
+      Fields.text('razon_social')
+        .label('Razón social')
+        .required()
+        .sortable()
+        .searchable()
+        .placeholder('Ingrese la razón social de la empresa'),
+
       Fields.select('estado')
         .label('Estado')
         .hideOnCreate()
@@ -123,8 +134,8 @@ export class DirectorResource extends Resource {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
-      mapResponse: (d: any): Director => ({
-        director_id: d.director_id,
+      mapResponse: (d: any): Employer => ({
+        employer_id: d.employer_id,
         user_id: d.user_id,
         nombres: d.nombres,
         apellidos: d.apellidos,
@@ -134,6 +145,8 @@ export class DirectorResource extends Resource {
         estado: d.estado,
         dni: d.dni,
         celular: d.celular,
+        ruc: d.ruc,
+        razon_social: d.razon_social,
         contrasena: d.contrasena,
       }),
     }
