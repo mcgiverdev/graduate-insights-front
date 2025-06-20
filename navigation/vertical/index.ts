@@ -34,7 +34,12 @@ export default [
     title: 'Encuestas',
     to: { name: 'surveys' },
     icon: { icon: 'tabler-clipboard-text' },
-
-    // Todos los roles pueden ver encuestas
+    requiredRoles: [ROLES.EMPLEADOR, ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
+  },
+  {
+    title: 'Mis Encuestas',
+    to: { name: 'my-surveys' },
+    icon: { icon: 'tabler-clipboard-check' },
+    requiredRoles: [ROLES.GRADUADO],
   },
 ]

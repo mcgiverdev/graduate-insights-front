@@ -30,4 +30,16 @@ export default [
     icon: { icon: 'tabler-briefcase' },
     requiredRoles: [ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
   },
+  {
+    title: 'Encuestas',
+    to: { name: 'surveys' },
+    icon: { icon: 'tabler-clipboard-text' },
+    requiredRoles: [ROLES.EMPLEADOR, ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
+  },
+  {
+    title: 'Mis Encuestas',
+    to: { name: 'my-surveys' },
+    icon: { icon: 'tabler-clipboard-check' },
+    requiredRoles: [ROLES.GRADUADO],
+  },
 ]
