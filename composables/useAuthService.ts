@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { useApi } from '@/composables/useApi'
+import { useUser } from '@/composables/useUser'
 
 interface LoginResponse {
   success: boolean
@@ -121,6 +122,12 @@ export const useAuthService = () => {
     })
 
     token.value = null
+
+    // Limpiar información del usuario
+    const { clearUser } = useUser()
+
+    clearUser()
+
     navigateTo('/login')
   }
 

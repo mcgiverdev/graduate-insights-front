@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { computed } from 'vue'
+import { useRoles } from '@/composables/useRoles'
 import navItems from '@/navigation/vertical'
 import { themeConfig } from '@themeConfig'
 
@@ -10,10 +12,27 @@ import NavBarI18n from '@core/components/I18n.vue'
 
 // @layouts plugin
 import { VerticalNavLayout } from '@layouts'
+
+// Filtrar elementos de navegación basándose en roles
+const { hasAnyRole, role } = useRoles()
+
+const filteredNavItems = computed(() => {
+  if (!role.value)
+    return []
+
+  return navItems.filter(item => {
+    // Si el elemento no tiene requiredRoles, está disponible para todos
+    if (!item.requiredRoles)
+      return true
+
+    // Verificar si el usuario tiene alguno de los roles requeridos
+    return hasAnyRole(item.requiredRoles)
+  })
+})
 </script>
 
 <template>
-  <VerticalNavLayout :nav-items="navItems">
+  <VerticalNavLayout :nav-items="filteredNavItems">
     <!-- 👉 navbar -->
     <template #navbar="{ toggleVerticalOverlayNavActive }">
       <div class="d-flex h-100 align-center">

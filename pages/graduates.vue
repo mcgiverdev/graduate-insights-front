@@ -3,7 +3,7 @@ import ResourceManager from '@/library/components/ResourceManager.vue'
 import { GraduateResource } from '@/library/resources/graduates/GraduateResource'
 
 definePageMeta({
-  middleware: ['auth'],
+  middleware: ['auth', 'role'],
   layout: 'default',
 })
 

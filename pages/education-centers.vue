@@ -3,7 +3,7 @@ import ResourceManager from '@/library/components/ResourceManager.vue'
 import { EducationCenterResource } from '@/library/resources/education-centers/EducationCenterResource'
 
 definePageMeta({
-  middleware: ['auth'],
+  middleware: ['auth', 'role'],
   layout: 'default',
 })
 

@@ -3,7 +3,7 @@ import ResourceManager from '@/library/components/ResourceManager.vue'
 import { EmployerResource } from '@/library/resources/employers/EmployerResource'
 
 definePageMeta({
-  middleware: ['auth'],
+  middleware: ['auth', 'role'],
   layout: 'default',
 })
 
