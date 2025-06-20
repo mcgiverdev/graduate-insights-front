@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
+import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import { useSnackbar } from '@/composables/useSnackbar'
 import { useSurveyService } from '@/composables/useSurveyService'
 import type { Survey } from '@/modules/surveys/types'
@@ -172,62 +174,62 @@ onMounted(() => {
 </script>
 
 <template>
-  <VCard>
-    <VCardTitle class="d-flex justify-space-between align-center">
-      <span>Gestión de Encuestas</span>
-      <VBtn
-        color="primary"
-        @click="$emit('createSurvey')"
-      >
-        <VIcon start>
-          mdi-plus
-        </VIcon>
-        Crear Encuesta
-      </VBtn>
-    </VCardTitle>
-
+  <VCard class="mb-6">
+    <VCardItem class="pb-4">
+      <VCardTitle>Gestión de Encuestas</VCardTitle>
+    </VCardItem>
     <VDivider />
+    <VCardText class="d-flex flex-wrap gap-4">
+      <div class="me-3 d-flex gap-3">
+        <AppSelect
+          :model-value="itemsPerPage"
+          :items="[10, 25, 50, 100].map(value => ({ value, title: String(value) }))"
+          style="inline-size: 6.25rem;"
+          @update:model-value="itemsPerPage = parseInt($event, 10)"
+        />
+      </div>
 
-    <!-- Filtros y búsqueda -->
-    <VCardText>
-      <VRow>
-        <VCol
-          cols="12"
-          md="6"
-        >
-          <VTextField
+      <VSpacer />
+
+      <div class="d-flex align-center flex-wrap gap-4">
+        <!-- Búsqueda -->
+        <div style="inline-size: 10rem;">
+          <AppTextField
             v-model="searchQuery"
-            label="Buscar encuestas..."
-            prepend-inner-icon="mdi-magnify"
-            clearable
+            placeholder="Buscar..."
+            prepend-inner-icon="tabler-search"
             @input="handleSearch"
           />
-        </VCol>
-        <VCol
-          cols="12"
-          md="3"
+        </div>
+
+        <!-- Filtros -->
+        <AppSelect
+          v-model="selectedType"
+          :items="[{ title: 'Todos los tipos', value: null }, ...surveyTypeOptions]"
+          placeholder="Tipo"
+          clearable
+          style="inline-size: 8rem;"
+          @update:model-value="handleFilter"
+        />
+
+        <AppSelect
+          v-model="selectedStatus"
+          :items="[{ title: 'Todos los estados', value: null }, ...statusOptions]"
+          placeholder="Estado"
+          clearable
+          style="inline-size: 8rem;"
+          @update:model-value="handleFilter"
+        />
+
+        <!-- Botón crear -->
+        <VBtn
+          prepend-icon="tabler-plus"
+          color="primary"
+          @click="$emit('createSurvey')"
         >
-          <VSelect
-            v-model="selectedType"
-            :items="surveyTypeOptions"
-            label="Tipo de encuesta"
-            clearable
-            @update:model-value="handleFilter"
-          />
-        </VCol>
-        <VCol
-          cols="12"
-          md="3"
-        >
-          <VSelect
-            v-model="selectedStatus"
-            :items="statusOptions"
-            label="Estado"
-            clearable
-            @update:model-value="handleFilter"
-          />
-        </VCol>
-      </VRow>
+          Crear Encuesta
+        </VBtn>
+      </div>
     </VCardText>
 
     <!-- Tabla de encuestas -->
@@ -281,58 +283,54 @@ onMounted(() => {
 
       <!-- Acciones -->
       <template #item.actions="{ item }">
-        <div class="d-flex gap-2">
-          <VTooltip text="Ver detalles">
-            <template #activator="{ props }">
-              <VBtn
-                v-bind="props"
-                icon="mdi-eye"
-                size="small"
-                variant="text"
-                color="info"
-                @click="$emit('viewSurvey', item)"
-              />
-            </template>
-          </VTooltip>
+        <div class="d-flex gap-1">
+          <VBtn
+            size="small"
+            color="info"
+            icon
+            @click="$emit('viewSurvey', item)"
+          >
+            <VTooltip activator="parent">
+              Ver detalles
+            </VTooltip>
+            <VIcon icon="tabler-eye" />
+          </VBtn>
 
-          <VTooltip text="Editar">
-            <template #activator="{ props }">
-              <VBtn
-                v-bind="props"
-                icon="mdi-pencil"
-                size="small"
-                variant="text"
-                color="primary"
-                @click="$emit('editSurvey', item)"
-              />
-            </template>
-          </VTooltip>
+          <VBtn
+            size="small"
+            color="primary"
+            icon
+            @click="$emit('editSurvey', item)"
+          >
+            <VTooltip activator="parent">
+              Editar
+            </VTooltip>
+            <VIcon icon="tabler-edit" />
+          </VBtn>
 
-          <VTooltip text="Duplicar">
-            <template #activator="{ props }">
-              <VBtn
-                v-bind="props"
-                icon="mdi-content-copy"
-                size="small"
-                variant="text"
-                color="secondary"
-                @click="$emit('duplicateSurvey', item)"
-              />
-            </template>
-          </VTooltip>
+          <VBtn
+            size="small"
+            color="secondary"
+            icon
+            @click="$emit('duplicateSurvey', item)"
+          >
+            <VTooltip activator="parent">
+              Duplicar
+            </VTooltip>
+            <VIcon icon="tabler-copy" />
+          </VBtn>
 
-          <VTooltip text="Eliminar">
-            <template #activator="{ props }">
-              <VBtn
-                v-bind="props"
-                icon="mdi-delete"
-                size="small"
-                variant="text"
-                color="error"
-                @click="handleDelete(item)"
-              />
-            </template>
-          </VTooltip>
+          <VBtn
+            size="small"
+            color="error"
+            icon
+            @click="handleDelete(item)"
+          >
+            <VTooltip activator="parent">
+              Eliminar
+            </VTooltip>
+            <VIcon icon="tabler-trash" />
+          </VBtn>
         </div>
       </template>
 

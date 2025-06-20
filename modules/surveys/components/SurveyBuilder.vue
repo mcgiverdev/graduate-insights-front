@@ -157,43 +157,78 @@ const currentEditingQuestion = computed(() => {
 
 <template>
   <div class="survey-builder">
-    <div class="d-flex justify-space-between align-center mb-6">
-      <h2 class="text-h4">
-        {{ editingSurvey ? 'Editar Encuesta' : 'Crear Nueva Encuesta' }}
-      </h2>
+    <VCard class="mb-6">
+      <VCardItem class="pb-4">
+        <VCardTitle>{{ editingSurvey ? 'Editar Encuesta' : 'Crear Nueva Encuesta' }}</VCardTitle>
+      </VCardItem>
+      <VDivider />
+      <VCardText class="d-flex justify-space-between align-center">
+        <div class="d-flex align-center gap-2">
+          <VChip
+            v-if="editingSurvey"
+            color="info"
+            variant="tonal"
+            size="small"
+          >
+            <VIcon
+              start
+              icon="tabler-edit"
+            />
+            Editando
+          </VChip>
+          <VChip
+            v-else
+            color="success"
+            variant="tonal"
+            size="small"
+          >
+            <VIcon
+              start
+              icon="tabler-plus"
+            />
+            Nueva Encuesta
+          </VChip>
 
-      <div class="d-flex gap-2">
-        <VBtn
-          variant="outlined"
-          color="secondary"
-          @click="togglePreview"
-        >
-          <VIcon start>
-            {{ previewMode ? 'mdi-pencil' : 'mdi-eye' }}
-          </VIcon>
-          {{ previewMode ? 'Editar' : 'Previsualizar' }}
-        </VBtn>
+          <VChip
+            v-if="surveyForm.questions.length > 0"
+            color="primary"
+            variant="outlined"
+            size="small"
+          >
+            {{ surveyForm.questions.length }} preguntas
+          </VChip>
+        </div>
 
-        <VBtn
-          variant="outlined"
-          @click="cancelSurvey"
-        >
-          Cancelar
-        </VBtn>
+        <div class="d-flex gap-2">
+          <VBtn
+            :prepend-icon="previewMode ? 'tabler-edit' : 'tabler-eye'"
+            variant="outlined"
+            color="secondary"
+            @click="togglePreview"
+          >
+            {{ previewMode ? 'Editar' : 'Previsualizar' }}
+          </VBtn>
 
-        <VBtn
-          color="primary"
-          :disabled="!isValidSurvey"
-          :loading="loadingSave"
-          @click="saveSurvey"
-        >
-          <VIcon start>
-            mdi-content-save
-          </VIcon>
-          {{ editingSurvey ? 'Actualizar' : 'Guardar' }}
-        </VBtn>
-      </div>
-    </div>
+          <VBtn
+            prepend-icon="tabler-x"
+            variant="outlined"
+            @click="cancelSurvey"
+          >
+            Cancelar
+          </VBtn>
+
+          <VBtn
+            :prepend-icon="editingSurvey ? 'tabler-device-floppy' : 'tabler-check'"
+            color="primary"
+            :disabled="!isValidSurvey"
+            :loading="loadingSave"
+            @click="saveSurvey"
+          >
+            {{ editingSurvey ? 'Actualizar' : 'Guardar' }}
+          </VBtn>
+        </div>
+      </VCardText>
+    </VCard>
 
     <VRow>
       <!-- Panel de construcción -->
@@ -244,25 +279,27 @@ const currentEditingQuestion = computed(() => {
 
         <!-- Lista de preguntas -->
         <VCard class="mt-4">
-          <VCardTitle class="d-flex justify-space-between align-center">
-            <div>
-              <VIcon start>
-                mdi-help-circle
-              </VIcon>
-              Preguntas ({{ surveyForm.questions.length }})
-            </div>
+          <VCardItem class="pb-4">
+            <VCardTitle class="d-flex justify-space-between align-center">
+              <div>
+                <VIcon
+                  start
+                  icon="tabler-help-circle"
+                />
+                Preguntas ({{ surveyForm.questions.length }})
+              </div>
 
-            <VBtn
-              color="primary"
-              size="small"
-              @click="addQuestion"
-            >
-              <VIcon start>
-                mdi-plus
-              </VIcon>
-              Agregar Pregunta
-            </VBtn>
-          </VCardTitle>
+              <VBtn
+                prepend-icon="tabler-plus"
+                color="primary"
+                size="small"
+                @click="addQuestion"
+              >
+                Agregar Pregunta
+              </VBtn>
+            </VCardTitle>
+          </VCardItem>
+          <VDivider />
 
           <VCardText>
             <div
@@ -346,38 +383,54 @@ const currentEditingQuestion = computed(() => {
 
                     <div class="d-flex flex-column gap-1">
                       <VBtn
-                        icon="mdi-pencil"
                         size="small"
-                        variant="text"
                         color="primary"
+                        icon
                         @click="editQuestion(index)"
-                      />
+                      >
+                        <VTooltip activator="parent">
+                          Editar pregunta
+                        </VTooltip>
+                        <VIcon icon="tabler-edit" />
+                      </VBtn>
 
                       <VBtn
-                        icon="mdi-arrow-up"
                         size="small"
-                        variant="text"
                         color="info"
+                        icon
                         :disabled="index === 0"
                         @click="moveQuestion(index, index - 1)"
-                      />
+                      >
+                        <VTooltip activator="parent">
+                          Mover arriba
+                        </VTooltip>
+                        <VIcon icon="tabler-arrow-up" />
+                      </VBtn>
 
                       <VBtn
-                        icon="mdi-arrow-down"
                         size="small"
-                        variant="text"
                         color="info"
+                        icon
                         :disabled="index === surveyForm.questions.length - 1"
                         @click="moveQuestion(index, index + 1)"
-                      />
+                      >
+                        <VTooltip activator="parent">
+                          Mover abajo
+                        </VTooltip>
+                        <VIcon icon="tabler-arrow-down" />
+                      </VBtn>
 
                       <VBtn
-                        icon="mdi-delete"
                         size="small"
-                        variant="text"
                         color="error"
+                        icon
                         @click="deleteQuestion(index)"
-                      />
+                      >
+                        <VTooltip activator="parent">
+                          Eliminar pregunta
+                        </VTooltip>
+                        <VIcon icon="tabler-trash" />
+                      </VBtn>
                     </div>
                   </div>
                 </VCardText>

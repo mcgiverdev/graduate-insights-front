@@ -19,17 +19,17 @@ function handleAnswer(questionIndex: number, value: any) {
 
 function getQuestionTypeIcon(type: QuestionType) {
   const icons = {
-    [QuestionType.YES_NO]: 'mdi-help-circle',
-    [QuestionType.SINGLE_CHOICE]: 'mdi-radiobox-marked',
-    [QuestionType.MULTIPLE_CHOICE]: 'mdi-checkbox-marked',
-    [QuestionType.TEXT]: 'mdi-text',
-    [QuestionType.NUMBER]: 'mdi-numeric',
-    [QuestionType.DATE]: 'mdi-calendar',
-    [QuestionType.EMAIL]: 'mdi-email',
-    [QuestionType.PHONE]: 'mdi-phone',
+    [QuestionType.YES_NO]: 'tabler-help-circle',
+    [QuestionType.SINGLE_CHOICE]: 'tabler-circle-dot',
+    [QuestionType.MULTIPLE_CHOICE]: 'tabler-checkbox',
+    [QuestionType.TEXT]: 'tabler-abc',
+    [QuestionType.NUMBER]: 'tabler-123',
+    [QuestionType.DATE]: 'tabler-calendar',
+    [QuestionType.EMAIL]: 'tabler-mail',
+    [QuestionType.PHONE]: 'tabler-phone',
   }
 
-  return icons[type] || 'mdi-help-circle'
+  return icons[type] || 'tabler-help-circle'
 }
 </script>
 
@@ -53,9 +53,8 @@ function getQuestionTypeIcon(type: QuestionType) {
       <VIcon
         size="64"
         color="grey-lighten-2"
-      >
-        mdi-clipboard-text-outline
-      </VIcon>
+        icon="tabler-clipboard-text"
+      />
       <p class="text-h6 mt-4 mb-2">
         No hay preguntas para mostrar
       </p>
@@ -207,13 +206,11 @@ function getQuestionTypeIcon(type: QuestionType) {
       class="text-center mt-6"
     >
       <VBtn
+        prepend-icon="tabler-send"
         color="primary"
         size="large"
         disabled
       >
-        <VIcon start>
-          mdi-send
-        </VIcon>
         Enviar Respuestas
       </VBtn>
 

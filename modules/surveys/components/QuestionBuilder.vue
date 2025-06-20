@@ -141,12 +141,16 @@ function resetForm() {
 
 <template>
   <VCard>
-    <VCardTitle>
-      <VIcon start>
-        mdi-help-circle-outline
-      </VIcon>
-      {{ question ? 'Editar Pregunta' : 'Nueva Pregunta' }}
-    </VCardTitle>
+    <VCardItem class="pb-4">
+      <VCardTitle>
+        <VIcon
+          start
+          icon="tabler-help-circle"
+        />
+        {{ question ? 'Editar Pregunta' : 'Nueva Pregunta' }}
+      </VCardTitle>
+    </VCardItem>
+    <VDivider />
 
     <VCardText>
       <VForm @submit.prevent="saveQuestion">
@@ -208,13 +212,11 @@ function resetForm() {
 
               <VBtn
                 v-if="questionForm.question_type !== QuestionType.YES_NO"
+                prepend-icon="tabler-plus"
                 color="primary"
                 size="small"
                 @click="addOption"
               >
-                <VIcon start>
-                  mdi-plus
-                </VIcon>
                 Agregar Opción
               </VBtn>
             </div>
@@ -262,30 +264,42 @@ function resetForm() {
                       class="d-flex gap-1"
                     >
                       <VBtn
-                        icon="mdi-arrow-up"
                         size="small"
-                        variant="text"
                         color="info"
+                        icon
                         :disabled="index === 0"
                         @click="moveOption(index, index - 1)"
-                      />
+                      >
+                        <VTooltip activator="parent">
+                          Mover arriba
+                        </VTooltip>
+                        <VIcon icon="tabler-arrow-up" />
+                      </VBtn>
 
                       <VBtn
-                        icon="mdi-arrow-down"
                         size="small"
-                        variant="text"
                         color="info"
+                        icon
                         :disabled="index === questionForm.options.length - 1"
                         @click="moveOption(index, index + 1)"
-                      />
+                      >
+                        <VTooltip activator="parent">
+                          Mover abajo
+                        </VTooltip>
+                        <VIcon icon="tabler-arrow-down" />
+                      </VBtn>
 
                       <VBtn
-                        icon="mdi-delete"
                         size="small"
-                        variant="text"
                         color="error"
+                        icon
                         @click="removeOption(index)"
-                      />
+                      >
+                        <VTooltip activator="parent">
+                          Eliminar opción
+                        </VTooltip>
+                        <VIcon icon="tabler-trash" />
+                      </VBtn>
                     </div>
                   </div>
                 </VCardText>
@@ -300,6 +314,7 @@ function resetForm() {
       <VSpacer />
 
       <VBtn
+        prepend-icon="tabler-x"
         variant="outlined"
         @click="cancelQuestion"
       >
@@ -307,13 +322,11 @@ function resetForm() {
       </VBtn>
 
       <VBtn
+        :prepend-icon="question ? 'tabler-device-floppy' : 'tabler-check'"
         color="primary"
         :disabled="!isValidQuestion"
         @click="saveQuestion"
       >
-        <VIcon start>
-          mdi-check
-        </VIcon>
         {{ question ? 'Actualizar' : 'Guardar' }} Pregunta
       </VBtn>
     </VCardActions>
