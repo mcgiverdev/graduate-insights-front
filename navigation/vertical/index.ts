@@ -24,4 +24,9 @@ export default [
     to: { name: 'education-centers' },
     icon: { icon: 'tabler-briefcase' },
   },
+  {
+    title: 'Encuestas',
+    to: { name: 'surveys' },
+    icon: { icon: 'tabler-clipboard-text' },
+  },
 ]
