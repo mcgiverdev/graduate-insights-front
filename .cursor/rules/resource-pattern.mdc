@@ -3,3 +3,54 @@ description:
 globs:
 alwaysApply: false
 ---
+# Patrón para Crear Recursos
+
+Al crear un nuevo recurso en la librería, sigue estas pautas:
+
+## Estructura del Recurso
+
+1. Crea un directorio dedicado en `resources/` para la entidad
+2. El archivo principal del recurso debe extender la clase base Resource
+3. Define la interfaz del modelo
+4. Implementa el método `form()` para definir los campos
+
+## Ejemplo de Implementación
+
+Ver [DirectorResource.ts](mdc:library/resources/directors/DirectorResource.ts) como ejemplo de implementación:
+
+```typescript
+export class MyResource extends Resource {
+  constructor() {
+    super({
+      name: 'resource_name',
+      resourcePath: '/api/path',
+      idField: 'id',
+      perPage: 10,
+      sortable: true,
+      filterable: true,
+    })
+  }
+
+  protected override form(): FormField[] {
+    return [
+      Fields.text('field_name')
+        .label('Label')
+        .required()
+        .sortable(),
+      // ... más campos
+    ]
+  }
+}
+```
+
+## Configuración de API
+
+Implementa `configureApi()` para personalizar:
+- Headers
+- Mapeo de respuesta/solicitud
+- Códigos de éxito
+- URL base
+
+## Exportación
+
+Exporta el nuevo recurso en [index.ts](mdc:library/index.ts) para hacerlo disponible a los usuarios de la librería.
