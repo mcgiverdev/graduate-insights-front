@@ -8,6 +8,7 @@ import type { FieldDefinition, ModelDefinition } from '../types/ModelDefinition'
 import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import AppDateTimePicker from '@/@core/components/app-form-elements/AppDateTimePicker.vue'
+import AppBelongsField from '@/@core/components/app-form-elements/AppBelongsField.vue'
 
 export default defineComponent({
   name: 'FormGenerator',
@@ -15,6 +16,7 @@ export default defineComponent({
     AppTextField,
     AppSelect,
     AppDateTimePicker,
+    AppBelongsField,
   },
 
   props: {
@@ -68,6 +70,9 @@ export default defineComponent({
               break
             case 'number':
               fieldSchema = yup.number()
+              break
+            case 'belongs':
+              fieldSchema = yup.mixed()
               break
             default:
               fieldSchema = yup.string()
@@ -165,6 +170,8 @@ export default defineComponent({
         case 'time':
         case 'date-time':
           return 'AppDateTimePicker'
+        case 'belongs':
+          return 'AppBelongsField'
         default:
           return 'AppTextField'
       }
@@ -178,6 +185,12 @@ export default defineComponent({
 
       if (field.type === 'enum' && field.options?.items)
         fieldProps.items = field.options.items
+
+      if (field.type === 'belongs' && field.options?.apiEndpoint) {
+        fieldProps.apiEndpoint = field.options.apiEndpoint
+        fieldProps.displayField = field.options.displayField || 'value'
+        fieldProps.valueField = field.options.valueField || 'key'
+      }
 
       if (field.type === 'text' && field.label.toLowerCase().includes('contraseña'))
         fieldProps.type = 'password'

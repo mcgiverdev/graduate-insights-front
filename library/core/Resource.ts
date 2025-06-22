@@ -144,12 +144,26 @@ export abstract class Resource {
     this.fields.forEach(field => {
       const fieldData = field.toField()
 
+      // Configurar opciones basadas en el tipo de campo
+      let fieldOptions: any
+
+      if (fieldData.component === 'select-field' && fieldData.props?.items) {
+        fieldOptions = { items: fieldData.props.items }
+      }
+      else if (fieldData.component === 'belongs-field') {
+        fieldOptions = {
+          apiEndpoint: fieldData.props?.apiEndpoint,
+          displayField: fieldData.props?.displayField || 'value',
+          valueField: fieldData.props?.valueField || 'key',
+        }
+      }
+
       fieldsObject[fieldData.name] = {
-        type: this.getFieldType(fieldData.component),
+        type: this.getFieldType(fieldData.component) as import('../types/FieldType').FieldType,
         label: fieldData.label,
         required: fieldData.rules?.includes('required'),
         placeholder: fieldData.props?.placeholder,
-        options: fieldData.props?.items ? { items: fieldData.props.items } : undefined,
+        options: fieldOptions,
         list: {
           visible: fieldData.showOnIndex !== false,
         },
@@ -192,6 +206,7 @@ export abstract class Resource {
       'date-field': 'date',
       'textarea-field': 'text',
       'file-field': 'file',
+      'belongs-field': 'belongs',
     }
 
     return typeMap[component] || 'text'

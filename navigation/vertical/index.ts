@@ -31,6 +31,12 @@ export default [
     requiredRoles: [ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
   },
   {
+    title: 'Jobs',
+    to: { name: 'jobs' },
+    icon: { icon: 'tabler-briefcase-2' },
+    requiredRoles: [ROLES.EMPLEADOR, ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
+  },
+  {
     title: 'Encuestas',
     to: { name: 'surveys' },
     icon: { icon: 'tabler-clipboard-text' },

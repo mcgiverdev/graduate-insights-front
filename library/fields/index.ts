@@ -95,6 +95,31 @@ export class FileField extends FormField {
   }
 }
 
+export class BelongsField extends FormField {
+  constructor(name: string) {
+    super(name)
+    this._component = 'belongs-field'
+  }
+
+  public apiEndpoint(endpoint: string): this {
+    this._props.apiEndpoint = endpoint
+
+    return this
+  }
+
+  public displayField(field: string): this {
+    this._props.displayField = field
+
+    return this
+  }
+
+  public valueField(field: string): this {
+    this._props.valueField = field
+
+    return this
+  }
+}
+
 export class Fields {
   public static text(name: string): TextField {
     return new TextField(name)
@@ -114,5 +139,9 @@ export class Fields {
 
   public static file(name: string): FileField {
     return new FileField(name)
+  }
+
+  public static belongs(name: string): BelongsField {
+    return new BelongsField(name)
   }
 }

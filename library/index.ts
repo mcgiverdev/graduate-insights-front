@@ -10,6 +10,7 @@ export { DirectorResource } from './resources/DirectorResource'
 export { EducationCenterResource } from './resources/education-centers/EducationCenterResource'
 export { EmployerResource } from './resources/employers/EmployerResource'
 export { GraduateResource } from './resources/graduates/GraduateResource'
+export { JobResource } from './resources/jobs/JobResource'
 
 // Component exports
 export { default as FormGenerator } from './components/FormGenerator.vue'

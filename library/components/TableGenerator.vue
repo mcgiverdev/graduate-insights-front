@@ -46,6 +46,20 @@ export default defineComponent({
     })
 
     const formatValue = (value: any, field: FieldDefinition) => {
+      // Formateo especial para campos enum (select)
+      if (field.type === 'enum' && field.options?.items) {
+        const option = field.options.items.find(item => item.value === value)
+
+        return option ? option.title : value
+      }
+
+      // Formateo especial para campos belongs
+      if (field.type === 'belongs' && field.options?.items) {
+        const option = field.options.items.find(item => item.key === value)
+
+        return option ? option.value : value
+      }
+
       const fieldType = FieldTypeRegistry.get(field.type)
       if (fieldType?.format)
         return fieldType.format(value)

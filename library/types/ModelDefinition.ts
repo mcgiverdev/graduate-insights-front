@@ -5,6 +5,9 @@ export interface FieldOptions {
     title: string
     value: string | number
   }>
+  apiEndpoint?: string
+  displayField?: string
+  valueField?: string
 }
 
 export interface DisplayConfig {
@@ -58,13 +61,11 @@ export interface ApiSuccessCodes {
 export interface ModelDefinition {
   name: string
   fields: Record<string, {
-    type: string
+    type: FieldType
     label: string
     required?: boolean
     placeholder?: string
-    options?: {
-      items: Array<{ value: any; title: string }>
-    }
+    options?: FieldOptions
     list: {
       visible: boolean
     }

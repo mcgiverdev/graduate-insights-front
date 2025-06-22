@@ -6,9 +6,10 @@ export interface BaseFieldType {
   parse?: (value: any) => any
 }
 
-export type FieldType = 'text' | 'email' | 'password' | 'date' | 'time' | 'date-time' | 'enum' | 'number' | 'tel'
+export type FieldType = 'text' | 'email' | 'password' | 'date' | 'time' | 'date-time' | 'enum' | 'number' | 'tel' | 'belongs'
 
 export interface BaseFieldConfig {
+  type?: string
   validate?: (value: any) => true | string
   format?: (value: any) => string
   parse?: (value: any) => any
@@ -51,6 +52,15 @@ export interface TelFieldConfig extends BaseFieldConfig {
   type: 'tel'
 }
 
+export interface BelongsFieldConfig extends BaseFieldConfig {
+  type: 'belongs'
+  apiEndpoint: string
+  items?: Array<{
+    key: string | number
+    value: string
+  }>
+}
+
 export type FieldTypeConfig =
   | TextFieldConfig
   | EmailFieldConfig
@@ -59,6 +69,7 @@ export type FieldTypeConfig =
   | EnumFieldConfig
   | NumberFieldConfig
   | TelFieldConfig
+  | BelongsFieldConfig
 
 // Clase para manejar el registro de tipos de campo
 export class FieldTypeRegistry {
