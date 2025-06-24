@@ -5,7 +5,9 @@ import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import { useSnackbar } from '@/composables/useSnackbar'
 import { useSurveyService } from '@/composables/useSurveyService'
 import type { Survey } from '@/modules/surveys/types'
-import { SurveyType } from '@/modules/surveys/types'
+import { SurveyStatus, SurveyType } from '@/modules/surveys/types'
+import { formatDate } from '@/utils/dateUtils'
+import StatisticsButton from "@/modules/survey-statistics/components/StatisticsButton.vue";
 
 // Emits
 defineEmits<{
@@ -39,12 +41,12 @@ const selectedSurvey = ref<Survey | null>(null)
 // Headers de la tabla
 const headers = [
   { title: 'Título', key: 'title', sortable: true },
-  { title: 'Descripción', key: 'description', sortable: false },
   { title: 'Tipo', key: 'survey_type', sortable: true },
   { title: 'Estado', key: 'status', sortable: true },
+  { title: 'Fecha Inicio', key: 'start_date', sortable: true },
+  { title: 'Fecha Fin', key: 'end_date', sortable: true },
   { title: 'Preguntas', key: 'questions', sortable: false },
-  { title: 'Fecha', key: 'created_at', sortable: true },
-  { title: 'Acciones', key: 'actions', sortable: false, width: '150px' },
+  { title: 'Acciones', key: 'actions', sortable: false, width: '200px' },
 ]
 
 // Opciones para los filtros
@@ -57,9 +59,11 @@ const surveyTypeOptions = computed(() => [
 ])
 
 const statusOptions = [
-  { title: 'Borrador', value: 'DRAFT' },
-  { title: 'Publicada', value: 'PUBLISHED' },
-  { title: 'Archivada', value: 'ARCHIVED' },
+  { title: 'Borrador', value: SurveyStatus.DRAFT },
+  { title: 'Activa', value: SurveyStatus.ACTIVE },
+  { title: 'Pausada', value: SurveyStatus.PAUSED },
+  { title: 'Cerrada', value: SurveyStatus.CLOSED },
+  { title: 'Completada', value: SurveyStatus.COMPLETED },
 ]
 
 // Métodos para formatear datos
@@ -87,36 +91,31 @@ function getSurveyTypeLabel(type: string) {
   return labels[type as SurveyType] || type
 }
 
-function getStatusColor(status?: string) {
+function getStatusColor(status?: SurveyStatus) {
   const colors = {
-    DRAFT: 'warning',
-    PUBLISHED: 'success',
-    ARCHIVED: 'error',
+    [SurveyStatus.DRAFT]: 'warning',
+    [SurveyStatus.ACTIVE]: 'success',
+    [SurveyStatus.PAUSED]: 'info',
+    [SurveyStatus.CLOSED]: 'error',
+    [SurveyStatus.COMPLETED]: 'secondary',
   }
 
-  return colors[status as keyof typeof colors] || 'grey'
+  return colors[status as SurveyStatus] || 'grey'
 }
 
-function getStatusLabel(status?: string) {
+function getStatusLabel(status?: SurveyStatus) {
   const labels = {
-    DRAFT: 'Borrador',
-    PUBLISHED: 'Publicada',
-    ARCHIVED: 'Archivada',
+    [SurveyStatus.DRAFT]: 'Borrador',
+    [SurveyStatus.ACTIVE]: 'Activa',
+    [SurveyStatus.PAUSED]: 'Pausada',
+    [SurveyStatus.CLOSED]: 'Cerrada',
+    [SurveyStatus.COMPLETED]: 'Completada',
   }
 
-  return labels[status as keyof typeof labels] || 'Sin estado'
+  return labels[status as SurveyStatus] || 'Sin estado'
 }
 
-function formatDate(dateString?: string) {
-  if (!dateString)
-    return '-'
-
-  return new Date(dateString).toLocaleDateString('es-ES', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-}
+// Función de formateo de fecha movida a utils/dateUtils.ts
 
 // Manejadores de eventos
 function handleSearch() {
@@ -265,6 +264,16 @@ onMounted(() => {
         </VChip>
       </template>
 
+      <!-- Fecha de inicio -->
+      <template #item.start_date="{ item }">
+        {{ formatDate(item.start_date) }}
+      </template>
+
+      <!-- Fecha de fin -->
+      <template #item.end_date="{ item }">
+        {{ item.end_date ? formatDate(item.end_date) : '-' }}
+      </template>
+
       <!-- Número de preguntas -->
       <template #item.questions="{ item }">
         <VChip
@@ -274,11 +283,6 @@ onMounted(() => {
         >
           {{ item.questions?.length || 0 }} preguntas
         </VChip>
-      </template>
-
-      <!-- Fecha de creación -->
-      <template #item.created_at="{ item }">
-        {{ formatDate(item.created_at) }}
       </template>
 
       <!-- Acciones -->
@@ -295,6 +299,19 @@ onMounted(() => {
             </VTooltip>
             <VIcon icon="tabler-eye" />
           </VBtn>
+
+          <StatisticsButton
+            v-if="item.id && item.status === SurveyStatus.ACTIVE"
+            :survey-id="item.id"
+            variant="outlined"
+            size="small"
+            icon-only
+            color="success"
+          >
+            <VTooltip activator="parent">
+              Ver Estadísticas
+            </VTooltip>
+          </StatisticsButton>
 
           <VBtn
             size="small"

@@ -20,6 +20,7 @@ function handleAnswer(questionIndex: number, value: any) {
 function getQuestionTypeIcon(type: QuestionType) {
   const icons = {
     [QuestionType.YES_NO]: 'tabler-help-circle',
+    [QuestionType.SCALE]: 'tabler-stars',
     [QuestionType.SINGLE_CHOICE]: 'tabler-circle-dot',
     [QuestionType.MULTIPLE_CHOICE]: 'tabler-checkbox',
     [QuestionType.TEXT]: 'tabler-abc',
@@ -106,6 +107,20 @@ function getQuestionTypeIcon(type: QuestionType) {
             <!-- Sí/No -->
             <VRadioGroup
               v-if="question.question_type === QuestionType.YES_NO"
+              v-model="answers[index]"
+              inline
+            >
+              <VRadio
+                v-for="option in question.options"
+                :key="option.order_number"
+                :label="option.option_text"
+                :value="option.option_text"
+              />
+            </VRadioGroup>
+
+            <!-- Escala -->
+            <VRadioGroup
+              v-else-if="question.question_type === QuestionType.SCALE"
               v-model="answers[index]"
               inline
             >

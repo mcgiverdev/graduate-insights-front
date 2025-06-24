@@ -8,15 +8,22 @@ export enum QuestionType {
   DATE = 'DATE',
   EMAIL = 'EMAIL',
   PHONE = 'PHONE',
+  SCALE = 'SCALE',
 }
 
 // Tipos de encuestas
 export enum SurveyType {
-  EMPLOYMENT_STATUS = 'EMPLOYMENT_STATUS',
-  SATISFACTION = 'SATISFACTION',
-  FEEDBACK = 'FEEDBACK',
-  EVALUATION = 'EVALUATION',
-  CUSTOM = 'CUSTOM',
+  EMPLOYMENT = 'EMPLOYMENT',
+  ACADEMIC = 'ACADEMIC',
+}
+
+// Estados de encuestas
+export enum SurveyStatus {
+  DRAFT = 'DRAFT', // Borrador - En construcción
+  ACTIVE = 'ACTIVE', // Activa - Disponible para responder
+  PAUSED = 'PAUSED', // Pausada - Temporalmente no disponible
+  CLOSED = 'CLOSED', // Cerrada - Ya no acepta respuestas
+  COMPLETED = 'COMPLETED', // Completada - Finalizada y procesada
 }
 
 // Interfaz para las opciones de respuesta
@@ -42,10 +49,12 @@ export interface Survey {
   title: string
   description: string
   survey_type: SurveyType
+  status: SurveyStatus
+  start_date: string
+  end_date?: string
   questions: SurveyQuestion[]
   created_at?: string
   updated_at?: string
-  status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
 }
 
 // Interfaz para la respuesta de la API al listar encuestas
@@ -64,6 +73,9 @@ export interface CreateSurveyRequest {
   title: string
   description: string
   survey_type: SurveyType
+  status: SurveyStatus
+  start_date: string
+  end_date?: string
   questions: Omit<SurveyQuestion, 'id'>[]
 }
 

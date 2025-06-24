@@ -39,6 +39,7 @@ const loadSurvey = async () => {
 const formatQuestionType = (type: QuestionType) => {
   const types = {
     YES_NO: 'Sí/No',
+    SCALE: 'Escala',
     TEXT: 'Respuesta de texto',
     NUMBER: 'Respuesta numérica',
     DATE: 'Respuesta de fecha',

@@ -101,7 +101,7 @@ async function updateSurvey(id: number, survey: CreateSurveyRequest) {
   loadingSave.value = true
 
   try {
-    const response = await useApi<SurveyResponse>(
+    await useApi<SurveyResponse>(
       `/graduate-insights/v1/api/survey/${id}`,
       {
         method: 'PUT',
@@ -112,10 +112,12 @@ async function updateSurvey(id: number, survey: CreateSurveyRequest) {
     return {
       success: true,
       message: 'Encuesta actualizada exitosamente',
-      data: response.data.data,
+      data: null,
     }
   }
   catch (error: any) {
+    console.error('Error updating survey:', error)
+
     return {
       success: false,
       message: error.data?.message || 'Error al actualizar la encuesta',

@@ -38,14 +38,17 @@ export default [
   },
   {
     title: 'Encuestas',
-    to: { name: 'surveys' },
-    icon: { icon: 'tabler-clipboard-text' },
-    requiredRoles: [ROLES.EMPLEADOR, ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
+    icon: { icon: 'mdi-poll' },
+    to: 'surveys',
+  },
+  {
+    title: 'Dashboard Estadísticas',
+    icon: { icon: 'mdi-view-dashboard' },
+    to: 'dashboard-estadisticas',
   },
   {
     title: 'Mis Encuestas',
-    to: { name: 'my-surveys' },
-    icon: { icon: 'tabler-clipboard-check' },
-    requiredRoles: [ROLES.GRADUADO],
+    icon: { icon: 'mdi-clipboard-text' },
+    to: 'my-surveys',
   },
 ]

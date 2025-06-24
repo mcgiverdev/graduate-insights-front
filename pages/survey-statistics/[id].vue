@@ -1,0 +1,598 @@
+<script setup lang="ts">
+import {
+  ArcElement,
+  Chart as ChartJS,
+  Legend,
+  Tooltip,
+} from 'chart.js'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { Doughnut } from 'vue-chartjs'
+import { useRoute } from 'vue-router'
+import { useSnackbar } from '@/composables/useSnackbar'
+import { useSurveyStatisticsService } from '@/composables/useSurveyStatisticsService'
+import DemographicsViewer from '@/modules/survey-statistics/components/DemographicsViewer.vue'
+import QuestionChartViewer from '@/modules/survey-statistics/components/QuestionChartViewer.vue'
+import QuestionStatistics from '@/modules/survey-statistics/components/QuestionStatistics.vue'
+import StatisticsCharts from '@/modules/survey-statistics/components/StatisticsCharts.vue'
+import StatisticsOverview from '@/modules/survey-statistics/components/StatisticsOverview.vue'
+import TrendsViewer from '@/modules/survey-statistics/components/TrendsViewer.vue'
+import { formatDateTime } from '@/utils/dateUtils'
+import { getDoughnutChartConfig } from '@core/libs/chartjs/chartjsConfig'
+
+ChartJS.register(ArcElement, Tooltip, Legend)
+
+definePageMeta({
+  middleware: 'auth',
+  layout: 'default',
+})
+
+const route = useRoute()
+const { showSnackbar } = useSnackbar()
+
+const {
+  statistics,
+  loadingStatistics,
+  fetchSurveyStatistics,
+  clearStatistics,
+  exportSurveyData,
+  loadingExport,
+} = useSurveyStatisticsService()
+
+const activeTab = ref('overview')
+const selectedQuestionId = ref<number | null>(null)
+const error = ref<string | null>(null)
+
+const doughnutOptions = computed(() => getDoughnutChartConfig())
+
+const genderChartData = computed(() => {
+  if (!statistics.value?.responses_by_gender)
+    return null
+
+  const data = statistics.value.responses_by_gender
+
+  return {
+    labels: Object.keys(data).map(key => {
+      switch (key) {
+      case 'masculino': return 'Masculino'
+      case 'femenino': return 'Femenino'
+      case 'otro': return 'Otro'
+      default: return key.charAt(0).toUpperCase() + key.slice(1)
+      }
+    }),
+    datasets: [
+      {
+        data: Object.values(data),
+        backgroundColor: [
+          'rgba(54, 162, 235, 0.8)',
+          'rgba(255, 99, 132, 0.8)',
+          'rgba(255, 205, 86, 0.8)',
+        ],
+        borderColor: [
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 99, 132, 1)',
+          'rgba(255, 205, 86, 1)',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  }
+})
+
+const surveyId = computed(() => Number(route.params.id))
+
+const tabs = [
+  {
+    value: 'overview',
+    title: 'Resumen General',
+    icon: 'mdi-chart-line',
+    description: 'Vista general de estadísticas',
+  },
+  {
+    value: 'charts',
+    title: 'Gráficos Demográficos',
+    icon: 'mdi-chart-pie',
+    description: 'Análisis demográfico visual',
+  },
+  {
+    value: 'trends',
+    title: 'Tendencias',
+    icon: 'mdi-trending-up',
+    description: 'Evolución temporal de respuestas',
+  },
+  {
+    value: 'demographics',
+    title: 'Demografía Detallada',
+    icon: 'mdi-account-group',
+    description: 'Análisis demográfico profundo',
+  },
+  {
+    value: 'questions',
+    title: 'Análisis por Pregunta',
+    icon: 'mdi-help-circle',
+    description: 'Estadísticas detalladas por pregunta',
+  },
+  {
+    value: 'question-charts',
+    title: 'Gráficos de Preguntas',
+    icon: 'mdi-chart-box',
+    description: 'Visualizaciones específicas por pregunta',
+  },
+]
+
+async function loadStatistics() {
+  if (!surveyId.value)
+    return
+
+  const result = await fetchSurveyStatistics(surveyId.value)
+
+  if (!result.success) {
+    showSnackbar({
+      text: result.message || 'Error al cargar las estadísticas',
+      color: 'error',
+    })
+  }
+}
+
+async function handleExport(format: 'csv' | 'excel' | 'pdf' = 'csv') {
+  if (!surveyId.value)
+    return
+
+  const result = await exportSurveyData(surveyId.value, format)
+
+  if (result.success) {
+    showSnackbar({
+      text: result.message || `Archivo ${format.toUpperCase()} exportado correctamente`,
+      color: 'success',
+    })
+  }
+  else {
+    showSnackbar({
+      text: result.message || 'Error al exportar los datos',
+      color: 'error',
+    })
+  }
+}
+
+function handleQuestionSelect(questionId: number) {
+  selectedQuestionId.value = questionId
+  activeTab.value = 'question-charts'
+}
+
+const surveyMetadata = computed(() => {
+  if (!statistics.value)
+    return null
+
+  return {
+    title: statistics.value.survey_title,
+    description: statistics.value.survey_description,
+    type: statistics.value.survey_type,
+    educationCenter: statistics.value.education_center_name,
+    createdAt: formatDateTime(statistics.value.survey_created_at),
+    lastResponse: formatDateTime(statistics.value.last_response_at),
+    dataGenerated: formatDateTime(statistics.value.data_generated_at),
+  }
+})
+
+onMounted(() => {
+  loadStatistics()
+})
+
+// Limpiar al salir del componente
+onUnmounted(() => {
+  clearStatistics()
+})
+
+// Head configuration
+useHead({
+  title: computed(() =>
+    statistics.value
+      ? `Estadísticas - ${statistics.value.survey_title}`
+      : 'Estadísticas de Encuesta',
+  ),
+})
+</script>
+
+<template>
+  <div>
+    <!-- Header con información básica -->
+    <div class="d-flex justify-space-between align-center mb-6">
+      <div>
+        <h1 class="text-h4 font-weight-bold">
+          Estadísticas de Encuesta
+        </h1>
+        <p
+          v-if="surveyMetadata"
+          class="text-body-1 text-medium-emphasis mb-0"
+        >
+          {{ surveyMetadata.title }}
+        </p>
+      </div>
+
+      <div class="d-flex gap-2">
+        <VBtn
+          :loading="loadingStatistics"
+          variant="outlined"
+          prepend-icon="mdi-refresh"
+          @click="loadStatistics"
+        >
+          Actualizar
+        </VBtn>
+
+        <VMenu>
+          <template #activator="{ props }">
+            <VBtn
+              v-bind="props"
+              :loading="loadingExport"
+              color="primary"
+              prepend-icon="mdi-download"
+            >
+              Exportar
+              <VIcon icon="mdi-chevron-down" />
+            </VBtn>
+          </template>
+
+          <VList>
+            <VListItem @click="handleExport('csv')">
+              <VListItemTitle>Exportar CSV</VListItemTitle>
+            </VListItem>
+            <VListItem @click="handleExport('excel')">
+              <VListItemTitle>Exportar Excel</VListItemTitle>
+            </VListItem>
+            <VListItem @click="handleExport('pdf')">
+              <VListItemTitle>Exportar PDF</VListItemTitle>
+            </VListItem>
+          </VList>
+        </VMenu>
+      </div>
+    </div>
+
+    <!-- Loading state -->
+    <div
+      v-if="loadingStatistics && !statistics"
+      class="d-flex justify-center align-center"
+      style="min-block-size: 400px;"
+    >
+      <div class="text-center">
+        <VProgressCircular
+          indeterminate
+          size="64"
+          color="primary"
+        />
+        <div class="mt-4 text-h6">
+          Cargando estadísticas...
+        </div>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <VAlert
+      v-else-if="error"
+      type="error"
+      class="mb-6"
+      closable
+      @click:close="error = null"
+    >
+      {{ error }}
+    </VAlert>
+
+    <!-- Content -->
+    <div v-else-if="statistics">
+      <!-- Resumen general -->
+      <StatisticsOverview
+        :statistics="statistics"
+        class="mb-6"
+      />
+
+      <!-- Survey Metadata Card -->
+      <VCard
+        v-if="surveyMetadata"
+        class="mb-6"
+      >
+        <VCardText>
+          <VRow>
+            <VCol
+              cols="12"
+              md="3"
+            >
+              <div class="text-body-2 text-medium-emphasis">
+                Centro Educativo
+              </div>
+              <div class="font-weight-medium">
+                {{ surveyMetadata.educationCenter }}
+              </div>
+            </VCol>
+            <VCol
+              cols="12"
+              md="3"
+            >
+              <div class="text-body-2 text-medium-emphasis">
+                Tipo de Encuesta
+              </div>
+              <div class="font-weight-medium">
+                {{ surveyMetadata.type }}
+              </div>
+            </VCol>
+            <VCol
+              cols="12"
+              md="3"
+            >
+              <div class="text-body-2 text-medium-emphasis">
+                Creada
+              </div>
+              <div class="font-weight-medium">
+                {{ surveyMetadata.createdAt }}
+              </div>
+            </VCol>
+            <VCol
+              cols="12"
+              md="3"
+            >
+              <div class="text-body-2 text-medium-emphasis">
+                Última Respuesta
+              </div>
+              <div class="font-weight-medium">
+                {{ surveyMetadata.lastResponse }}
+              </div>
+            </VCol>
+          </VRow>
+        </VCardText>
+      </VCard>
+
+      <!-- Tabs de contenido -->
+      <VTabs
+        v-model="activeTab"
+        class="mb-6"
+      >
+        <VTab
+          v-for="tab in tabs"
+          :key="tab.value"
+          :value="tab.value"
+        >
+          <VIcon
+            :icon="tab.icon"
+            class="me-2"
+          />
+          {{ tab.title }}
+        </VTab>
+      </VTabs>
+
+      <VWindow v-model="activeTab">
+        <!-- Tab 1: Resumen General -->
+        <VWindowItem value="overview">
+          <VRow>
+            <VCol
+              cols="12"
+              md="6"
+            >
+              <VCard>
+                <VCardText>
+                  <VCardTitle class="mb-4">
+                    Métricas Clave
+                  </VCardTitle>
+
+                  <div class="d-flex flex-column gap-4">
+                    <div class="d-flex justify-space-between align-center">
+                      <span>Tasa de Respuesta</span>
+                      <div class="d-flex align-center gap-2">
+                        <VProgressLinear
+                          :model-value="statistics.response_rate"
+                          height="8"
+                          color="primary"
+                          class="flex-grow-1"
+                          style="max-inline-size: 100px;"
+                        />
+                        <span class="font-weight-bold">
+                          {{ Math.round(statistics.response_rate) }}%
+                        </span>
+                      </div>
+                    </div>
+
+                    <div class="d-flex justify-space-between align-center">
+                      <span>Tasa de Completitud</span>
+                      <div class="d-flex align-center gap-2">
+                        <VProgressLinear
+                          :model-value="statistics.completion_rate"
+                          height="8"
+                          color="success"
+                          class="flex-grow-1"
+                          style="max-inline-size: 100px;"
+                        />
+                        <span class="font-weight-bold">
+                          {{ Math.round(statistics.completion_rate) }}%
+                        </span>
+                      </div>
+                    </div>
+
+                    <VDivider />
+
+                    <div class="d-flex justify-space-between">
+                      <span>Total de Preguntas</span>
+                      <span class="font-weight-bold">{{ statistics.total_questions }}</span>
+                    </div>
+
+                    <div class="d-flex justify-space-between">
+                      <span>Preguntas Respondidas</span>
+                      <span class="font-weight-bold">{{ statistics.answered_questions }}</span>
+                    </div>
+
+                    <div class="d-flex justify-space-between">
+                      <span>Última Respuesta</span>
+                      <span class="font-weight-bold">
+                        {{ formatDateTime(statistics.last_response_at) }}
+                      </span>
+                    </div>
+                  </div>
+                </VCardText>
+              </VCard>
+            </VCol>
+
+            <VCol
+              cols="12"
+              md="6"
+            >
+              <VCard>
+                <VCardText>
+                  <VCardTitle class="mb-4">
+                    Distribución por Género
+                  </VCardTitle>
+
+                  <div v-if="genderChartData">
+                    <Doughnut
+                      :data="genderChartData"
+                      :options="doughnutOptions"
+                      :height="200"
+                    />
+                  </div>
+                </VCardText>
+              </VCard>
+            </VCol>
+          </VRow>
+        </VWindowItem>
+
+        <!-- Tab 2: Gráficos Demográficos -->
+        <VWindowItem value="charts">
+          <StatisticsCharts :statistics="statistics" />
+        </VWindowItem>
+
+        <!-- Tab 3: Tendencias -->
+        <VWindowItem value="trends">
+          <VRow>
+            <VCol cols="12">
+              <TrendsViewer
+                :survey-id="surveyId"
+                :survey-title="statistics.survey_title"
+              />
+            </VCol>
+          </VRow>
+        </VWindowItem>
+
+        <!-- Tab 4: Demografía Detallada -->
+        <VWindowItem value="demographics">
+          <VRow>
+            <VCol cols="12">
+              <DemographicsViewer
+                :survey-id="surveyId"
+                :survey-title="statistics.survey_title"
+              />
+            </VCol>
+          </VRow>
+        </VWindowItem>
+
+        <!-- Tab 5: Análisis por Pregunta -->
+        <VWindowItem value="questions">
+          <div
+            v-if="loadingStatistics"
+            class="text-center py-8"
+          >
+            <VProgressCircular
+              indeterminate
+              color="primary"
+              size="48"
+            />
+            <div class="mt-4">
+              Cargando análisis de preguntas...
+            </div>
+          </div>
+          <div
+            v-else-if="!statistics || !statistics.question_statistics || statistics.question_statistics.length === 0"
+            class="text-center py-8"
+          >
+            <VIcon
+              size="64"
+              color="grey-lighten-1"
+              icon="mdi-help-circle"
+            />
+            <div class="mt-4 text-h6 text-medium-emphasis">
+              No hay preguntas disponibles
+            </div>
+            <div class="text-body-2 text-medium-emphasis">
+              Esta encuesta no tiene preguntas configuradas o no hay datos suficientes.
+            </div>
+          </div>
+          <QuestionStatistics
+            v-else
+            :statistics="statistics"
+            @question-selected="handleQuestionSelect"
+          />
+        </VWindowItem>
+
+        <!-- Tab 6: Gráficos de Preguntas -->
+        <VWindowItem value="question-charts">
+          <VRow>
+            <VCol
+              cols="12"
+              class="mb-4"
+            >
+              <VCard
+                variant="tonal"
+                color="info"
+              >
+                <VCardText class="d-flex align-center">
+                  <VIcon
+                    icon="mdi-information"
+                    class="me-2"
+                  />
+                  <div>
+                    <div class="font-weight-medium">
+                      Gráficos por Pregunta
+                    </div>
+                    <div class="text-body-2">
+                      Seleccione una pregunta de la pestaña "Análisis por Pregunta"
+                      o ingrese el ID de la pregunta manualmente.
+                    </div>
+                  </div>
+                </VCardText>
+              </VCard>
+            </VCol>
+
+            <VCol
+              cols="12"
+              md="4"
+            >
+              <VTextField
+                v-model.number="selectedQuestionId"
+                type="number"
+                label="ID de Pregunta"
+                placeholder="Ingrese el ID de la pregunta"
+                min="1"
+                outlined
+              />
+            </VCol>
+          </VRow>
+
+          <VRow v-if="selectedQuestionId">
+            <VCol cols="12">
+              <QuestionChartViewer
+                :survey-id="surveyId"
+                :question-id="selectedQuestionId"
+                :question-text="statistics?.question_statistics?.find(q => q.question_id === selectedQuestionId)?.question_text"
+              />
+            </VCol>
+          </VRow>
+        </VWindowItem>
+      </VWindow>
+    </div>
+
+    <!-- Empty state -->
+    <div
+      v-else
+      class="d-flex justify-center align-center"
+      style="min-block-size: 400px;"
+    >
+      <div class="text-center">
+        <VIcon
+          size="64"
+          color="grey-lighten-1"
+        >
+          mdi-chart-line
+        </VIcon>
+        <div class="mt-4 text-h6 text-medium-emphasis">
+          No se encontraron estadísticas
+        </div>
+        <div class="text-body-2 text-medium-emphasis">
+          Verifica el ID de la encuesta e intenta nuevamente
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

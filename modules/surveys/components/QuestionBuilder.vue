@@ -24,6 +24,7 @@ const questionForm = ref({
 // Opciones de tipos de pregunta
 const questionTypeOptions = [
   { title: 'Sí/No', value: QuestionType.YES_NO, description: 'Pregunta de respuesta binaria' },
+  { title: 'Escala', value: QuestionType.SCALE, description: 'Escala de 1 a 5 (satisfacción/evaluación)' },
   { title: 'Opción única', value: QuestionType.SINGLE_CHOICE, description: 'Seleccionar una opción' },
   { title: 'Opción múltiple', value: QuestionType.MULTIPLE_CHOICE, description: 'Seleccionar múltiples opciones' },
   { title: 'Texto', value: QuestionType.TEXT, description: 'Respuesta de texto libre' },
@@ -45,6 +46,7 @@ const isValidQuestion = computed(() => {
 const needsOptions = computed(() => {
   return [
     QuestionType.YES_NO,
+    QuestionType.SCALE,
     QuestionType.SINGLE_CHOICE,
     QuestionType.MULTIPLE_CHOICE,
   ].includes(questionForm.value.question_type)
@@ -74,6 +76,17 @@ watch(() => questionForm.value.question_type, (newType, oldType) => {
     questionForm.value.options = [
       { option_text: 'Sí', order_number: 1 },
       { option_text: 'No', order_number: 2 },
+    ]
+  }
+
+  // Si cambia a SCALE, crear opciones predeterminadas de escala 1-5
+  if (newType === QuestionType.SCALE && oldType !== QuestionType.SCALE) {
+    questionForm.value.options = [
+      { option_text: '1 - Muy insatisfecho', order_number: 1 },
+      { option_text: '2 - Insatisfecho', order_number: 2 },
+      { option_text: '3 - Neutral', order_number: 3 },
+      { option_text: '4 - Satisfecho', order_number: 4 },
+      { option_text: '5 - Muy satisfecho', order_number: 5 },
     ]
   }
 })
@@ -211,7 +224,7 @@ function resetForm() {
               </h4>
 
               <VBtn
-                v-if="questionForm.question_type !== QuestionType.YES_NO"
+                v-if="questionForm.question_type !== QuestionType.YES_NO && questionForm.question_type !== QuestionType.SCALE"
                 prepend-icon="tabler-plus"
                 color="primary"
                 size="small"

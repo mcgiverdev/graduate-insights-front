@@ -2,9 +2,11 @@
 import { computed, ref } from 'vue'
 import QuestionBuilder from './QuestionBuilder.vue'
 import SurveyPreview from './SurveyPreview.vue'
+import AppDateTimePicker from '@/@core/components/app-form-elements/AppDateTimePicker.vue'
 import { useSnackbar } from '@/composables/useSnackbar'
 import { useSurveyService } from '@/composables/useSurveyService'
-import { type CreateSurveyRequest, type Survey, type SurveyQuestion, SurveyType } from '@/modules/surveys/types'
+import { type CreateSurveyRequest, type Survey, type SurveyQuestion, SurveyStatus, SurveyType } from '@/modules/surveys/types'
+import { getCurrentDateISO } from '@/utils/dateUtils'
 
 interface Props {
   editingSurvey?: Survey | null
@@ -25,7 +27,10 @@ const { showSnackbar } = useSnackbar()
 const surveyForm = ref<CreateSurveyRequest>({
   title: '',
   description: '',
-  survey_type: SurveyType.CUSTOM,
+  survey_type: SurveyType.EMPLOYMENT,
+  status: SurveyStatus.DRAFT,
+  start_date: getCurrentDateISO(),
+  end_date: undefined,
   questions: [],
 })
 
@@ -36,11 +41,17 @@ const editingQuestionIndex = ref<number | null>(null)
 
 // Opciones para el tipo de encuesta
 const surveyTypeOptions = [
-  { title: 'Estado Laboral', value: SurveyType.EMPLOYMENT_STATUS },
-  { title: 'Satisfacción', value: SurveyType.SATISFACTION },
-  { title: 'Retroalimentación', value: SurveyType.FEEDBACK },
-  { title: 'Evaluación', value: SurveyType.EVALUATION },
-  { title: 'Personalizada', value: SurveyType.CUSTOM },
+  { title: 'Laboral', value: SurveyType.EMPLOYMENT },
+  { title: 'Académico', value: SurveyType.ACADEMIC },
+]
+
+// Opciones para el estado de encuesta
+const statusOptions = [
+  { title: 'Borrador', value: SurveyStatus.DRAFT },
+  { title: 'Activa', value: SurveyStatus.ACTIVE },
+  { title: 'Pausada', value: SurveyStatus.PAUSED },
+  { title: 'Cerrada', value: SurveyStatus.CLOSED },
+  { title: 'Completada', value: SurveyStatus.COMPLETED },
 ]
 
 // Validaciones
@@ -56,6 +67,9 @@ if (props.editingSurvey) {
     title: props.editingSurvey.title,
     description: props.editingSurvey.description,
     survey_type: props.editingSurvey.survey_type,
+    status: props.editingSurvey.status,
+    start_date: props.editingSurvey.start_date,
+    end_date: props.editingSurvey.end_date,
     questions: props.editingSurvey.questions.map(q => ({
       question_text: q.question_text,
       question_type: q.question_type,
@@ -124,8 +138,7 @@ async function saveSurvey() {
       result = await updateSurvey(props.editingSurvey.id, surveyForm.value)
     else
       result = await createSurvey(surveyForm.value)
-
-    if (result.success) {
+    if (result.success || !result) {
       showSnackbar(result.message, 'success')
       emit('save', result.data)
     }
@@ -271,6 +284,30 @@ const currentEditingQuestion = computed(() => {
                   :items="surveyTypeOptions"
                   label="Tipo de encuesta"
                   required
+                />
+              </VCol>
+
+              <VCol cols="12">
+                <VSelect
+                  v-model="surveyForm.status"
+                  :items="statusOptions"
+                  label="Estado de la encuesta"
+                  required
+                />
+              </VCol>
+
+              <VCol cols="12">
+                <AppDateTimePicker
+                  v-model="surveyForm.start_date"
+                  label="Fecha de inicio"
+                  required
+                />
+              </VCol>
+
+              <VCol cols="12">
+                <AppDateTimePicker
+                  v-model="surveyForm.end_date"
+                  label="Fecha de finalización"
                 />
               </VCol>
             </VRow>

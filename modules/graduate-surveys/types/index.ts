@@ -8,16 +8,13 @@ export enum QuestionType {
   DATE = 'DATE',
   EMAIL = 'EMAIL',
   PHONE = 'PHONE',
+  SCALE = 'SCALE',
 }
 
 // Tipos de encuestas
 export enum SurveyType {
-  EMPLOYMENT_STATUS = 'EMPLOYMENT_STATUS',
-  EMPLOYMENT_SATISFACTION = 'EMPLOYMENT_SATISFACTION',
-  SATISFACTION = 'SATISFACTION',
-  FEEDBACK = 'FEEDBACK',
-  EVALUATION = 'EVALUATION',
-  CUSTOM = 'CUSTOM',
+  EMPLOYMENT = 'EMPLOYMENT',
+  ACADEMIC = 'ACADEMIC',
 }
 
 // Interfaz para las opciones de respuesta

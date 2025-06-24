@@ -51,12 +51,8 @@ const formatDate = (dateString: string) => {
 
 const getSurveyTypeLabel = (type: string) => {
   const types: Record<string, string> = {
-    EMPLOYMENT_STATUS: 'Estado Laboral',
-    EMPLOYMENT_SATISFACTION: 'Satisfacción Laboral',
-    SATISFACTION: 'Satisfacción',
-    FEEDBACK: 'Retroalimentación',
-    EVALUATION: 'Evaluación',
-    CUSTOM: 'Personalizada',
+    EMPLOYMENT: 'Laboral',
+    ACADEMIC: 'Académico'
   }
 
   return types[type] || type
@@ -64,12 +60,8 @@ const getSurveyTypeLabel = (type: string) => {
 
 const getSurveyTypeColor = (type: string) => {
   const colors: Record<string, string> = {
-    EMPLOYMENT_STATUS: 'primary',
-    EMPLOYMENT_SATISFACTION: 'success',
-    SATISFACTION: 'info',
-    FEEDBACK: 'warning',
-    EVALUATION: 'secondary',
-    CUSTOM: 'purple',
+    EMPLOYMENT: 'primary',
+    ACADEMIC: 'success',
   }
 
   return colors[type] || 'grey'

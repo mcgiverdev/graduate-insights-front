@@ -68,6 +68,7 @@ const allRequiredQuestionsAnswered = computed(() => {
       case 'NUMBER':
         return typeof answer === 'number' && !isNaN(answer)
       case 'YES_NO':
+      case 'SCALE':
       case 'SINGLE_CHOICE':
         return answer !== null && answer !== undefined
       case 'MULTIPLE_CHOICE':
@@ -97,6 +98,7 @@ const initializeForm = () => {
           answers.value[question.question_id] = question.number_response || null
           break
         case 'YES_NO':
+        case 'SCALE':
         case 'SINGLE_CHOICE':
           answers.value[question.question_id] = question.selected_option_ids?.[0] || null
           break
@@ -137,6 +139,7 @@ const validateCurrentQuestion = () => {
     case 'NUMBER':
       return typeof answer === 'number' && !isNaN(answer)
     case 'YES_NO':
+    case 'SCALE':
     case 'SINGLE_CHOICE':
       return answer !== null && answer !== undefined
     case 'MULTIPLE_CHOICE':
@@ -200,6 +203,7 @@ const confirmSubmit = async () => {
           number_response: answer,
         }
       case 'YES_NO':
+      case 'SCALE':
       case 'SINGLE_CHOICE':
         return {
           question_id: question.question_id,
@@ -239,6 +243,7 @@ const handleCancel = () => {
 const formatQuestionType = (type: QuestionType) => {
   const types = {
     YES_NO: 'Sí/No',
+    SCALE: 'Escala',
     TEXT: 'Texto',
     NUMBER: 'Número',
     DATE: 'Fecha',
@@ -358,6 +363,23 @@ onMounted(() => {
             <VRadio
               v-for="option in currentQuestion.options"
               :key="`yes_no_${option.id}`"
+              :label="option.option_text"
+              :value="option.id"
+              color="primary"
+            />
+          </VRadioGroup>
+        </div>
+
+        <!-- Respuesta de Escala -->
+        <div v-else-if="currentQuestion.question_type === 'SCALE'">
+          <VRadioGroup
+            :model-value="answers[currentQuestion.question_id] || null"
+            inline
+            @update:model-value="(value) => answers[currentQuestion.question_id] = value"
+          >
+            <VRadio
+              v-for="option in currentQuestion.options"
+              :key="`scale_${option.id}`"
               :label="option.option_text"
               :value="option.id"
               color="primary"
