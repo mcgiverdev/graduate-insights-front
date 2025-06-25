@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import QuestionBuilder from './QuestionBuilder.vue'
 import SurveyPreview from './SurveyPreview.vue'
 import AppDateTimePicker from '@/@core/components/app-form-elements/AppDateTimePicker.vue'
 import { useSnackbar } from '@/composables/useSnackbar'
 import { useSurveyService } from '@/composables/useSurveyService'
-import { type CreateSurveyRequest, type Survey, type SurveyQuestion, SurveyStatus, SurveyType } from '@/modules/surveys/types'
+import { type CreateSurveyRequest, type Survey, type SurveyQuestion, SurveyStatus, type SurveyTypeOption } from '@/modules/surveys/types'
 import { getCurrentDateISO } from '@/utils/dateUtils'
 
 interface Props {
@@ -20,14 +20,14 @@ const emit = defineEmits<{
 }>()
 
 // Composables
-const { createSurvey, updateSurvey, loadingSave } = useSurveyService()
+const { createSurvey, updateSurvey, loadingSave, fetchSurveyTypes } = useSurveyService()
 const { showSnackbar } = useSnackbar()
 
 // Estado del formulario
 const surveyForm = ref<CreateSurveyRequest>({
   title: '',
   description: '',
-  survey_type: SurveyType.EMPLOYMENT,
+  survey_type_id: 1,
   status: SurveyStatus.DRAFT,
   start_date: getCurrentDateISO(),
   end_date: undefined,
@@ -39,11 +39,9 @@ const previewMode = ref(false)
 const showQuestionBuilder = ref(false)
 const editingQuestionIndex = ref<number | null>(null)
 
-// Opciones para el tipo de encuesta
-const surveyTypeOptions = [
-  { title: 'Laboral', value: SurveyType.EMPLOYMENT },
-  { title: 'Académico', value: SurveyType.ACADEMIC },
-]
+// Estado para los tipos de encuesta
+const surveyTypeOptions = ref<Array<{ title: string; value: number }>>([])
+const loadingSurveyTypes = ref(false)
 
 // Opciones para el estado de encuesta
 const statusOptions = [
@@ -53,6 +51,33 @@ const statusOptions = [
   { title: 'Cerrada', value: SurveyStatus.CLOSED },
   { title: 'Completada', value: SurveyStatus.COMPLETED },
 ]
+
+// Cargar tipos de encuesta
+async function loadSurveyTypes() {
+  loadingSurveyTypes.value = true
+
+  try {
+    const result = await fetchSurveyTypes()
+
+    if (result.success) {
+      // Mapear los datos tal como llegan de la API (key, value)
+      surveyTypeOptions.value = result.data.map((type: SurveyTypeOption) => ({
+        title: type.value,
+        value: type.key,
+      }))
+    }
+    else {
+      showSnackbar('Error al cargar los tipos de encuesta', 'error')
+    }
+  }
+  catch (error) {
+    console.error('Error loading survey types:', error)
+    showSnackbar('Error al cargar los tipos de encuesta', 'error')
+  }
+  finally {
+    loadingSurveyTypes.value = false
+  }
+}
 
 // Validaciones
 const isValidSurvey = computed(() => {
@@ -66,7 +91,7 @@ if (props.editingSurvey) {
   surveyForm.value = {
     title: props.editingSurvey.title,
     description: props.editingSurvey.description,
-    survey_type: props.editingSurvey.survey_type,
+    survey_type_id: props.editingSurvey.survey_type.id,
     status: props.editingSurvey.status,
     start_date: props.editingSurvey.start_date,
     end_date: props.editingSurvey.end_date,
@@ -81,6 +106,11 @@ if (props.editingSurvey) {
     })),
   }
 }
+
+// Cargar tipos de encuesta al montar el componente
+onMounted(() => {
+  loadSurveyTypes()
+})
 
 // Métodos para manejar preguntas
 function addQuestion() {
@@ -280,7 +310,7 @@ const currentEditingQuestion = computed(() => {
 
               <VCol cols="12">
                 <VSelect
-                  v-model="surveyForm.survey_type"
+                  v-model="surveyForm.survey_type_id"
                   :items="surveyTypeOptions"
                   label="Tipo de encuesta"
                   required
@@ -402,7 +432,7 @@ const currentEditingQuestion = computed(() => {
 
                       <div
                         v-if="question.options.length > 0"
-                        class="ml-4"
+                        class="ms-4"
                       >
                         <p class="text-body-2 text-medium-emphasis mb-1">
                           Opciones:

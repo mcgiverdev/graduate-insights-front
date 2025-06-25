@@ -15,6 +15,8 @@ export enum QuestionType {
 export enum SurveyType {
   EMPLOYMENT = 'EMPLOYMENT',
   ACADEMIC = 'ACADEMIC',
+  SKILLS = 'SKILLS',
+  ENTREPRENEURSHIP = 'ENTREPRENEURSHIP',
 }
 
 // Interfaz para las opciones de respuesta
@@ -37,12 +39,20 @@ export interface GraduateSurveyQuestion {
   options: SurveyOption[]
 }
 
+// Interfaz para el tipo de encuesta (nuevo formato de la API)
+export interface SurveyTypeObject {
+  id: number
+  name: string
+  description: string
+  active: boolean
+}
+
 // Interfaz para la encuesta básica en la lista
 export interface GraduateSurveyListItem {
   survey_id: number
   title: string
   description: string
-  survey_type: SurveyType
+  survey_type: SurveyTypeObject
   completed: boolean
   created_date: string
   question_count: number

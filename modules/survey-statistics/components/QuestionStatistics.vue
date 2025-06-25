@@ -40,18 +40,42 @@ const { current: currentTheme } = useTheme()
 const barChartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
+  interaction: {
+    intersect: false,
+    mode: 'index',
+  },
   plugins: {
     legend: {
       display: false,
     },
   },
   scales: {
-    y: {
-      beginAtZero: true,
+    x: {
+      grid: {
+        display: false,
+      },
       ticks: {
-        stepSize: 5,
+        maxRotation: 45,
+        minRotation: 0,
       },
     },
+    y: {
+      beginAtZero: true,
+      grid: {
+        display: true,
+        color: 'rgba(255, 255, 255, 0.1)',
+      },
+      ticks: {
+        stepSize: 1,
+        precision: 0,
+        callback(value: any) {
+          return Number.isInteger(value) ? value : ''
+        },
+      },
+    },
+  },
+  animation: {
+    duration: 0,
   },
 }))
 
@@ -76,16 +100,96 @@ function getChartOptions(chartType: string) {
 }
 
 function getChartDataForQuestion(question: QuestionStatistic) {
-  // Verificar que question y option_counts existan
-  if (!question || !question.option_counts)
+  // Verificar que question exista
+  if (!question) {
+    console.log('QuestionStatistics: No question provided')
+
     return null
+  }
+
+  // Log para depuración
+  console.log('QuestionStatistics: Processing question', {
+    id: question.question_id,
+    type: question.type,
+    option_counts: question.option_counts,
+    percentages: question.percentages,
+  })
+
+  // Verificar que option_counts exista y tenga datos
+  if (!question.option_counts || Object.keys(question.option_counts).length === 0) {
+    console.log('QuestionStatistics: No option_counts or empty option_counts')
+
+    // Para preguntas SCALE, crear datos basados en estadísticas disponibles
+    if (question.type === 'SCALE' && question.total_responses > 0) {
+      console.log('QuestionStatistics: Creating SCALE data from available stats')
+
+      const defaultLabels = ['1 - Muy insatisfecho', '2 - Insatisfecho', '3 - Neutral', '4 - Satisfecho', '5 - Muy satisfecho']
+
+      // Si tenemos promedio, intentar simular una distribución básica
+      let simulatedData = [1, 1, 2, 3, 2] // Distribución por defecto
+
+      if (question.average && question.total_responses > 0) {
+        // Crear una distribución simulada basada en el promedio
+        const avg = question.average
+        const total = question.total_responses
+
+        // Distribución más realista basada en el promedio
+        if (avg <= 2)
+          simulatedData = [Math.ceil(total * 0.4), Math.ceil(total * 0.3), Math.ceil(total * 0.2), Math.ceil(total * 0.1), 0]
+        else if (avg <= 3)
+          simulatedData = [Math.ceil(total * 0.2), Math.ceil(total * 0.3), Math.ceil(total * 0.3), Math.ceil(total * 0.15), Math.ceil(total * 0.05)]
+        else if (avg <= 4)
+          simulatedData = [Math.ceil(total * 0.1), Math.ceil(total * 0.15), Math.ceil(total * 0.25), Math.ceil(total * 0.35), Math.ceil(total * 0.15)]
+        else
+          simulatedData = [0, Math.ceil(total * 0.1), Math.ceil(total * 0.2), Math.ceil(total * 0.3), Math.ceil(total * 0.4)]
+
+        // Ajustar para que sume exactamente el total
+        const currentSum = simulatedData.reduce((a, b) => a + b, 0)
+        if (currentSum !== total) {
+          const diff = total - currentSum
+
+          simulatedData[Math.floor(avg) - 1] += diff
+        }
+      }
+
+      return {
+        labels: defaultLabels,
+        datasets: [
+          {
+            label: 'Respuestas (estimado)',
+            data: simulatedData,
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.8)',
+              'rgba(255, 159, 64, 0.8)',
+              'rgba(255, 205, 86, 0.8)',
+              'rgba(54, 162, 235, 0.8)',
+              'rgba(75, 192, 192, 0.8)',
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(255, 159, 64, 1)',
+              'rgba(255, 205, 86, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(75, 192, 192, 1)',
+            ],
+            borderWidth: 1,
+          },
+        ],
+      }
+    }
+
+    return null
+  }
 
   const labels = Object.keys(question.option_counts).map(formatOptionName)
   const data = Object.values(question.option_counts)
 
   // Si no hay datos, retornar null
-  if (labels.length === 0 || data.length === 0)
+  if (labels.length === 0 || data.length === 0) {
+    console.log('QuestionStatistics: Empty labels or data')
+
     return null
+  }
 
   const colors = [
     'rgba(255, 99, 132, 0.8)',
@@ -105,6 +209,8 @@ function getChartDataForQuestion(question: QuestionStatistic) {
     'rgba(255, 159, 64, 1)',
   ]
 
+  console.log('QuestionStatistics: Returning chart data', { labels, data })
+
   return {
     labels,
     datasets: [
@@ -121,11 +227,24 @@ function getChartDataForQuestion(question: QuestionStatistic) {
 
 function formatOptionName(option: string): string {
   const optionMap: Record<string, string> = {
+    // Mapeos para escala de satisfacción
     muy_insatisfecho: 'Muy Insatisfecho',
     insatisfecho: 'Insatisfecho',
     neutral: 'Neutral',
     satisfecho: 'Satisfecho',
     muy_satisfecho: 'Muy Satisfecho',
+
+    // Mapeos para opciones numéricas de escala
+    1: '1 - Muy insatisfecho',
+    2: '2 - Insatisfecho',
+    3: '3 - Neutral',
+    4: '4 - Satisfecho',
+    5: '5 - Muy satisfecho',
+
+    // Mapeos para opciones de Sí/No
+    si: 'Sí',
+    no: 'No',
+    yes: 'Sí',
 
     // Agregar más mapeos según sea necesario
   }
@@ -195,11 +314,29 @@ function formatOptionName(option: string): string {
                 md="8"
               >
                 <div v-if="getChartDataForQuestion(question)">
-                  <Bar
-                    :data="getChartDataForQuestion(question)!"
-                    :options="barChartOptions"
-                    :height="250"
-                  />
+                  <VAlert
+                    v-if="!question.option_counts || Object.keys(question.option_counts).length === 0"
+                    type="warning"
+                    variant="tonal"
+                    class="mb-3"
+                    density="compact"
+                  >
+                    <VIcon
+                      icon="mdi-information"
+                      class="me-2"
+                    />
+                    Los datos del gráfico son estimados basados en el promedio ({{ question.average?.toFixed(1) }})
+                    ya que no se recibieron datos detallados de la API.
+                  </VAlert>
+                  <div
+                    class="chart-container"
+                    style="position: relative; block-size: 300px; inline-size: 100%;"
+                  >
+                    <Bar
+                      :data="getChartDataForQuestion(question)!"
+                      :options="barChartOptions"
+                    />
+                  </div>
                 </div>
                 <div
                   v-else
@@ -212,6 +349,10 @@ function formatOptionName(option: string): string {
                   />
                   <div class="text-body-2 text-medium-emphasis mt-2">
                     No hay datos suficientes para mostrar el gráfico
+                  </div>
+                  <div class="text-caption text-medium-emphasis mt-1">
+                    Datos recibidos: {{ question.option_counts ? 'Sí' : 'No' }},
+                    Total respuestas: {{ question.total_responses }}
                   </div>
                 </div>
               </VCol>
@@ -287,12 +428,16 @@ function formatOptionName(option: string): string {
                 lg="8"
               >
                 <div v-if="getChartDataForQuestion(question)">
-                  <component
-                    :is="getChartComponent(question.recommended_chart_type || 'bar')"
-                    :data="getChartDataForQuestion(question)!"
-                    :options="getChartOptions(question.recommended_chart_type || 'bar')"
-                    :height="250"
-                  />
+                  <div
+                    class="chart-container"
+                    style="position: relative; block-size: 300px; inline-size: 100%;"
+                  >
+                    <component
+                      :is="getChartComponent(question.recommended_chart_type || 'bar')"
+                      :data="getChartDataForQuestion(question)!"
+                      :options="getChartOptions(question.recommended_chart_type || 'bar')"
+                    />
+                  </div>
                 </div>
                 <div
                   v-else

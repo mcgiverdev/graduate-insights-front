@@ -5,6 +5,7 @@ import type {
   Survey,
   SurveyListResponse,
   SurveyResponse,
+  SurveyTypesResponse,
 } from '@/modules/surveys/types'
 
 const surveys = ref<Survey[]>([])
@@ -17,12 +18,35 @@ const loadingSave = ref(false)
 const currentSurvey = ref<Survey | null>(null)
 const previewMode = ref(false)
 
-async function fetchSurveys(page: number = 1, size: number = 10) {
+async function fetchSurveys(
+  page: number = 1,
+  size: number = 10,
+  filters: {
+    searchQuery?: string
+    surveyType?: string
+    status?: string
+  } = {},
+) {
   loadingList.value = true
 
   try {
+    // Construir parámetros de consulta
+    const params = new URLSearchParams({
+      page: page.toString(),
+      size: size.toString(),
+    })
+
+    if (filters.searchQuery)
+      params.append('search', filters.searchQuery)
+
+    if (filters.surveyType)
+      params.append('survey_type', filters.surveyType)
+
+    if (filters.status)
+      params.append('status', filters.status)
+
     const response = await useApi<SurveyListResponse>(
-      `/graduate-insights/v1/api/survey?page=${page}&size=${size}`,
+      `/graduate-insights/v1/api/survey?${params.toString()}`,
       { method: 'GET' },
     )
 
@@ -43,6 +67,29 @@ async function fetchSurveys(page: number = 1, size: number = 10) {
   }
   finally {
     loadingList.value = false
+  }
+}
+
+async function fetchSurveyTypes() {
+  try {
+    const response = await useApi<SurveyTypesResponse>(
+      '/graduate-insights/v1/api/survey-types/list',
+      { method: 'GET' },
+    )
+
+    return {
+      success: true,
+      data: response.data.data,
+    }
+  }
+  catch (error) {
+    console.error('Error fetching survey types:', error)
+
+    return {
+      success: false,
+      data: [],
+      error,
+    }
   }
 }
 
@@ -182,6 +229,7 @@ export function useSurveyService() {
 
     // Métodos CRUD
     fetchSurveys,
+    fetchSurveyTypes,
     getSurvey,
     createSurvey,
     updateSurvey,

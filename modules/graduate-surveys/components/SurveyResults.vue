@@ -161,7 +161,7 @@ onMounted(() => {
                   variant="tonal"
                   class="ms-2"
                 >
-                  {{ survey.survey_type }}
+                  {{ survey.survey_type.name }}
                 </VChip>
               </div>
             </VCol>
@@ -324,7 +324,7 @@ onMounted(() => {
                 </div>
 
                 <!-- Respuesta Sí/No y opción única -->
-                <div v-else-if="['YES_NO', 'SINGLE_CHOICE'].includes(question.question_type)">
+                <div v-else-if="['YES_NO', 'SINGLE_CHOICE', 'SCALE'].includes(question.question_type)">
                   <div class="d-flex align-center mb-2">
                     <VIcon
                       icon="tabler-check-circle"

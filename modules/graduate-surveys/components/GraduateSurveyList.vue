@@ -2,7 +2,7 @@
 import { computed, onMounted } from 'vue'
 import { useGraduateSurveyService } from '@/composables/useGraduateSurveyService'
 import { useSnackbar } from '@/composables/useSnackbar'
-import type { GraduateSurveyListItem } from '@/modules/graduate-surveys/types'
+import {type GraduateSurveyListItem, SurveyType, type SurveyTypeObject} from '@/modules/graduate-surveys/types'
 
 const emit = defineEmits<{
   takeSurvey: [survey: GraduateSurveyListItem]
@@ -47,24 +47,6 @@ const formatDate = (dateString: string) => {
     month: 'long',
     day: 'numeric',
   })
-}
-
-const getSurveyTypeLabel = (type: string) => {
-  const types: Record<string, string> = {
-    EMPLOYMENT: 'Laboral',
-    ACADEMIC: 'Académico'
-  }
-
-  return types[type] || type
-}
-
-const getSurveyTypeColor = (type: string) => {
-  const colors: Record<string, string> = {
-    EMPLOYMENT: 'primary',
-    ACADEMIC: 'success',
-  }
-
-  return colors[type] || 'grey'
 }
 
 // Cargar datos al montar
@@ -211,11 +193,11 @@ onMounted(() => {
                 </VCardTitle>
                 <VCardSubtitle>
                   <VChip
-                    :color="getSurveyTypeColor(survey.survey_type)"
+                    color="primary"
                     size="x-small"
                     class="me-2"
                   >
-                    {{ getSurveyTypeLabel(survey.survey_type) }}
+                    {{ survey.survey_type.name }}
                   </VChip>
                   {{ survey.question_count }} pregunta{{ survey.question_count !== 1 ? 's' : '' }}
                 </VCardSubtitle>
@@ -293,11 +275,11 @@ onMounted(() => {
                 </VCardTitle>
                 <VCardSubtitle>
                   <VChip
-                    :color="getSurveyTypeColor(survey.survey_type)"
+                    color="success"
                     size="x-small"
                     class="me-2"
                   >
-                    {{ getSurveyTypeLabel(survey.survey_type) }}
+                    {{ survey.survey_type.name }}
                   </VChip>
                   {{ survey.question_count }} pregunta{{ survey.question_count !== 1 ? 's' : '' }}
                 </VCardSubtitle>

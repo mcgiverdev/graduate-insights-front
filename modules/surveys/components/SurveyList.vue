@@ -4,10 +4,10 @@ import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import { useSnackbar } from '@/composables/useSnackbar'
 import { useSurveyService } from '@/composables/useSurveyService'
+import StatisticsButton from '@/modules/survey-statistics/components/StatisticsButton.vue'
 import type { Survey } from '@/modules/surveys/types'
 import { SurveyStatus, SurveyType } from '@/modules/surveys/types'
 import { formatDate } from '@/utils/dateUtils'
-import StatisticsButton from "@/modules/survey-statistics/components/StatisticsButton.vue";
 
 // Emits
 defineEmits<{
@@ -49,13 +49,12 @@ const headers = [
   { title: 'Acciones', key: 'actions', sortable: false, width: '200px' },
 ]
 
-// Opciones para los filtros
+// Opciones para los filtros (basado en los tipos disponibles en la nueva API)
 const surveyTypeOptions = computed(() => [
-  { title: 'Estado Laboral', value: SurveyType.EMPLOYMENT_STATUS },
-  { title: 'Satisfacción', value: SurveyType.SATISFACTION },
-  { title: 'Retroalimentación', value: SurveyType.FEEDBACK },
-  { title: 'Evaluación', value: SurveyType.EVALUATION },
-  { title: 'Personalizada', value: SurveyType.CUSTOM },
+  { title: 'Empleo', value: SurveyType.EMPLOYMENT },
+  { title: 'Académico', value: SurveyType.ACADEMIC },
+  { title: 'Habilidades', value: SurveyType.SKILLS },
+  { title: 'Emprendimiento', value: SurveyType.ENTREPRENEURSHIP },
 ])
 
 const statusOptions = [
@@ -66,33 +65,8 @@ const statusOptions = [
   { title: 'Completada', value: SurveyStatus.COMPLETED },
 ]
 
-// Métodos para formatear datos
-function getSurveyTypeColor(type: string) {
-  const colors = {
-    [SurveyType.EMPLOYMENT_STATUS]: 'primary',
-    [SurveyType.SATISFACTION]: 'success',
-    [SurveyType.FEEDBACK]: 'info',
-    [SurveyType.EVALUATION]: 'warning',
-    [SurveyType.CUSTOM]: 'secondary',
-  }
-
-  return colors[type as SurveyType] || 'grey'
-}
-
-function getSurveyTypeLabel(type: string) {
-  const labels = {
-    [SurveyType.EMPLOYMENT_STATUS]: 'Estado Laboral',
-    [SurveyType.SATISFACTION]: 'Satisfacción',
-    [SurveyType.FEEDBACK]: 'Retroalimentación',
-    [SurveyType.EVALUATION]: 'Evaluación',
-    [SurveyType.CUSTOM]: 'Personalizada',
-  }
-
-  return labels[type as SurveyType] || type
-}
-
 function getStatusColor(status?: SurveyStatus) {
-  const colors = {
+  const colors: Record<string, string> = {
     [SurveyStatus.DRAFT]: 'warning',
     [SurveyStatus.ACTIVE]: 'success',
     [SurveyStatus.PAUSED]: 'info',
@@ -104,7 +78,7 @@ function getStatusColor(status?: SurveyStatus) {
 }
 
 function getStatusLabel(status?: SurveyStatus) {
-  const labels = {
+  const labels: Record<string, string> = {
     [SurveyStatus.DRAFT]: 'Borrador',
     [SurveyStatus.ACTIVE]: 'Activa',
     [SurveyStatus.PAUSED]: 'Pausada',
@@ -114,8 +88,6 @@ function getStatusLabel(status?: SurveyStatus) {
 
   return labels[status as SurveyStatus] || 'Sin estado'
 }
-
-// Función de formateo de fecha movida a utils/dateUtils.ts
 
 // Manejadores de eventos
 function handleSearch() {
@@ -163,7 +135,13 @@ async function confirmDelete() {
 }
 
 async function loadSurveys() {
-  await fetchSurveys(currentPage.value, itemsPerPage.value)
+  const filters = {
+    searchQuery: searchQuery.value || undefined,
+    surveyType: selectedType.value || undefined,
+    status: selectedStatus.value || undefined,
+  }
+
+  await fetchSurveys(currentPage.value, itemsPerPage.value, filters)
 }
 
 // Cargar datos al montar el componente
@@ -245,11 +223,11 @@ onMounted(() => {
       <!-- Tipo de encuesta -->
       <template #item.survey_type="{ item }">
         <VChip
-          :color="getSurveyTypeColor(item.survey_type)"
+          color="primary"
           variant="tonal"
           size="small"
         >
-          {{ getSurveyTypeLabel(item.survey_type) }}
+          {{ item.survey_type.name }}
         </VChip>
       </template>
 
@@ -409,8 +387,8 @@ onMounted(() => {
   </VCard>
 </template>
 
-<style scoped>
-:deep(.v-data-table-footer) {
+<style>
+.v-data-table-footer {
   border-block-start: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 </style>
