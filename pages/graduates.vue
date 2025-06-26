@@ -11,11 +11,7 @@ const resource = new GraduateResource()
 </script>
 
 <template>
-  <VCard>
-    <VCardText>
-      <ResourceManager :resource="resource" />
-    </VCardText>
-  </VCard>
+  <ResourceManager :resource="resource" />
 </template>
 
 <style lang="scss">

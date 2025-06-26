@@ -2,9 +2,9 @@ import { ROLES } from '@/composables/useRoles'
 
 export default [
   {
-    title: 'Home',
+    title: 'Dashboard',
     to: { name: 'index' },
-    icon: { icon: 'tabler-smart-home' },
+    icon: { icon: 'tabler-dashboard' },
   },
   {
     title: 'Graduates',
@@ -21,13 +21,13 @@ export default [
   {
     title: 'Directors',
     to: { name: 'directors' },
-    icon: { icon: 'tabler-briefcase' },
-    requiredRoles: [ROLES.ADMINISTRADOR],
+    icon: { icon: 'tabler-shield-star' },
+    requiredRoles: [ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
   },
   {
     title: 'Education Centers',
     to: { name: 'education-centers' },
-    icon: { icon: 'tabler-briefcase' },
+    icon: { icon: 'tabler-school' },
     requiredRoles: [ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
   },
   {
@@ -38,19 +38,19 @@ export default [
   },
   {
     title: 'Encuestas',
-    icon: { icon: 'tabler-chart-bar' },
+    icon: { icon: 'tabler-file-text' },
     to: { name: 'surveys' },
     requiredRoles: [ROLES.EMPLEADOR, ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
   },
   {
-    title: 'Dashboard Estadísticas',
-    icon: { icon: 'mdi-view-dashboard' },
+    title: 'Estadísticas Detalladas',
+    icon: { icon: 'tabler-chart-bar' },
     to: 'dashboard-estadisticas',
-    requiredRoles: [ROLES.EMPLEADOR, ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
+    requiredRoles: [ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
   },
   {
     title: 'Mis Encuestas',
-    icon: { icon: 'mdi-clipboard-text' },
+    icon: { icon: 'tabler-clipboard-text' },
     to: 'my-surveys',
     requiredRoles: [ROLES.GRADUADO],
   },

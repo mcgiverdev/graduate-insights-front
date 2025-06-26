@@ -124,6 +124,32 @@ export interface DashboardChart {
   total_responses?: number
 }
 
+export interface Survey {
+  id: number
+  title: string
+  description: string
+  survey_type: {
+    id: number
+    name: string
+    description: string
+    active: boolean
+  }
+  status: string
+  start_date: string
+  end_date: string
+  questions: Array<{
+    id: number
+    question_text: string
+    question_type: string
+    required: boolean
+    options: Array<{
+      id: number
+      option_text: string
+      order_number: number
+    }>
+  }>
+}
+
 export interface DashboardStatistics {
   general_statistics: {
     total_surveys: number
@@ -132,14 +158,13 @@ export interface DashboardStatistics {
     overall_response_rate: number
     active_surveys: number
     completed_surveys: number
-    responses_by_education_center: Record<string, number>
     responses_by_graduation_year: Record<string, number>
   }
   dashboard_charts: DashboardChart[]
+  recent_surveys: Survey[]
   kpi_indicators: DashboardKPI[]
   applied_filters: {
     graduation_year?: number
-    education_center_id?: number
   }
 }
 
@@ -291,15 +316,13 @@ async function fetchQuestionChart(surveyId: number, questionId: number, chartTyp
   }
 }
 
-async function fetchDashboard(filters: { graduation_year?: number; education_center_id?: number } = {}) {
+async function fetchDashboard(filters: { graduation_year?: number } = {}) {
   loadingDashboard.value = true
 
   try {
     const params = new URLSearchParams()
     if (filters.graduation_year)
       params.append('graduation_year', filters.graduation_year.toString())
-    if (filters.education_center_id)
-      params.append('education_center_id', filters.education_center_id.toString())
 
     const response = await useApi<DashboardResponse>(
       `/graduate-insights/v1/api/survey-statistics/dashboard?${params.toString()}`,
