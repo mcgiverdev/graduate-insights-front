@@ -11,8 +11,8 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      titleTemplate: '%s - NuxtJS Admin Template',
-      title: 'Vuexy',
+      titleTemplate: '%s - Sistema de Egresados',
+      title: 'Sistema de Egresados',
 
       link: [{
         rel: 'icon',

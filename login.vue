@@ -39,7 +39,7 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
     <div class="auth-logo d-flex align-center gap-x-3">
       <VNodeRenderer :nodes="themeConfig.app.logo" />
       <h1 class="auth-title">
-        {{ themeConfig.app.title }}
+        SYSGRAD
       </h1>
     </div>
   </a>
@@ -86,10 +86,10 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
       >
         <VCardText>
           <h4 class="text-h4 mb-1">
-            Welcome to <span class="text-capitalize">{{ themeConfig.app.title }}</span>! 👋🏻
+            Bienvenido a <span class="text-capitalize">Sistema de Egresados</span>! 👋🏻
           </h4>
           <p class="mb-0">
-            Please sign-in to your account and start the adventure
+            Inicia sesión en tu cuenta para comenzar
           </p>
         </VCardText>
         <VCardText>

@@ -4,38 +4,33 @@
     <span class="d-flex align-center text-medium-emphasis">
       &copy;
       {{ new Date().getFullYear() }}
-      Made With
+      Sistema de Egresados
       <VIcon
-        icon="tabler-heart-filled"
-        color="error"
+        icon="tabler-graduation-cap"
+        color="primary"
         size="1.25rem"
-        class="mx-1"
+        class="mx-2"
       />
-      By <a
-        href="https://pixinvent.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="text-primary ms-1"
-      >Pixinvent</a>
+      Gestión Educativa
     </span>
     <!-- 👉 Footer: right content -->
     <span class="d-md-flex gap-x-4 text-primary d-none">
       <a
-        href="https://themeforest.net/licenses/standard"
+        href="javascript:void(0)"
         target="noopener noreferrer"
-      >License</a>
+      >Privacidad</a>
       <a
-        href="https://1.envato.market/pixinvent_portfolio"
+        href="javascript:void(0)"
         target="noopener noreferrer"
-      >More Themes</a>
+      >Términos</a>
       <a
-        href="https://demos.pixinvent.com/vuexy-vuejs-admin-template/documentation/"
+        href="javascript:void(0)"
         target="noopener noreferrer"
-      >Documentation</a>
+      >Soporte</a>
       <a
-        href="https://pixinvent.ticksy.com/"
+        href="javascript:void(0)"
         target="noopener noreferrer"
-      >Support</a>
+      >Ayuda</a>
     </span>
   </div>
 </template>
