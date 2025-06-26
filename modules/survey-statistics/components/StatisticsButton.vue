@@ -52,12 +52,12 @@ function navigateToStatistics() {
   >
     <VIcon
       v-if="iconOnly"
-      icon="mdi-chart-bar"
+      icon="tabler-chart-bar"
     />
     <template v-else>
       <VIcon
         start
-        icon="mdi-chart-bar"
+        icon="tabler-chart-bar"
       />
       {{ buttonText }}
     </template>

@@ -5,12 +5,15 @@ export interface SurveyStatistics {
   survey_id: number
   survey_title: string
   survey_description: string
-  survey_type: string
-  graduation_year: number
-  education_center_name: string
-  education_center_id: number
-  survey_created_at: string
-  last_response_at: string
+  survey_type: {
+    id: number
+    name: string
+    description: string
+    active: boolean
+  }
+  status: string
+  start_date: string
+  end_date: string
   data_generated_at: string
   total_graduates: number
   total_responses: number
@@ -18,10 +21,8 @@ export interface SurveyStatistics {
   response_rate: number
   completion_rate: number
   total_questions: number
-  answered_questions: number
   responses_by_location: Record<string, number>
   responses_by_industry: Record<string, number>
-  responses_by_salary_range: Record<string, number>
   responses_by_gender: Record<string, number>
   responses_by_employment_status: Record<string, number>
   responses_by_month: Record<string, number>
@@ -44,6 +45,8 @@ export interface QuestionStatistic {
   option_counts: Record<string, number>
   percentages: Record<string, number>
   recommended_chart_type: string
+  average_response_length?: number
+  sample_responses?: string[]
 }
 
 export interface SurveyStatisticsResponse {

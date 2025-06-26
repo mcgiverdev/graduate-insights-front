@@ -26,6 +26,16 @@ function formatDate(dateString: string | undefined): string {
     day: 'numeric',
   })
 }
+
+function getStatusDisplayColor(status: string): string {
+  switch (status) {
+    case 'ACTIVE': return 'success'
+    case 'COMPLETED': return 'info'
+    case 'DRAFT': return 'warning'
+    case 'CANCELLED': return 'error'
+    default: return 'default'
+  }
+}
 </script>
 
 <template>
@@ -35,12 +45,21 @@ function formatDate(dateString: string | undefined): string {
         <VCardTitle class="pa-0">
           {{ statistics?.survey_title }}
         </VCardTitle>
-        <VChip
-          :color="getStatusColor(statistics?.response_rate || 0)"
-          size="small"
-        >
-          {{ Math.round(statistics?.response_rate || 0) }}% de respuesta
-        </VChip>
+        <div class="d-flex gap-2">
+          <VChip
+            :color="getStatusColor(statistics?.response_rate || 0)"
+            size="small"
+          >
+            {{ Math.round(statistics?.response_rate || 0) }}% de respuesta
+          </VChip>
+          <VChip
+            :color="getStatusDisplayColor(statistics?.status || '')"
+            size="small"
+            variant="outlined"
+          >
+            {{ statistics?.status }}
+          </VChip>
+        </div>
       </div>
 
       <VRow>
@@ -106,28 +125,40 @@ function formatDate(dateString: string | undefined): string {
       <div class="d-flex justify-space-between">
         <div>
           <div class="text-body-2 text-medium-emphasis">
-            Centro Educativo
+            Tipo de Encuesta
           </div>
           <div class="font-weight-medium">
-            {{ statistics?.education_center_name }}
+            {{ statistics?.survey_type?.name }}
+          </div>
+          <div class="text-caption text-medium-emphasis">
+            {{ statistics?.survey_type?.description }}
           </div>
         </div>
 
         <div>
           <div class="text-body-2 text-medium-emphasis">
-            Año de Graduación
+            Fecha de Inicio
           </div>
           <div class="font-weight-medium">
-            {{ statistics?.graduation_year }}
+            {{ formatDate(statistics?.start_date) }}
           </div>
         </div>
 
         <div>
           <div class="text-body-2 text-medium-emphasis">
-            Última Respuesta
+            Fecha de Fin
           </div>
           <div class="font-weight-medium">
-            {{ formatDate(statistics?.last_response_at) }}
+            {{ formatDate(statistics?.end_date) }}
+          </div>
+        </div>
+
+        <div>
+          <div class="text-body-2 text-medium-emphasis">
+            Datos Generados
+          </div>
+          <div class="font-weight-medium">
+            {{ formatDate(statistics?.data_generated_at) }}
           </div>
         </div>
       </div>

@@ -93,11 +93,11 @@ async function loadDemographics() {
 
 function getDemographicIcon(demographic: string) {
   switch (demographic) {
-    case 'gender': return 'mdi-human-male-female'
-    case 'age': return 'mdi-calendar'
-    case 'location': return 'mdi-map-marker'
-    case 'industry': return 'mdi-domain'
-    default: return 'mdi-chart-pie'
+    case 'gender': return 'tabler-users'
+    case 'age': return 'tabler-calendar'
+    case 'location': return 'tabler-map-pin'
+    case 'industry': return 'tabler-building'
+    default: return 'tabler-chart-pie'
   }
 }
 
@@ -272,7 +272,7 @@ loadDemographics()
           size="64"
           color="grey-lighten-1"
         >
-          mdi-account-group
+          tabler-users
         </VIcon>
         <div class="mt-2 text-grey">
           No hay datos demográficos disponibles

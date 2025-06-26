@@ -5,19 +5,17 @@ import {
   CategoryScale,
   Chart as ChartJS,
   Legend,
-  LineElement,
   LinearScale,
   PointElement,
   Title,
   Tooltip,
 } from 'chart.js'
-import { ref, watch } from 'vue'
-import { Bar, Doughnut, Line, Pie } from 'vue-chartjs'
-import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
-import { useSnackbar } from '@/composables/useSnackbar'
+import { computed, onMounted, ref, watch } from 'vue'
+import { Bar, Doughnut, Pie } from 'vue-chartjs'
+import TextQuestionViewer from './TextQuestionViewer.vue'
 import { useSurveyStatisticsService } from '@/composables/useSurveyStatisticsService'
-
-// Chart.js imports
+import { useSnackbar } from '@/composables/useSnackbar'
+import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 
 const props = defineProps<Props>()
 
@@ -30,7 +28,6 @@ ChartJS.register(
   Tooltip,
   Legend,
   PointElement,
-  LineElement,
 )
 
 interface Props {
@@ -40,86 +37,37 @@ interface Props {
 }
 
 // Composables
-const { questionChart, loadingQuestionChart, fetchQuestionChart } = useSurveyStatisticsService()
+const { questionChart, loadingQuestionChart, fetchQuestionChart, statistics } = useSurveyStatisticsService()
 const { showSnackbar } = useSnackbar()
 
 // State
-const selectedChartType = ref('pie')
+const selectedChartType = ref('bar')
+const error = ref<string | null>(null)
 
 // Chart type options
 const chartTypeOptions = [
+  { title: 'Gráfico de Barras', value: 'bar' },
   { title: 'Gráfico de Torta', value: 'pie' },
   { title: 'Gráfico de Dona', value: 'doughnut' },
-  { title: 'Gráfico de Barras', value: 'bar' },
-  { title: 'Gráfico de Líneas', value: 'line' },
 ]
 
-// Chart data
-const chartData = ref({
-  labels: [] as string[],
-  datasets: [] as any[],
+// Obtener datos de la pregunta específica de las estadísticas locales
+const questionData = computed(() => {
+  if (!statistics.value?.question_statistics)
+    return null
+
+  return statistics.value.question_statistics.find(q => q.question_id === props.questionId)
 })
 
-// Chart options
-const chartOptions = ref({
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      position: 'right' as const,
-    },
-    tooltip: {
-      enabled: true,
-    },
-  },
+// Verificar si es una pregunta de texto
+const isTextQuestion = computed(() => {
+  return questionData.value?.type === 'TEXT'
 })
 
-// Methods
-async function loadQuestionChart() {
-  const result = await fetchQuestionChart(props.surveyId, props.questionId, selectedChartType.value)
-
-  if (result.success && result.data) {
-    // Validar que los datos existen antes de procesarlos
-    const labels = Array.isArray(result.data.labels) ? result.data.labels : []
-    const datasets = Array.isArray(result.data.datasets) ? result.data.datasets : []
-
-    // Crear datasets válidos
-    const processedDatasets = datasets.length > 0
-      ? datasets.map(dataset => ({
-        ...dataset,
-        backgroundColor: dataset.background_colors || ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
-        borderColor: dataset.border_color || '#fff',
-        borderWidth: dataset.border_width || 1,
-      }))
-      : [{
-          label: 'Sin datos',
-          data: [1],
-          backgroundColor: ['#E0E0E0'],
-          borderColor: '#BDBDBD',
-          borderWidth: 1,
-        }]
-
-    chartData.value = {
-      labels: labels.length > 0 ? labels : ['Sin datos'],
-      datasets: processedDatasets,
-    }
-
-    // Update chart options from API response
-    if (result.data.configuration) {
-      chartOptions.value = {
-        ...chartOptions.value,
-        ...result.data.configuration,
-      }
-    }
-  }
-  else {
-    showSnackbar({
-      text: result.message || 'Error al cargar el gráfico de la pregunta',
-      color: 'error',
-    })
-
-    // Reset chart data on error
-    chartData.value = {
+// Chart data procesado desde la API
+const chartData = computed(() => {
+  if (!questionChart.value) {
+    return {
       labels: ['Sin datos'],
       datasets: [{
         label: 'Sin datos',
@@ -130,22 +78,183 @@ async function loadQuestionChart() {
       }],
     }
   }
-}
 
-// Watch for chart type changes
-watch(selectedChartType, () => {
-  loadQuestionChart()
+  try {
+    // Procesar datasets desde la API
+    const processedDatasets = questionChart.value.datasets.map(dataset => ({
+      ...dataset,
+      backgroundColor: dataset.background_colors || ['#2196F3', '#4CAF50', '#FF9800', '#F44336', '#9C27B0'],
+      borderColor: dataset.border_color || '#FFFFFF',
+      borderWidth: dataset.border_width || 1,
+    }))
+
+    return {
+      labels: questionChart.value.labels,
+      datasets: processedDatasets,
+    }
+  }
+  catch (err) {
+    console.error('QuestionChartViewer: Error processing API data', err)
+
+    return {
+      labels: ['Error'],
+      datasets: [{
+        label: 'Error',
+        data: [1],
+        backgroundColor: ['#F44336'],
+        borderColor: '#FFFFFF',
+        borderWidth: 1,
+      }],
+    }
+  }
 })
 
-// Load initial chart
-loadQuestionChart()
+// Chart options basadas en la configuración de la API
+const chartOptions = computed(() => {
+  const baseOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'right' as const,
+        display: true,
+      },
+      tooltip: {
+        enabled: true,
+        callbacks: {
+          label: (context: any) => {
+            const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0)
+
+            // Obtener el valor correcto según el tipo de gráfico
+            const value = context.parsed.y !== undefined ? context.parsed.y : context.parsed
+            const percentage = ((value * 100) / total).toFixed(1)
+
+            return `${context.label}: ${value} (${percentage}%)`
+          },
+        },
+      },
+    },
+  }
+
+  // Aplicar configuración de la API si existe
+  if (questionChart.value?.configuration) {
+    const apiConfig = questionChart.value.configuration
+
+    // Aplicar configuración de leyenda
+    if (apiConfig.legend) {
+      baseOptions.plugins.legend = {
+        ...baseOptions.plugins.legend,
+        display: apiConfig.legend.display,
+        position: (apiConfig.legend.position as any) || 'right',
+      }
+    }
+
+    // Aplicar configuración de tooltip
+    if (apiConfig.tooltip) {
+      baseOptions.plugins.tooltip = {
+        ...baseOptions.plugins.tooltip,
+        enabled: apiConfig.tooltip.enabled,
+      }
+    }
+  }
+
+  // Opciones específicas para gráfico de barras
+  if (selectedChartType.value === 'bar') {
+    return {
+      ...baseOptions,
+      plugins: {
+        ...baseOptions.plugins,
+        legend: {
+          display: false,
+        },
+      },
+      scales: {
+        x: {
+          grid: {
+            display: false,
+          },
+          ticks: {
+            maxRotation: 45,
+            minRotation: 0,
+          },
+        },
+        y: {
+          beginAtZero: true,
+          grid: {
+            display: true,
+            color: 'rgba(0, 0, 0, 0.1)',
+          },
+          ticks: {
+            stepSize: 1,
+            precision: 0,
+            callback(value: any) {
+              return Number.isInteger(value) ? value : ''
+            },
+          },
+        },
+      },
+    }
+  }
+
+  return baseOptions
+})
+
+// Verificar si hay datos de la API
+const hasApiData = computed(() => {
+  return questionChart.value
+         && questionChart.value.labels
+         && questionChart.value.labels.length > 0
+         && questionChart.value.datasets
+         && questionChart.value.datasets.length > 0
+})
+
+// Cargar datos del gráfico desde la API
+async function loadQuestionChart() {
+  error.value = null
+
+  try {
+    const result = await fetchQuestionChart(props.surveyId, props.questionId, selectedChartType.value)
+
+    if (!result.success) {
+      error.value = result.message || 'Error al cargar el gráfico de la pregunta'
+      showSnackbar({
+        text: result.message || 'Error al cargar el gráfico de la pregunta',
+        color: 'error',
+      })
+    }
+  }
+  catch (err) {
+    console.error('QuestionChartViewer: Error loading chart', err)
+    error.value = 'Error inesperado al cargar el gráfico'
+    showSnackbar({
+      text: 'Error inesperado al cargar el gráfico',
+      color: 'error',
+    })
+  }
+}
+
+// Watch para cambios en el tipo de gráfico
+watch(selectedChartType, () => {
+  loadQuestionChart()
+}, { immediate: false })
+
+// Watch para cambios en questionId
+watch(() => props.questionId, () => {
+  loadQuestionChart()
+}, { immediate: false })
+
+// Cargar datos iniciales
+onMounted(() => {
+  loadQuestionChart()
+})
 </script>
 
 <template>
   <VCard>
     <VCardTitle class="d-flex align-center justify-space-between">
-      <span>{{ questionText || `Pregunta ${questionId}` }}</span>
+      <span>{{ questionChart?.title || questionText || `Pregunta ${questionId}` }}</span>
       <AppSelect
+        v-if="!isTextQuestion"
         v-model="selectedChartType"
         :items="chartTypeOptions"
         style="max-inline-size: 200px;"
@@ -155,6 +264,17 @@ loadQuestionChart()
     </VCardTitle>
 
     <VCardText>
+      <!-- Error State -->
+      <VAlert
+        v-if="error"
+        type="error"
+        class="mb-4"
+        closable
+        @click:close="error = null"
+      >
+        {{ error }}
+      </VAlert>
+
       <!-- Loading State -->
       <div
         v-if="loadingQuestionChart"
@@ -169,11 +289,30 @@ loadQuestionChart()
         </div>
       </div>
 
-      <!-- Chart Content -->
-      <div
-        v-else-if="questionChart && chartData.labels.length > 0"
-        class="chart-container"
-      >
+      <!-- Pregunta de Texto -->
+      <div v-else-if="isTextQuestion">
+        <TextQuestionViewer
+          v-if="questionData && questionData.type === 'TEXT'"
+          :question="questionData as any"
+        />
+        <div
+          v-else
+          class="text-center py-8"
+        >
+          <VIcon
+            size="64"
+            color="grey-lighten-1"
+          >
+            tabler-text
+          </VIcon>
+          <div class="mt-2 text-grey">
+            No se encontraron datos para esta pregunta de texto
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráficos para otros tipos de preguntas -->
+      <div v-else-if="hasApiData">
         <div style="block-size: 400px;">
           <!-- Pie Chart -->
           <Pie
@@ -195,13 +334,6 @@ loadQuestionChart()
             :data="chartData"
             :options="chartOptions"
           />
-
-          <!-- Line Chart -->
-          <Line
-            v-else-if="selectedChartType === 'line'"
-            :data="chartData"
-            :options="chartOptions"
-          />
         </div>
 
         <!-- Chart Metadata -->
@@ -210,7 +342,7 @@ loadQuestionChart()
         <VRow>
           <VCol
             cols="12"
-            md="6"
+            md="3"
           >
             <div class="text-body-2 text-medium-emphasis">
               Total de Respuestas
@@ -221,27 +353,87 @@ loadQuestionChart()
           </VCol>
           <VCol
             cols="12"
-            md="6"
+            md="3"
+          >
+            <div class="text-body-2 text-medium-emphasis">
+              Tipo de Gráfico
+            </div>
+            <div class="text-h6 text-capitalize">
+              {{ questionChart?.chart_type || selectedChartType }}
+            </div>
+          </VCol>
+          <VCol
+            v-if="questionChart?.metadata?.response_rate"
+            cols="12"
+            md="3"
           >
             <div class="text-body-2 text-medium-emphasis">
               Tasa de Respuesta
             </div>
             <div class="text-h6">
-              {{ questionChart?.metadata?.response_rate || 0 }}%
+              {{ Math.round(questionChart.metadata.response_rate) }}%
             </div>
+          </VCol>
+          <VCol
+            v-if="questionChart?.metadata?.question_type"
+            cols="12"
+            md="3"
+          >
+            <div class="text-body-2 text-medium-emphasis">
+              Tipo de Pregunta
+            </div>
+            <VChip
+              size="small"
+              color="primary"
+              variant="tonal"
+            >
+              {{ questionChart.metadata.question_type }}
+            </VChip>
           </VCol>
         </VRow>
 
-        <!-- Question Type Info -->
-        <VChip
-          v-if="questionChart?.metadata?.question_type"
-          class="mt-2"
-          size="small"
-          color="primary"
-          variant="tonal"
-        >
-          {{ questionChart.metadata.question_type }}
-        </VChip>
+        <!-- Información adicional basada en datos locales -->
+        <div v-if="questionData">
+          <VDivider class="my-4" />
+          <VRow>
+            <VCol
+              v-if="questionData.average"
+              cols="12"
+              md="4"
+            >
+              <div class="text-body-2 text-medium-emphasis">
+                Promedio
+              </div>
+              <div class="text-h6">
+                {{ questionData.average.toFixed(1) }}
+              </div>
+            </VCol>
+            <VCol
+              v-if="questionData.min"
+              cols="12"
+              md="4"
+            >
+              <div class="text-body-2 text-medium-emphasis">
+                Valor Mínimo
+              </div>
+              <div class="text-h6">
+                {{ questionData.min }}
+              </div>
+            </VCol>
+            <VCol
+              v-if="questionData.max"
+              cols="12"
+              md="4"
+            >
+              <div class="text-body-2 text-medium-emphasis">
+                Valor Máximo
+              </div>
+              <div class="text-h6">
+                {{ questionData.max }}
+              </div>
+            </VCol>
+          </VRow>
+        </div>
       </div>
 
       <!-- Empty State -->
@@ -253,16 +445,13 @@ loadQuestionChart()
           size="64"
           color="grey-lighten-1"
         >
-          mdi-chart-pie
+          tabler-chart-pie
         </VIcon>
         <div class="mt-2 text-grey">
           No hay datos disponibles para esta pregunta
         </div>
-        <div
-          v-if="questionChart && chartData.labels.length === 0"
-          class="text-caption text-medium-emphasis mt-2"
-        >
-          La pregunta no tiene respuestas suficientes para generar un gráfico
+        <div class="text-caption text-medium-emphasis mt-2">
+          ID de pregunta: {{ questionId }}
         </div>
       </div>
     </VCardText>

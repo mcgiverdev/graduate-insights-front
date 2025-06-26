@@ -10,12 +10,10 @@ import { Doughnut } from 'vue-chartjs'
 import { useRoute } from 'vue-router'
 import { useSnackbar } from '@/composables/useSnackbar'
 import { useSurveyStatisticsService } from '@/composables/useSurveyStatisticsService'
-import DemographicsViewer from '@/modules/survey-statistics/components/DemographicsViewer.vue'
 import QuestionChartViewer from '@/modules/survey-statistics/components/QuestionChartViewer.vue'
 import QuestionStatistics from '@/modules/survey-statistics/components/QuestionStatistics.vue'
-import StatisticsCharts from '@/modules/survey-statistics/components/StatisticsCharts.vue'
+import SimpleTrendsViewer from '@/modules/survey-statistics/components/SimpleTrendsViewer.vue'
 import StatisticsOverview from '@/modules/survey-statistics/components/StatisticsOverview.vue'
-import TrendsViewer from '@/modules/survey-statistics/components/TrendsViewer.vue'
 import { formatDateTime } from '@/utils/dateUtils'
 import { getDoughnutChartConfig } from '@core/libs/chartjs/chartjsConfig'
 
@@ -53,6 +51,8 @@ const genderChartData = computed(() => {
   return {
     labels: Object.keys(data).map(key => {
       switch (key) {
+      case 'M': return 'Masculino'
+      case 'F': return 'Femenino'
       case 'masculino': return 'Masculino'
       case 'femenino': return 'Femenino'
       case 'otro': return 'Otro'
@@ -84,38 +84,22 @@ const tabs = [
   {
     value: 'overview',
     title: 'Resumen General',
-    icon: 'mdi-chart-line',
-    description: 'Vista general de estadísticas',
-  },
-  {
-    value: 'charts',
-    title: 'Gráficos Demográficos',
-    icon: 'mdi-chart-pie',
-    description: 'Análisis demográfico visual',
+    icon: 'tabler-chart-line',
   },
   {
     value: 'trends',
     title: 'Tendencias',
-    icon: 'mdi-trending-up',
-    description: 'Evolución temporal de respuestas',
-  },
-  {
-    value: 'demographics',
-    title: 'Demografía Detallada',
-    icon: 'mdi-account-group',
-    description: 'Análisis demográfico profundo',
+    icon: 'tabler-trending-up',
   },
   {
     value: 'questions',
     title: 'Análisis por Pregunta',
-    icon: 'mdi-help-circle',
-    description: 'Estadísticas detalladas por pregunta',
+    icon: 'tabler-help-circle',
   },
   {
     value: 'question-charts',
     title: 'Gráficos de Preguntas',
-    icon: 'mdi-chart-box',
-    description: 'Visualizaciones específicas por pregunta',
+    icon: 'tabler-chart-bar',
   },
 ]
 
@@ -165,11 +149,34 @@ const surveyMetadata = computed(() => {
   return {
     title: statistics.value.survey_title,
     description: statistics.value.survey_description,
-    type: statistics.value.survey_type,
-    educationCenter: statistics.value.education_center_name,
-    createdAt: formatDateTime(statistics.value.survey_created_at),
-    lastResponse: formatDateTime(statistics.value.last_response_at),
+    type: statistics.value.survey_type?.name || 'N/A',
+    typeDescription: statistics.value.survey_type?.description || '',
+    status: statistics.value.status,
+    startDate: statistics.value.start_date,
+    endDate: statistics.value.end_date,
     dataGenerated: formatDateTime(statistics.value.data_generated_at),
+  }
+})
+
+const processedStatistics = computed(() => {
+  if (!statistics.value)
+    return null
+
+  const processedQuestions = statistics.value.question_statistics?.map(question => {
+    if (question.type === 'TEXT') {
+      return {
+        ...question,
+        hasTextAnalysis: !!(question.average_response_length || question.sample_responses),
+        displaySamples: question.sample_responses?.slice(0, 3) || [],
+      }
+    }
+
+    return question
+  }) || []
+
+  return {
+    ...statistics.value,
+    question_statistics: processedQuestions,
   }
 })
 
@@ -194,9 +201,20 @@ useHead({
 
 <template>
   <div>
-    <!-- Header con información básica -->
-    <div class="d-flex justify-space-between align-center mb-6">
-      <div>
+    <!-- Header con navegación -->
+    <div class="d-flex align-center mb-4">
+      <VBtn
+        variant="text"
+        prepend-icon="tabler-arrow-left"
+        @click="$router.push('/surveys')"
+      >
+        Volver a Encuestas
+      </VBtn>
+      <VDivider
+        vertical
+        class="mx-4"
+      />
+      <div class="flex-grow-1">
         <h1 class="text-h4 font-weight-bold">
           Estadísticas de Encuesta
         </h1>
@@ -212,7 +230,7 @@ useHead({
         <VBtn
           :loading="loadingStatistics"
           variant="outlined"
-          prepend-icon="mdi-refresh"
+          prepend-icon="tabler-refresh"
           @click="loadStatistics"
         >
           Actualizar
@@ -224,10 +242,10 @@ useHead({
               v-bind="props"
               :loading="loadingExport"
               color="primary"
-              prepend-icon="mdi-download"
+              prepend-icon="tabler-download"
             >
               Exportar
-              <VIcon icon="mdi-chevron-down" />
+              <VIcon icon="tabler-chevron-down" />
             </VBtn>
           </template>
 
@@ -295,32 +313,13 @@ useHead({
               md="3"
             >
               <div class="text-body-2 text-medium-emphasis">
-                Centro Educativo
-              </div>
-              <div class="font-weight-medium">
-                {{ surveyMetadata.educationCenter }}
-              </div>
-            </VCol>
-            <VCol
-              cols="12"
-              md="3"
-            >
-              <div class="text-body-2 text-medium-emphasis">
                 Tipo de Encuesta
               </div>
               <div class="font-weight-medium">
                 {{ surveyMetadata.type }}
               </div>
-            </VCol>
-            <VCol
-              cols="12"
-              md="3"
-            >
-              <div class="text-body-2 text-medium-emphasis">
-                Creada
-              </div>
-              <div class="font-weight-medium">
-                {{ surveyMetadata.createdAt }}
+              <div class="text-caption text-medium-emphasis">
+                {{ surveyMetadata.typeDescription }}
               </div>
             </VCol>
             <VCol
@@ -328,10 +327,37 @@ useHead({
               md="3"
             >
               <div class="text-body-2 text-medium-emphasis">
-                Última Respuesta
+                Estado
               </div>
               <div class="font-weight-medium">
-                {{ surveyMetadata.lastResponse }}
+                <VChip
+                  :color="surveyMetadata.status === 'ACTIVE' ? 'success' : 'warning'"
+                  size="small"
+                >
+                  {{ surveyMetadata.status }}
+                </VChip>
+              </div>
+            </VCol>
+            <VCol
+              cols="12"
+              md="3"
+            >
+              <div class="text-body-2 text-medium-emphasis">
+                Fecha de Inicio
+              </div>
+              <div class="font-weight-medium">
+                {{ surveyMetadata.startDate }}
+              </div>
+            </VCol>
+            <VCol
+              cols="12"
+              md="3"
+            >
+              <div class="text-body-2 text-medium-emphasis">
+                Fecha de Fin
+              </div>
+              <div class="font-weight-medium">
+                {{ surveyMetadata.endDate }}
               </div>
             </VCol>
           </VRow>
@@ -411,15 +437,13 @@ useHead({
                     </div>
 
                     <div class="d-flex justify-space-between">
-                      <span>Preguntas Respondidas</span>
-                      <span class="font-weight-bold">{{ statistics.answered_questions }}</span>
+                      <span>Fecha de Inicio</span>
+                      <span class="font-weight-bold">{{ statistics.start_date }}</span>
                     </div>
 
                     <div class="d-flex justify-space-between">
-                      <span>Última Respuesta</span>
-                      <span class="font-weight-bold">
-                        {{ formatDateTime(statistics.last_response_at) }}
-                      </span>
+                      <span>Fecha de Fin</span>
+                      <span class="font-weight-bold">{{ statistics.end_date }}</span>
                     </div>
                   </div>
                 </VCardText>
@@ -449,16 +473,11 @@ useHead({
           </VRow>
         </VWindowItem>
 
-        <!-- Tab 2: Gráficos Demográficos -->
-        <VWindowItem value="charts">
-          <StatisticsCharts :statistics="statistics" />
-        </VWindowItem>
-
-        <!-- Tab 3: Tendencias -->
+        <!-- Tab 2: Tendencias -->
         <VWindowItem value="trends">
           <VRow>
             <VCol cols="12">
-              <TrendsViewer
+              <SimpleTrendsViewer
                 :survey-id="surveyId"
                 :survey-title="statistics.survey_title"
               />
@@ -466,19 +485,7 @@ useHead({
           </VRow>
         </VWindowItem>
 
-        <!-- Tab 4: Demografía Detallada -->
-        <VWindowItem value="demographics">
-          <VRow>
-            <VCol cols="12">
-              <DemographicsViewer
-                :survey-id="surveyId"
-                :survey-title="statistics.survey_title"
-              />
-            </VCol>
-          </VRow>
-        </VWindowItem>
-
-        <!-- Tab 5: Análisis por Pregunta -->
+        <!-- Tab 3: Análisis por Pregunta -->
         <VWindowItem value="questions">
           <div
             v-if="loadingStatistics"
@@ -500,7 +507,7 @@ useHead({
             <VIcon
               size="64"
               color="grey-lighten-1"
-              icon="mdi-help-circle"
+              icon="tabler-help-circle"
             />
             <div class="mt-4 text-h6 text-medium-emphasis">
               No hay preguntas disponibles
@@ -511,12 +518,12 @@ useHead({
           </div>
           <QuestionStatistics
             v-else
-            :statistics="statistics"
+            :statistics="processedStatistics"
             @question-selected="handleQuestionSelect"
           />
         </VWindowItem>
 
-        <!-- Tab 6: Gráficos de Preguntas -->
+        <!-- Tab 4: Gráficos de Preguntas -->
         <VWindowItem value="question-charts">
           <VRow>
             <VCol
@@ -529,7 +536,7 @@ useHead({
               >
                 <VCardText class="d-flex align-center">
                   <VIcon
-                    icon="mdi-information"
+                    icon="tabler-info-circle"
                     class="me-2"
                   />
                   <div>
@@ -584,7 +591,7 @@ useHead({
           size="64"
           color="grey-lighten-1"
         >
-          mdi-chart-line
+          tabler-chart-line
         </VIcon>
         <div class="mt-4 text-h6 text-medium-emphasis">
           No se encontraron estadísticas

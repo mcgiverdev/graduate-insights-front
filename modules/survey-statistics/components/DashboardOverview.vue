@@ -111,9 +111,9 @@ function formatChartData(chart: DashboardChart) {
 
 function getTrendIcon(trend: string) {
   switch (trend) {
-  case 'up': return 'mdi-trending-up'
-  case 'down': return 'mdi-trending-down'
-  default: return 'mdi-trending-neutral'
+    case 'up': return 'tabler-trending-up'
+    case 'down': return 'tabler-trending-down'
+    default: return 'tabler-trending-up'
   }
 }
 
@@ -228,7 +228,7 @@ onMounted(() => {
         size="64"
         color="grey-lighten-1"
       >
-        mdi-chart-line
+        tabler-chart-line
       </VIcon>
       <div class="mt-4 text-grey">
         Seleccione filtros para ver el dashboard

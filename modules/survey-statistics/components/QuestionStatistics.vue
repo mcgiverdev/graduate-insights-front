@@ -298,7 +298,7 @@ function formatOptionName(option: string): string {
                     size="small"
                     color="primary"
                     variant="outlined"
-                    prepend-icon="mdi-chart-box"
+                    prepend-icon="tabler-chart-bar"
                     @click="emit('question-selected', question.question_id)"
                   >
                     Ver Gráficos
@@ -322,7 +322,7 @@ function formatOptionName(option: string): string {
                     density="compact"
                   >
                     <VIcon
-                      icon="mdi-information"
+                      icon="tabler-info-circle"
                       class="me-2"
                     />
                     Los datos del gráfico son estimados basados en el promedio ({{ question.average?.toFixed(1) }})
@@ -345,7 +345,7 @@ function formatOptionName(option: string): string {
                   <VIcon
                     size="48"
                     color="grey-lighten-2"
-                    icon="mdi-chart-bar"
+                    icon="tabler-chart-bar"
                   />
                   <div class="text-body-2 text-medium-emphasis mt-2">
                     No hay datos suficientes para mostrar el gráfico
@@ -446,7 +446,7 @@ function formatOptionName(option: string): string {
                   <VIcon
                     size="48"
                     color="grey-lighten-2"
-                    icon="mdi-chart-bar"
+                    icon="tabler-chart-bar"
                   />
                   <div class="text-body-2 text-medium-emphasis mt-2">
                     No hay datos suficientes para mostrar el gráfico

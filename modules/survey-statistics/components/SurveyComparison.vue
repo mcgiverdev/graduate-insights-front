@@ -383,7 +383,7 @@ onMounted(() => {
         size="64"
         color="grey-lighten-1"
       >
-        mdi-chart-bar
+        tabler-chart-bar
       </VIcon>
       <div class="mt-4 text-grey">
         Seleccione encuestas para ver las comparaciones
