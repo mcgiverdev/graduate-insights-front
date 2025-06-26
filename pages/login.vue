@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useAuthService } from '@/composables/useAuthService'
 import { useSnackbar } from '@/composables/useSnackbar'
-import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
 import authV2LoginIllustrationBorderedLight from '@images/pages/auth-v2-login-illustration-bordered-light.png'
@@ -131,7 +130,7 @@ const handleLogin = async () => {
             Bienvenido a <span class="text-capitalize">Sistema de Egresados</span>! 👋🏻
           </h4>
           <p class="mb-0">
-            Inicia sesión en tu cuenta para comenzar
+            Inicia sesión en tu cuenta para acceder al sistema
           </p>
         </VCardText>
         <VCardText>
@@ -142,9 +141,9 @@ const handleLogin = async () => {
                 <AppTextField
                   v-model="form.email"
                   autofocus
-                  label="Email or Username"
+                  label="Correo electrónico"
                   type="email"
-                  placeholder="johndoe@email.com"
+                  placeholder="usuario@ejemplo.com"
                 />
               </VCol>
 
@@ -152,7 +151,7 @@ const handleLogin = async () => {
               <VCol cols="12">
                 <AppTextField
                   v-model="form.password"
-                  label="Password"
+                  label="Contraseña"
                   placeholder="············"
                   :type="isPasswordVisible ? 'text' : 'password'"
                   autocomplete="password"
@@ -163,13 +162,13 @@ const handleLogin = async () => {
                 <div class="d-flex align-center flex-wrap justify-space-between my-6">
                   <VCheckbox
                     v-model="form.remember"
-                    label="Remember me"
+                    label="Recordarme"
                   />
                   <a
                     class="text-primary"
                     href="javascript:void(0)"
                   >
-                    Forgot Password?
+                    ¿Olvidaste tu contraseña?
                   </a>
                 </div>
 
@@ -178,41 +177,24 @@ const handleLogin = async () => {
                   type="submit"
                   :loading="loading"
                 >
-                  Login
+                  Iniciar Sesión
                 </VBtn>
               </VCol>
 
               <!-- create account -->
               <VCol
                 cols="12"
-                class="text-body-1 text-center"
+                class="text-body-1 text-center mt-4"
               >
                 <span class="d-inline-block">
-                  New on our platform?
+                  ¿Nuevo en la plataforma?
                 </span>
                 <a
                   class="text-primary ms-1 d-inline-block text-body-1"
                   href="javascript:void(0)"
                 >
-                  Create an account
+                  Crear una cuenta
                 </a>
-              </VCol>
-
-              <VCol
-                cols="12"
-                class="d-flex align-center"
-              >
-                <VDivider />
-                <span class="mx-4">or</span>
-                <VDivider />
-              </VCol>
-
-              <!-- auth providers -->
-              <VCol
-                cols="12"
-                class="text-center"
-              >
-                <AuthProvider />
               </VCol>
             </VRow>
           </VForm>

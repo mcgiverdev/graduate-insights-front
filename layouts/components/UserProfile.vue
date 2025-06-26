@@ -94,7 +94,7 @@ onMounted(() => {
               />
             </template>
 
-            <VListItemTitle>Profile</VListItemTitle>
+            <VListItemTitle>Mi Perfil</VListItemTitle>
           </VListItem>
 
           <!--          &lt;!&ndash; 👉 Settings &ndash;&gt; -->
@@ -149,7 +149,7 @@ onMounted(() => {
               />
             </template>
 
-            <VListItemTitle>Logout</VListItemTitle>
+            <VListItemTitle>Cerrar Sesión</VListItemTitle>
           </VListItem>
         </VList>
       </VMenu>

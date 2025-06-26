@@ -2,36 +2,36 @@ import { ROLES } from '@/composables/useRoles'
 
 export default [
   {
-    title: 'Dashboard',
+    title: 'Inicio',
     to: { name: 'index' },
-    icon: { icon: 'tabler-dashboard' },
+    icon: { icon: 'tabler-home' },
   },
   {
-    title: 'Graduates',
+    title: 'Graduados',
     to: { name: 'graduates' },
     icon: { icon: 'tabler-users' },
     requiredRoles: [ROLES.EMPLEADOR, ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
   },
   {
-    title: 'Employers',
+    title: 'Empleadores',
     to: { name: 'employers' },
     icon: { icon: 'tabler-briefcase' },
     requiredRoles: [ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
   },
   {
-    title: 'Directors',
+    title: 'Directores',
     to: { name: 'directors' },
     icon: { icon: 'tabler-shield-star' },
     requiredRoles: [ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
   },
   {
-    title: 'Education Centers',
+    title: 'Centros Educativos',
     to: { name: 'education-centers' },
     icon: { icon: 'tabler-school' },
     requiredRoles: [ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
   },
   {
-    title: 'Jobs',
+    title: 'Ofertas Laborales',
     to: { name: 'jobs' },
     icon: { icon: 'tabler-briefcase-2' },
     requiredRoles: [ROLES.EMPLEADOR, ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
@@ -41,12 +41,6 @@ export default [
     icon: { icon: 'tabler-file-text' },
     to: { name: 'surveys' },
     requiredRoles: [ROLES.EMPLEADOR, ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
-  },
-  {
-    title: 'Estadísticas Detalladas',
-    icon: { icon: 'tabler-chart-bar' },
-    to: 'dashboard-estadisticas',
-    requiredRoles: [ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
   },
   {
     title: 'Mis Encuestas',
