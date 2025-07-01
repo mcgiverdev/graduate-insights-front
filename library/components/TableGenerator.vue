@@ -74,7 +74,7 @@ export default defineComponent({
         return item[idField]
 
       // Si no hay campo ID definido o no se encuentra, intentamos con campos comunes
-      const commonIdFields = ['id', 'ID', '_id', 'director_id', 'userId', 'user_id']
+      const commonIdFields = ['id', 'ID', '_id', 'director_id', 'userId', 'user_id', 'employer_id', 'job_offers_id']
       for (const field of commonIdFields) {
         if (item[field] !== undefined)
           return item[field]

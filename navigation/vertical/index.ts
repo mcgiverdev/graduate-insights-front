@@ -10,7 +10,7 @@ export default [
     title: 'Graduados',
     to: { name: 'graduates' },
     icon: { icon: 'tabler-users' },
-    requiredRoles: [ROLES.EMPLEADOR, ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
+    requiredRoles: [ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
   },
   {
     title: 'Empleadores',
@@ -31,21 +31,39 @@ export default [
     requiredRoles: [ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
   },
   {
-    title: 'Ofertas Laborales',
+    title: 'Trabajos de egresado',
     to: { name: 'jobs' },
     icon: { icon: 'tabler-briefcase-2' },
-    requiredRoles: [ROLES.EMPLEADOR, ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
+    requiredRoles: [ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
+  },
+  {
+    title: 'Ofertas Laborales',
+    to: { name: 'job-offers' },
+    icon: { icon: 'tabler-calendar-event' },
+    requiredRoles: [ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
+  },
+  {
+    title: 'Mis Ofertas Laborales',
+    to: { name: 'my-job-offers' },
+    icon: { icon: 'tabler-calendar-plus' },
+    requiredRoles: [ROLES.EMPLEADOR],
   },
   {
     title: 'Encuestas',
     icon: { icon: 'tabler-file-text' },
     to: { name: 'surveys' },
-    requiredRoles: [ROLES.EMPLEADOR, ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
+    requiredRoles: [ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
   },
   {
     title: 'Mis Encuestas',
     icon: { icon: 'tabler-clipboard-text' },
     to: 'my-surveys',
+    requiredRoles: [ROLES.GRADUADO],
+  },
+  {
+    title: 'Mis Trabajos',
+    icon: { icon: 'tabler-briefcase' },
+    to: 'my-jobs',
     requiredRoles: [ROLES.GRADUADO],
   },
 ]
