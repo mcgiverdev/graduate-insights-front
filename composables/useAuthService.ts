@@ -43,24 +43,53 @@ export const useAuthService = () => {
           sameSite: 'strict',
         })
 
+        // Guardar el token
         token.value = loginData.data
 
-        // Obtener la ruta guardada o redirigir al dashboard
-        const returnTo = useCookie('returnTo', {
-          path: '/',
-          secure: true,
-          sameSite: 'strict',
-        })
+        try {
+          // Hacer una nueva instancia de useApi con el token actualizado
+          const userResponse = await $fetch<{ data: { verified: boolean } }>('/graduate-insights/v1/api/auth/me', {
+            baseURL: useRuntimeConfig().public.apiBaseUrl,
+            headers: {
+              Authorization: `Bearer ${loginData.data}`,
+            },
+          })
 
-        const redirectPath = returnTo.value || '/'
+          // Si el usuario no está verificado, redirigir a la página de validación
+          if (!userResponse.data.verified) {
+            return navigateTo({
+              path: '/validate-code',
+              query: {
+                email,
+              },
+            })
+          }
 
-        // Limpiar la cookie de retorno
-        returnTo.value = null
+          // Si está verificado, proceder con la redirección normal
+          const returnTo = useCookie('returnTo', {
+            path: '/',
+            secure: true,
+            sameSite: 'strict',
+          })
 
-        // Redirigir a la ruta guardada o al dashboard
-        await navigateTo(redirectPath)
+          const redirectPath = returnTo.value || '/'
 
-        return { success: true, message: loginData.message }
+          // Limpiar la cookie de retorno
+          returnTo.value = null
+
+          // Redirigir a la ruta guardada o al dashboard
+          await navigateTo(redirectPath)
+
+          return { success: true, message: loginData.message }
+        }
+        catch (meError) {
+          console.error('Error al obtener información del usuario:', meError)
+
+          // Si falla la obtención del usuario, limpiar el token y mostrar error
+          token.value = null
+
+          return { success: false, message: 'Error al obtener información del usuario' }
+        }
       }
 
       return { success: false, message: loginData.message || 'Error al iniciar sesión' }

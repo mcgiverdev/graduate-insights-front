@@ -7,6 +7,7 @@ export interface UserData {
   email: string
   role: string
   avatar?: string
+  verified: boolean
 }
 
 const user = ref<UserData | null>(null)
