@@ -6,21 +6,31 @@
  * @param options - Opciones de formateo (opcional)
  * @returns Fecha formateada o '-' si no hay fecha
  */
-export function formatDate(
-  dateString?: string,
-  options: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  },
-): string {
+export const formatDate = (dateString: string | null | undefined): string => {
   if (!dateString)
     return '-'
 
-  // Agregar tiempo para evitar problemas de zona horaria
-  const date = new Date(`${dateString}T12:00:00`)
+  try {
+    const date = new Date(dateString)
 
-  return date.toLocaleDateString('es-ES', options)
+    // Verificar si la fecha es válida
+    if (isNaN(date.getTime()))
+      return '-'
+
+    return new Intl.DateTimeFormat('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).format(date)
+  }
+  catch (error) {
+    console.error('Error al formatear la fecha:', error)
+
+    return '-'
+  }
 }
 
 /**

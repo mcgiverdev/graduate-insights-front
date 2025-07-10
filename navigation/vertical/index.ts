@@ -78,4 +78,10 @@ export default [
     to: 'my-jobs',
     requiredRoles: [ROLES.GRADUADO],
   },
+  {
+    title: 'Feed',
+    to: { name: 'feed' },
+    icon: { icon: 'tabler-news' },
+    roles: ['GRADUATE', 'DIRECTOR'],
+  },
 ]
