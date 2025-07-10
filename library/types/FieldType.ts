@@ -6,7 +6,7 @@ export interface BaseFieldType {
   parse?: (value: any) => any
 }
 
-export type FieldType = 'text' | 'email' | 'password' | 'date' | 'time' | 'date-time' | 'enum' | 'number' | 'tel' | 'belongs'
+export type FieldType = 'text' | 'email' | 'password' | 'date' | 'time' | 'date-time' | 'enum' | 'number' | 'tel' | 'belongs' | 'file'
 
 export interface BaseFieldConfig {
   type?: string
@@ -61,6 +61,13 @@ export interface BelongsFieldConfig extends BaseFieldConfig {
   }>
 }
 
+export interface FileFieldConfig extends BaseFieldConfig {
+  type: 'file'
+  accept?: string
+  maxSize?: number
+  directory?: string
+}
+
 export type FieldTypeConfig =
   | TextFieldConfig
   | EmailFieldConfig
@@ -70,6 +77,7 @@ export type FieldTypeConfig =
   | NumberFieldConfig
   | TelFieldConfig
   | BelongsFieldConfig
+  | FileFieldConfig
 
 // Clase para manejar el registro de tipos de campo
 export class FieldTypeRegistry {
@@ -169,6 +177,17 @@ export class FieldTypeRegistry {
           return 'Debe ser un número de teléfono'
         if (!/^\d+$/.test(value))
           return 'Solo debe contener números'
+
+        return true
+      },
+    }],
+    ['file', {
+      type: 'file',
+      validate: (value: any) => {
+        if (!value)
+          return true
+        if (!(value instanceof File))
+          return 'Debe ser un archivo válido'
 
         return true
       },

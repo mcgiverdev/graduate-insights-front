@@ -6,8 +6,8 @@ export interface Director {
   director_id: number
   user_id: number
   nombres: string
-    apellidos: string
-    fecha_nacimiento: string
+  apellidos: string
+  fecha_nacimiento: string
   genero: string
   correo: string
   estado: string

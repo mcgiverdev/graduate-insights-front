@@ -135,7 +135,46 @@ export abstract class Resource {
 
         return mappedData
       },
+      mapRequest: (data: any): any => {
+        // Verificar si hay archivos en los datos
+        const hasFiles = this.hasFileFields(data)
+
+        if (hasFiles) {
+          // Crear FormData para manejar archivos
+          const formData = new FormData()
+
+          Object.keys(data).forEach(key => {
+            const value = data[key]
+            if (value instanceof File)
+              formData.append(key, value)
+            else if (value !== null && value !== undefined)
+              formData.append(key, String(value))
+          })
+
+          return formData
+        }
+
+        return data
+      },
     }
+  }
+
+  // Método para verificar si hay campos de archivo en los datos
+  private hasFileFields(data: any): boolean {
+    return Object.values(data).some(value => value instanceof File)
+  }
+
+  // Método para obtener los headers correctos según el tipo de datos
+  public getRequestHeaders(data: any): Record<string, string> {
+    const baseHeaders = { ...this.apiConfig.headers }
+
+    if (this.hasFileFields(data)) {
+      // Para FormData, el navegador debe establecer el Content-Type automáticamente
+      // para incluir el boundary correcto
+      delete baseHeaders['Content-Type']
+    }
+
+    return baseHeaders
   }
 
   public getModel(): ModelDefinition {

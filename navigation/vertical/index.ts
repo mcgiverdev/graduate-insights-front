@@ -31,6 +31,18 @@ export default [
     requiredRoles: [ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
   },
   {
+    title: 'Tipos de Eventos',
+    to: { name: 'event-types' },
+    icon: { icon: 'tabler-calendar-stats' },
+    requiredRoles: [ROLES.DIRECTOR],
+  },
+  {
+    title: 'Eventos',
+    to: { name: 'events' },
+    icon: { icon: 'tabler-calendar' },
+    requiredRoles: [ROLES.DIRECTOR],
+  },
+  {
     title: 'Trabajos de egresado',
     to: { name: 'jobs' },
     icon: { icon: 'tabler-briefcase-2' },

@@ -7,6 +7,7 @@ import type { FieldType } from '../types/FieldType'
 import type { FieldDefinition, ModelDefinition } from '../types/ModelDefinition'
 import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
+import AppFileField from '@/@core/components/app-form-elements/AppFileField.vue'
 import AppDateTimePicker from '@/@core/components/app-form-elements/AppDateTimePicker.vue'
 import AppBelongsField from '@/@core/components/app-form-elements/AppBelongsField.vue'
 
@@ -17,6 +18,7 @@ export default defineComponent({
     AppSelect,
     AppDateTimePicker,
     AppBelongsField,
+    AppFileField,
   },
 
   props: {
@@ -72,6 +74,9 @@ export default defineComponent({
               fieldSchema = yup.number()
               break
             case 'belongs':
+              fieldSchema = yup.mixed()
+              break
+            case 'file':
               fieldSchema = yup.mixed()
               break
             default:
@@ -156,8 +161,11 @@ export default defineComponent({
       })
 
       const validationResult = await validate()
-      if (validationResult.valid)
+      if (validationResult.valid) {
+        console.log('FormGenerator - Datos antes de emit:', values)
+        console.log('FormGenerator - Hay archivos:', Object.values(values).some(v => v instanceof File))
         emit('submit', values)
+      }
     }
 
     const getFieldComponent = (type: FieldType) => {
@@ -172,6 +180,8 @@ export default defineComponent({
           return 'AppDateTimePicker'
         case 'belongs':
           return 'AppBelongsField'
+        case 'file':
+          return 'AppFileField'
         default:
           return 'AppTextField'
       }
@@ -190,6 +200,12 @@ export default defineComponent({
         fieldProps.apiEndpoint = field.options.apiEndpoint
         fieldProps.displayField = field.options.displayField || 'value'
         fieldProps.valueField = field.options.valueField || 'key'
+      }
+
+      if (field.type === 'file') {
+        fieldProps.accept = field.options?.accept || ''
+        fieldProps.maxSize = field.options?.maxSize || 10240
+        fieldProps.placeholder = field.placeholder || 'Seleccionar archivo'
       }
 
       if (field.type === 'text' && field.label.toLowerCase().includes('contraseña'))

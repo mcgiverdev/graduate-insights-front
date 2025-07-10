@@ -1,0 +1,90 @@
+# Patrón de Composables - Graduate Insights
+
+## Estructura de Composables
+
+Los composables deben seguir este patrón basado en [useAuthService.ts](composables/useAuthService.ts):
+
+```typescript
+import { ref } from 'vue'
+import { useApi } from '@/composables/useApi'
+
+interface ServiceResponse {
+  success: boolean
+  message: string
+  data?: any
+}
+
+interface ServiceError {
+  error: string
+  errors?: string[]
+}
+
+export const useServiceName = () => {
+  const loading = ref(false)
+  const error = ref<string | null>(null)
+
+  const methodName = async (params: any) => {
+    try {
+      loading.value = true
+      error.value = null
+
+      const response = await useApi<ServiceResponse>('/graduate-insights/v1/api/endpoint', {
+        method: 'POST',
+        body: params,
+      })
+
+      if (response.data.success) {
+        return { success: true, data: response.data.data }
+      }
+
+      return { success: false, message: response.data.message }
+    }
+    catch (err: any) {
+      console.error('Error en methodName:', err)
+      const errorData = err.data as ServiceError
+      error.value = errorData?.error || 'Error en la operación'
+      return { success: false, message: error.value }
+    }
+    finally {
+      loading.value = false
+    }
+  }
+
+  return {
+    loading: readonly(loading),
+    error: readonly(error),
+    methodName,
+  }
+}
+
+## Reglas para Composables
+
+1. **Nomenclatura**: Comenzar con `use` seguido del nombre del servicio
+2. **Estados reactivos**: Usar `ref()` para loading y error
+3. **Manejo de errores**: Siempre incluir try-catch con manejo de errores
+4. **Tipos**: Definir interfaces para respuestas y errores
+5. **Loading states**: Manejar estados de carga correctamente
+6. **Readonly**: Exponer estados como readonly cuando sea apropiado
+7. **Logging**: Incluir console.error para debugging
+8. **Endpoints**: Usar la estructura `/graduate-insights/v1/api/`
+9. **Retorno consistente**: Siempre retornar objetos con `success` y `message`
+
+## Composables de Servicios Específicos
+
+- `useAuthService`: Autenticación y manejo de tokens
+- `useDirectorService`: Operaciones con directores
+- `useGraduateService`: Operaciones con graduados
+- `useEmployerService`: Operaciones con empleadores
+- `useEducationCenterService`: Operaciones con centros educativos
+- `useSurveyService`: Operaciones con encuestas
+
+## Patrones Comunes
+
+- Usar `useApi` para llamadas HTTP
+- Manejar cookies para tokens con `useCookie`
+- Usar `navigateTo` para redirecciones
+- Implementar manejo de errores 401 para autenticación
+description:
+globs:
+alwaysApply: false
+---

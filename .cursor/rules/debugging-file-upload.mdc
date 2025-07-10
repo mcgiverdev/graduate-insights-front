@@ -1,0 +1,115 @@
+# Debugging de Campos de Archivo - Graduate Insights
+
+## Problema Actual
+
+El campo `cvFile` en `GraduateResource` se está enviando como `null` al backend.
+
+## Pasos de Debugging
+
+### 1. Verificar que el campo aparece en el formulario
+
+El campo `cvFile` debería aparecer solo en el formulario de **creación** de graduados, no en edición ni en la tabla.
+
+```typescript
+Fields.file('cvFile')
+  .label('Archivo CV')
+  .accept(['.pdf', '.doc', '.docx'])
+  .maxSize(5120) // 5MB
+  .placeholder('Seleccionar archivo CV')
+  .hideOnIndex()      // Oculto en tabla
+  .hideOnUpdate()     // Solo en creación
+```
+
+### 2. Verificar el flujo de datos
+
+He agregado logs de debugging en varios puntos:
+
+1. **FormGenerator**: Verifica que el archivo esté en los datos
+2. **GenericRepository**: Verifica que los datos lleguen correctamente
+3. **CrudController**: Verifica la conversión a FormData
+
+### 3. Verificar en el navegador
+
+1. Abrir DevTools (F12)
+2. Ir a la página de Graduados
+3. Hacer clic en "Nuevo graduado"
+4. Seleccionar un archivo PDF en el campo "Archivo CV"
+5. Llenar los demás campos requeridos
+6. Hacer clic en "Guardar"
+7. Revisar los logs en la consola
+
+### 4. Verificar en Network Tab
+
+1. En DevTools, ir a la pestaña "Network"
+2. Filtrar por "Fetch/XHR"
+3. Hacer el submit del formulario
+4. Buscar la petición POST a `/graduate-insights/v1/api/graduate`
+5. Verificar:
+   - **Request Headers**: Debe tener `Content-Type: multipart/form-data`
+   - **Request Payload**: Debe mostrar FormData con el archivo
+
+### 5. Logs esperados en consola
+
+```
+FormGenerator - Datos antes de emit: {cvFile: File, nombres: "...", ...}
+FormGenerator - Hay archivos: true
+GenericRepository - Datos recibidos: {cvFile: File, nombres: "...", ...}
+GenericRepository - Hay archivos: true
+GenericRepository - Datos después de mapRequest: FormData {}
+GenericRepository - Tipo de datos: FormData
+CrudController - Datos recibidos: FormData {}
+CrudController - Tiene archivos: true
+CrudController - Es FormData: true
+CrudController - Headers finales: {Accept: "application/json"}
+```
+
+### 6. Posibles causas si no funciona
+
+1. **El archivo no se selecciona**: Verificar que AppFileField emite correctamente
+2. **Los datos no se procesan**: Verificar que mapRequest funciona
+3. **Headers incorrectos**: Verificar que no se establece Content-Type para FormData
+4. **Backend no recibe**: Verificar que el endpoint acepta multipart/form-data
+
+### 7. Verificar en el backend
+
+En el controlador Spring Boot, agregar logs:
+
+```java
+@PostMapping
+public ResponseEntity<?> create(
+    @RequestBody GraduateRequest graduateRequest,
+    @RequestParam(value = "cvFile", required = false) MultipartFile cvFile
+) {
+    System.out.println("cvFile recibido: " + (cvFile != null ? cvFile.getOriginalFilename() : "null"));
+    System.out.println("cvFile size: " + (cvFile != null ? cvFile.getSize() : 0));
+    // ... resto del código
+}
+```
+
+### 8. Soluciones comunes
+
+1. **Verificar que el campo esté visible**: Remover `hideOnUpdate()` temporalmente
+2. **Verificar validación**: El archivo podría estar siendo rechazado por validación
+3. **Verificar tamaño**: El archivo podría ser muy grande
+4. **Verificar tipo**: El archivo podría no ser del tipo permitido
+
+## Comando de prueba con curl
+
+```bash
+curl -X POST http://localhost:8080/graduate-insights/v1/api/graduate \
+  -H "Authorization: Bearer your-token" \
+  -F "nombres=Juan" \
+  -F "apellidos=Pérez" \
+  -F "correo=juan@test.com" \
+  -F "dni=12345678" \
+  -F "genero=M" \
+  -F "fecha_nacimiento=1990-01-01" \
+  -F "celular=987654321" \
+  -F "fecha_inicio=2020-01-01" \
+  -F "fecha_fin=2024-01-01" \
+  -F "cvFile=@test.pdf"
+```
+description:
+globs:
+alwaysApply: false
+---

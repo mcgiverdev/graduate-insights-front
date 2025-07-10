@@ -16,6 +16,7 @@ export interface Graduate {
   fecha_inicio: string
   fecha_fin: string
   cv: string
+  cv_path?: File | null
   contrasena?: string
 }
 
@@ -117,8 +118,17 @@ export class GraduateResource extends Resource {
       Fields.text('cv')
         .label('cv')
         .required()
+        .placeholder('Ingrese CV')
         .hideOnIndex()
-        .placeholder('Ingrese CV'),
+        .hideOnCreate(),
+
+      Fields.file('cv_path')
+        .label('Archivo CV')
+        .accept(['.pdf', '.doc', '.docx'])
+        .maxSize(5120) // 5MB
+        .placeholder('Seleccionar archivo CV')
+        .hideOnIndex()
+        .hideOnCreate(),
 
       Fields.text('contrasena')
         .label('Contraseña')
@@ -151,6 +161,7 @@ export class GraduateResource extends Resource {
         fecha_fin: d.fecha_fin,
         contrasena: d.contrasena,
         cv: d.cv,
+        cv_path: d.cv_path, // El archivo no viene del servidor
       }),
     }
   }

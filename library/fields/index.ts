@@ -74,6 +74,12 @@ export class FileField extends FormField {
   constructor(name: string) {
     super(name)
     this._component = 'file-field'
+    this._props.fileType = 'CV' // Valor por defecto
+
+    // Agregar el manejador de errores por defecto
+    this._props.onError = (error: string) => {
+      console.error(`Error en campo ${name}:`, error)
+    }
   }
 
   public accept(mimeTypes: string[]): this {
@@ -88,8 +94,20 @@ export class FileField extends FormField {
     return this
   }
 
-  public directory(path: string): this {
-    this._props.directory = path
+  public graduateId(id: number): this {
+    this._props.graduateId = id
+
+    return this
+  }
+
+  public fileType(type: string): this {
+    this._props.fileType = type
+
+    return this
+  }
+
+  public onError(handler: (error: string) => void): this {
+    this._props.onError = handler
 
     return this
   }

@@ -86,9 +86,15 @@ export class GenericRepository<T> {
   async addItem(item: Partial<T>) {
     this.loadingSave.value = true
     try {
+      console.log('GenericRepository - Datos recibidos:', item)
+      console.log('GenericRepository - Hay archivos:', Object.values(item).some(v => v instanceof File))
+
       const dataToSend = this.modelDefinition.api.mapRequest
         ? this.modelDefinition.api.mapRequest(item)
         : item
+
+      console.log('GenericRepository - Datos después de mapRequest:', dataToSend)
+      console.log('GenericRepository - Tipo de datos:', dataToSend instanceof FormData ? 'FormData' : typeof dataToSend)
 
       await this.crudController.create(dataToSend)
 

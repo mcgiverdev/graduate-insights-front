@@ -144,28 +144,46 @@ export class CrudController {
   }
 
   async create(data: Record<string, any>): Promise<any> {
+    // Determinar si los datos contienen archivos
+    const hasFiles = data instanceof FormData || Object.values(data).some(value => value instanceof File)
+
+    console.log('CrudController - Datos recibidos:', data)
+    console.log('CrudController - Tiene archivos:', hasFiles)
+    console.log('CrudController - Es FormData:', data instanceof FormData)
+
+    const headers = { ...this.modelDefinition.api.headers }
+
+    // Solo establecer Content-Type si no hay archivos
+    if (!hasFiles)
+      headers['Content-Type'] = 'application/json'
+
+    console.log('CrudController - Headers finales:', headers)
+
     return this.handleApiResponse('create', () =>
       useApi<any>(this.getEndpoint('create'), {
         method: 'post',
-        headers: {
-          ...this.modelDefinition.api.headers,
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: data,
       }),
     )
   }
 
   async update(id: string | number, data: Record<string, any>): Promise<any> {
+    // Determinar si los datos contienen archivos
+    const hasFiles = data instanceof FormData || Object.values(data).some(value => value instanceof File)
+
+    const headers = { ...this.modelDefinition.api.headers }
+
+    // Solo establecer Content-Type si no hay archivos
+    if (!hasFiles)
+      headers['Content-Type'] = 'application/json'
+
     return this.handleApiResponse('update', () =>
       useApi<any>(
         this.getEndpoint('update').replace(':id', id.toString()),
         {
           method: 'put',
-          headers: {
-            ...this.modelDefinition.api.headers,
-            'Content-Type': 'application/json',
-          },
+          headers,
           body: data,
         },
       ),
