@@ -4,14 +4,6 @@ import svgLoader from 'vite-svg-loader'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  // Enable SPA mode for static deployment with nginx
-  ssr: false,
-  nitro: {
-    prerender: {
-      routes: ['/'],
-    },
-  },
-
   runtimeConfig: {
     public: {
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:8080',

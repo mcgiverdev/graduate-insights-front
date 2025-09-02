@@ -58,7 +58,8 @@
     "vuetify": "3.7.5",
     "webfontloader": "^1.6.28",
     "yup": "^1.6.1",
-    "zod": "^3.25.46"
+    "zod": "^3.25.46",
+    "flatpickr": "^4.6.13"
   },
   "devDependencies": {
     "@antfu/eslint-config-vue": "^0.43.1",
