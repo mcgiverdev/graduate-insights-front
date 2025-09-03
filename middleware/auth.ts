@@ -1,4 +1,9 @@
 export default defineNuxtRouteMiddleware(async to => {
+  // En modo SPA, el plugin auth.client.ts maneja la autenticación
+  // Este middleware solo se ejecuta en modo SSR
+  if (process.client && !process.server)
+    return
+
   const token = useCookie('accessToken', {
     path: '/',
     secure: true,

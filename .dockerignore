@@ -3,7 +3,7 @@ node_modules
 npm-debug.log*
 .pnpm-debug.log*
 
-# Build outputs - excluir todo excepto .output/public que necesitamos
+º# Build outputs - excluir todo excepto .output/public que necesitamos
 .output/server
 .output/nitro.json
 .nuxt

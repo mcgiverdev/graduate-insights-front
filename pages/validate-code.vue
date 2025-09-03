@@ -14,7 +14,10 @@ const otp = ref('')
 const isOtpInserted = ref(false)
 const email = ref('')
 const loading = ref(false)
+const resendLoading = ref(false)
 const error = ref('')
+const resendMessage = ref('')
+const resendCooldown = ref(0)
 
 // Obtener el email de la query string
 onMounted(() => {
@@ -22,6 +25,17 @@ onMounted(() => {
 
   email.value = route.query.email?.toString() || ''
 })
+
+// Countdown timer para el reenvío
+const startResendCooldown = () => {
+  resendCooldown.value = 60 // 60 segundos de cooldown
+
+  const interval = setInterval(() => {
+    resendCooldown.value--
+    if (resendCooldown.value <= 0)
+      clearInterval(interval)
+  }, 1000)
+}
 
 const onFinish = async () => {
   if (!email.value) {
@@ -32,6 +46,7 @@ const onFinish = async () => {
 
   try {
     loading.value = true
+    error.value = ''
 
     const response = await useApi('/graduate-insights/v1/api/mail/validate-code', {
       method: 'POST',
@@ -61,6 +76,47 @@ const onFinish = async () => {
   }
   finally {
     loading.value = false
+  }
+}
+
+const resendCode = async () => {
+  if (!email.value) {
+    error.value = 'No se proporcionó un correo electrónico'
+
+    return
+  }
+
+  if (resendCooldown.value > 0)
+    return
+
+  try {
+    resendLoading.value = true
+    error.value = ''
+    resendMessage.value = ''
+
+    const response = await useApi('/graduate-insights/v1/api/mail/send-code', {
+      method: 'POST',
+      body: {
+        email: email.value,
+      },
+    })
+
+    if (response.status === 200) {
+      resendMessage.value = 'Código reenviado correctamente. Revisa tu correo electrónico.'
+      startResendCooldown()
+
+      // Limpiar el OTP actual para que el usuario ingrese el nuevo código
+      otp.value = ''
+    }
+    else {
+      error.value = 'Error al reenviar el código. Intenta nuevamente.'
+    }
+  }
+  catch (e: any) {
+    error.value = e.data?.message || 'Error al reenviar el código. Intenta nuevamente.'
+  }
+  finally {
+    resendLoading.value = false
   }
 }
 </script>
@@ -112,7 +168,7 @@ const onFinish = async () => {
         </VCardText>
 
         <VCardText>
-          <VForm @submit.prevent="() => {}">
+          <VForm @submit.prevent="onFinish">
             <VRow>
               <!-- código -->
               <VCol cols="12">
@@ -126,6 +182,16 @@ const onFinish = async () => {
                   class="pa-0"
                   @finish="onFinish"
                 />
+
+                <!-- Mostrar mensaje de éxito al reenviar -->
+                <VAlert
+                  v-if="resendMessage"
+                  type="success"
+                  class="mt-4"
+                  variant="tonal"
+                >
+                  {{ resendMessage }}
+                </VAlert>
 
                 <!-- Mostrar error si existe -->
                 <VAlert
@@ -142,11 +208,16 @@ const onFinish = async () => {
               <VCol cols="12">
                 <VBtn
                   :loading="loading || isOtpInserted"
-                  :disabled="loading || isOtpInserted"
+                  :disabled="loading || isOtpInserted || otp.length !== 6"
                   block
                   type="submit"
                 >
-                  Verificar mi cuenta
+                  <span v-if="isOtpInserted">
+                    ✓ Código verificado
+                  </span>
+                  <span v-else>
+                    Verificar mi cuenta
+                  </span>
                 </VBtn>
               </VCol>
 
@@ -154,12 +225,20 @@ const onFinish = async () => {
               <VCol cols="12">
                 <div class="d-flex justify-center align-center flex-wrap">
                   <span class="me-1">¿No recibiste el código?</span>
-                  <a
-                    href="#"
-                    @click.prevent="() => {}"
+                  <VBtn
+                    variant="text"
+                    size="small"
+                    :loading="resendLoading"
+                    :disabled="resendLoading || resendCooldown > 0 || isOtpInserted"
+                    @click="resendCode"
                   >
-                    Reenviar
-                  </a>
+                    <span v-if="resendCooldown > 0">
+                      Reenviar en {{ resendCooldown }}s
+                    </span>
+                    <span v-else>
+                      Reenviar código
+                    </span>
+                  </VBtn>
                 </div>
               </VCol>
             </VRow>

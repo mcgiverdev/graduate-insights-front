@@ -159,7 +159,8 @@ export default defineNuxtConfig({
     },
   ],
 
-  router: {
-    middleware: ['auth'],
-  },
+  // Remover middleware global para SPA mode
+  // router: {
+  //   middleware: ['auth'],
+  // },
 })
