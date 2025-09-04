@@ -48,20 +48,11 @@ const handleLogin = async () => {
   })
 
   if (result.success) {
-    // Obtener la ruta guardada o redirigir al dashboard
-    const returnTo = useCookie('returnTo', {
-      path: '/',
-      secure: true,
-      sameSite: 'strict',
-    })
+    // Pequeño delay para asegurar que el token se guarde
+    await nextTick()
 
-    const redirectPath = returnTo.value || '/'
-
-    // Limpiar la cookie de retorno
-    returnTo.value = null
-
-    // Redirigir a la ruta guardada o al dashboard
-    navigateTo(redirectPath)
+    // Redirigir al dashboard
+    await navigateTo('/', { replace: true })
   }
 }
 </script>

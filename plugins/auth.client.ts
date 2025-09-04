@@ -7,10 +7,12 @@ export default defineNuxtPlugin(async () => {
 
   // Función para verificar autenticación
   const checkAuth = async (to: any) => {
+    const isProduction = process.env.NODE_ENV === 'production'
+
     const token = useCookie('accessToken', {
       path: '/',
-      secure: true,
-      sameSite: 'strict',
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : 'lax',
     })
 
     // Si la ruta es pública o tiene meta.public, permitir acceso
@@ -22,8 +24,8 @@ export default defineNuxtPlugin(async () => {
       // Guardar la ruta actual para redirigir después del login
       const returnTo = useCookie('returnTo', {
         path: '/',
-        secure: true,
-        sameSite: 'strict',
+        secure: isProduction,
+        sameSite: isProduction ? 'strict' : 'lax',
       })
 
       returnTo.value = to.fullPath
@@ -55,8 +57,8 @@ export default defineNuxtPlugin(async () => {
         // Guardar la ruta actual para redirigir después del login
         const returnTo = useCookie('returnTo', {
           path: '/',
-          secure: true,
-          sameSite: 'strict',
+          secure: isProduction,
+          sameSite: isProduction ? 'strict' : 'lax',
         })
 
         returnTo.value = to.fullPath

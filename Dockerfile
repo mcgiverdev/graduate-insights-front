@@ -40,6 +40,14 @@ COPY . .
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 ENV NODE_ENV=production
 
+# Variables de versión para la aplicación
+ARG APP_VERSION=v1.0.3
+ARG BUILD_DATE
+ARG GIT_COMMIT
+ENV APP_VERSION=$APP_VERSION
+ENV BUILD_DATE=$BUILD_DATE
+ENV GIT_COMMIT=$GIT_COMMIT
+
 # Ejecutar nuxt prepare
 RUN pnpm nuxt prepare
 
@@ -64,14 +72,23 @@ RUN if [ ! -f "/usr/share/nginx/html/index.html" ]; then \
 
 # Crear configuración de Nginx para SPA
 RUN echo 'server { \
-  listen 3000; \
-  server_name localhost; \
+  listen 80; \
+  server_name _; \
   root /usr/share/nginx/html; \
   index index.html; \
   \
+  # Configuración para proxy reverso \
+  port_in_redirect off; \
+  absolute_redirect off; \
+  \
   # Manejo de rutas SPA - todas las rutas van a index.html \
   location / { \
-  try_files $uri $uri/ /index.html; \
+  try_files $uri $uri/ @fallback; \
+  } \
+  \
+  # Fallback para SPA routing \
+  location @fallback { \
+  rewrite ^.*$ /index.html last; \
   } \
   \
   # Servir archivos estáticos de _nuxt \
@@ -92,6 +109,9 @@ RUN echo 'server { \
   add_header X-Content-Type-Options "nosniff" always; \
   add_header X-XSS-Protection "1; mode=block" always; \
   \
+  # Headers para proxy reverso \
+  add_header X-Forwarded-Proto $scheme always; \
+  \
   # Gzip compression \
   gzip on; \
   gzip_vary on; \
@@ -100,11 +120,11 @@ RUN echo 'server { \
   }' > /etc/nginx/conf.d/default.conf
 
 # Exponer el puerto
-EXPOSE 3000
+EXPOSE 80
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
 
 # Comando para iniciar nginx
 CMD ["nginx", "-g", "daemon off;"]

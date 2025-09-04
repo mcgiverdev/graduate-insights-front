@@ -12,9 +12,15 @@ export default defineNuxtConfig({
     },
   },
 
+  // Configuración del servidor de desarrollo
+  devServer: {
+    port: 80,
+    host: '0.0.0.0', // Permite conexiones desde cualquier IP
+  },
+
   runtimeConfig: {
     public: {
-      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:8080',
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://api.unudev.genesyslite.com',
     },
   },
   app: {
@@ -28,6 +34,10 @@ export default defineNuxtConfig({
         href: `${process.env.NUXT_APP_BASE_URL}/favicon.ico`,
       }],
     },
+
+    // Configuración para SPA con proxy reverso
+    baseURL: process.env.NUXT_APP_BASE_URL || '/',
+    buildAssetsDir: '/_nuxt/',
   },
 
   devtools: {
@@ -54,7 +64,11 @@ export default defineNuxtConfig({
     }],
   },
 
-  plugins: ['@/plugins/vuetify/index.ts', '@/plugins/iconify/index.ts'],
+  plugins: [
+    '@/plugins/vuetify/index.ts',
+    '@/plugins/iconify/index.ts',
+    '@/plugins/version.client.ts',
+  ],
 
   imports: {
     dirs: ['./@core/utils', './@core/composable/', './plugins/*/composables/*'],
@@ -100,6 +114,17 @@ export default defineNuxtConfig({
   },
 
   vite: {
+    server: {
+      host: '0.0.0.0',
+      port: 80,
+      allowedHosts: [
+        'panel.unu.test',
+        'localhost',
+        '127.0.0.1',
+        '.unu.test', // Permite cualquier subdominio de unu.test
+      ],
+    },
+
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('.', import.meta.url)),
@@ -151,9 +176,10 @@ export default defineNuxtConfig({
     '@nuxtjs/device',
     '@pinia/nuxt',
     async (options, nuxt) => {
-      nuxt.hooks.hook('vite:extendConfig', config => config.plugins.push(
-        vuetify(),
-      ))
+      nuxt.hooks.hook('vite:extendConfig', config => {
+        if (config.plugins)
+          config.plugins.push(vuetify())
+      })
     },
   ],
 

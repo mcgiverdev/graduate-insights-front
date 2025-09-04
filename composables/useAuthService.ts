@@ -36,11 +36,13 @@ export const useAuthService = () => {
 
       if (loginData.success) {
         // Guardar el token en una cookie
+        const isProduction = process.env.NODE_ENV === 'production'
+
         const token = useCookie('accessToken', {
           maxAge: 60 * 60 * 24, // 24 horas
           path: '/',
-          secure: true,
-          sameSite: 'strict',
+          secure: isProduction,
+          sameSite: isProduction ? 'strict' : 'lax',
         })
 
         // Guardar el token
@@ -65,21 +67,8 @@ export const useAuthService = () => {
             })
           }
 
-          // Si está verificado, proceder con la redirección normal
-          const returnTo = useCookie('returnTo', {
-            path: '/',
-            secure: true,
-            sameSite: 'strict',
-          })
-
-          const redirectPath = returnTo.value || '/'
-
-          // Limpiar la cookie de retorno
-          returnTo.value = null
-
-          // Redirigir a la ruta guardada o al dashboard
-          await navigateTo(redirectPath)
-
+          // Si está verificado, no hacer redirección desde aquí
+          // La redirección se manejará desde la página de login
           return { success: true, message: loginData.message }
         }
         catch (meError) {
@@ -114,12 +103,13 @@ export const useAuthService = () => {
         // Obtener la ruta actual antes de eliminar el token
         const currentRoute = useRoute()
         const currentPath = currentRoute.fullPath
+        const isProduction = process.env.NODE_ENV === 'production'
 
         // Eliminar el token
         const token = useCookie('accessToken', {
           path: '/',
-          secure: true,
-          sameSite: 'strict',
+          secure: isProduction,
+          sameSite: isProduction ? 'strict' : 'lax',
         })
 
         token.value = null
@@ -127,8 +117,8 @@ export const useAuthService = () => {
         // Guardar la ruta actual en una cookie
         const returnTo = useCookie('returnTo', {
           path: '/',
-          secure: true,
-          sameSite: 'strict',
+          secure: isProduction,
+          sameSite: isProduction ? 'strict' : 'lax',
         })
 
         returnTo.value = currentPath
@@ -144,20 +134,33 @@ export const useAuthService = () => {
   }
 
   const logout = () => {
+    const isProduction = process.env.NODE_ENV === 'production'
+
     const token = useCookie('accessToken', {
       path: '/',
-      secure: true,
-      sameSite: 'strict',
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : 'lax',
     })
 
+    // Limpiar el token
     token.value = null
+
+    // También limpiar la cookie returnTo si existe
+    const returnTo = useCookie('returnTo', {
+      path: '/',
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : 'lax',
+    })
+
+    returnTo.value = null
 
     // Limpiar información del usuario
     const { clearUser } = useUser()
 
     clearUser()
 
-    navigateTo('/login')
+    // Redirigir al login
+    navigateTo('/login', { replace: true, external: false })
   }
 
   return {
