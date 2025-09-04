@@ -100,8 +100,6 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    define: { 'process.env': {} },
-
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('.', import.meta.url)),

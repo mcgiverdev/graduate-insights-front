@@ -1,0 +1,33 @@
+services:
+  graduate-insights-front:
+    image: unudev25/graduate-insights-front:latest
+    container_name: graduate-insights-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NUXT_PUBLIC_API_BASE_URL=http://localhost:8080
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--quiet", "--tries=1", "--timeout=5", "http://127.0.0.1:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Opcional: Si necesitas una base de datos o otros servicios
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: graduate-insights-db
+  #   environment:
+  #     POSTGRES_DB: graduate_insights
+  #     POSTGRES_USER: admin
+  #     POSTGRES_PASSWORD: password
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+# volumes:
+#   postgres_data:
