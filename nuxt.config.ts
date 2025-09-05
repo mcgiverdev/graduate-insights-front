@@ -67,7 +67,6 @@ export default defineNuxtConfig({
   plugins: [
     '@/plugins/vuetify/index.ts',
     '@/plugins/iconify/index.ts',
-    '@/plugins/version.client.ts',
   ],
 
   imports: {

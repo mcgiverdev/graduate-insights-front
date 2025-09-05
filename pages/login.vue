@@ -55,6 +55,8 @@ const handleLogin = async () => {
     await navigateTo('/', { replace: true })
   }
 }
+
+console.log('version v1.0.4')
 </script>
 
 <template>
