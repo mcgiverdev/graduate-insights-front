@@ -29,6 +29,7 @@ const {
 
 const isFormVisible = ref(false)
 const itemToEdit = ref<any>(null)
+const formServerErrors = ref<Record<string, string>>({})
 
 const isSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
@@ -57,6 +58,7 @@ watch([page, itemsPerPage, searchQuery], () => {
 }, { immediate: true })
 
 const openAddForm = () => {
+  formServerErrors.value = {}
   itemToEdit.value = null
   isFormVisible.value = true
 }
@@ -66,6 +68,7 @@ const openEditForm = async (id: number) => {
     const item = await getItem(id)
 
     itemToEdit.value = item || null
+    formServerErrors.value = {}
     isFormVisible.value = true
   }
   catch (error) {
@@ -110,6 +113,7 @@ const handleDelete = async () => {
 
 const handleSubmit = async (data: any) => {
   try {
+    formServerErrors.value = {}
     if (itemToEdit.value) {
       // Asumimos que el ID del item está en una propiedad que termina en _id
       const idKey = Object.keys(itemToEdit.value).find(key => key.endsWith('_id'))
@@ -139,7 +143,13 @@ const handleSubmit = async (data: any) => {
     isSnackbarVisible.value = true
   }
   catch (error: any) {
-    snackbarMessage.value = error.message || 'Error al procesar la operación'
+    if (error?.data?.errors) {
+      formServerErrors.value = error.data.errors
+      snackbarMessage.value = error.data.message || 'Corrige los errores e intenta nuevamente'
+    }
+    else {
+      snackbarMessage.value = error?.message || 'Error al procesar la operación'
+    }
     isSnackbarVisible.value = true
   }
 }
@@ -252,7 +262,7 @@ const executeAction = async () => {
               :model-definition="resource.getModel()"
               :initial-data="itemToEdit"
               :mode="itemToEdit ? 'edit' : 'create'"
-              :fields="itemToEdit ? resource.getUpdateFields() : resource.getCreateFields()"
+              :server-errors="formServerErrors"
               @submit="handleSubmit"
               @cancel="isFormVisible = false"
             />

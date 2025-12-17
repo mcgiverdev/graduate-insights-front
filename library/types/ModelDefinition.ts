@@ -8,6 +8,8 @@ export interface FieldOptions {
   apiEndpoint?: string
   displayField?: string
   valueField?: string
+  accept?: string
+  maxSize?: number
 }
 
 export interface DisplayConfig {

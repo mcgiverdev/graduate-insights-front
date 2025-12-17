@@ -75,7 +75,7 @@ export class CrudController {
     }
     catch (error: any) {
       console.error(`Error en ${type}:`, error)
-      throw new Error(error.message || `Error en la operación ${type}`)
+      throw error
     }
   }
 

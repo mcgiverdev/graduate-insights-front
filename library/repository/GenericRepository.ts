@@ -102,6 +102,9 @@ export class GenericRepository<T> {
     }
     catch (error: any) {
       console.error('Error al crear el item:', error)
+      if (error?.data?.errors)
+        throw error
+
       throw new Error(error.message || `Error al crear ${this.modelDefinition.name}`)
     }
     finally {
@@ -122,6 +125,9 @@ export class GenericRepository<T> {
     }
     catch (error: any) {
       console.error('Error al actualizar el item:', error)
+      if (error?.data?.errors)
+        throw error
+
       throw new Error(error.message || `Error al actualizar ${this.modelDefinition.name}`)
     }
     finally {

@@ -1,258 +1,296 @@
-<script lang="ts">
+<script setup lang="ts">
 import { useForm } from 'vee-validate'
-import type { PropType } from 'vue'
-import { computed, defineComponent, ref, watch } from 'vue'
+import { computed, ref, toRaw, watch } from 'vue'
 import * as yup from 'yup'
 import type { FieldType } from '../types/FieldType'
 import type { FieldDefinition, ModelDefinition } from '../types/ModelDefinition'
-import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
-import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
-import AppFileField from '@/@core/components/app-form-elements/AppFileField.vue'
-import AppDateTimePicker from '@/@core/components/app-form-elements/AppDateTimePicker.vue'
 import AppBelongsField from '@/@core/components/app-form-elements/AppBelongsField.vue'
+import AppDateTimePicker from '@/@core/components/app-form-elements/AppDateTimePicker.vue'
+import AppFileField from '@/@core/components/app-form-elements/AppFileField.vue'
+import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
+import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 
-export default defineComponent({
-  name: 'FormGenerator',
-  components: {
-    AppTextField,
-    AppSelect,
-    AppDateTimePicker,
-    AppBelongsField,
-    AppFileField,
-  },
+interface FormGeneratorProps {
+  modelDefinition: ModelDefinition
+  initialData?: Record<string, any> | null
+  mode?: 'create' | 'edit'
+  serverErrors?: Record<string, string>
+}
 
-  props: {
-    modelDefinition: {
-      type: Object as PropType<ModelDefinition>,
-      required: true,
-    },
-    initialData: {
-      type: Object as PropType<Record<string, any> | null>,
-      default: () => ({}),
-    },
-    mode: {
-      type: String as PropType<'create' | 'edit'>,
-      default: 'create',
-    },
-    serverErrors: {
-      type: Object as PropType<Record<string, string>>,
-      default: () => ({}),
-    },
-  },
+const props = withDefaults(defineProps<FormGeneratorProps>(), {
+  initialData: () => ({}),
+  mode: 'create',
+  serverErrors: () => ({}),
+})
 
-  emits: ['submit', 'cancel'],
+const emit = defineEmits<{(e: 'submit', values: Record<string, any>): void; (e: 'cancel'): void }>()
 
-  setup(props, { emit }) {
-    const hasAttemptedSubmit = ref(false)
-    const externalErrors = ref<Record<string, string | undefined>>({})
+const hasAttemptedSubmit = ref(false)
+const serverErrorBag = ref<Record<string, string>>({})
 
-    const visibleFields = computed(() =>
-      Object.entries(props.modelDefinition.fields).filter(([_, field]) => {
-        const config = props.mode === 'create' ? field.create : field.edit
+const fieldEntries = computed(() => Object.entries(props.modelDefinition.fields))
+const fieldNames = computed(() => fieldEntries.value.map(([name]) => name))
 
-        return config?.visible !== false
-      }),
-    )
+const visibleFields = computed(() =>
+  fieldEntries.value.filter(([_, field]) => {
+    const config = props.mode === 'create' ? field.create : field.edit
 
-    const generateValidationSchema = () => {
-      const schema: Record<string, any> = {}
+    return config?.visible !== false
+  }),
+)
 
-      visibleFields.value.forEach(([name, field]) => {
-        const config = props.mode === 'create' ? field.create : field.edit
-        if (config?.rules) {
-          let fieldSchema: any
+const normalizeFieldName = (rawName: string): string | null => {
+  if (fieldNames.value.includes(rawName))
+    return rawName
 
-          switch (field.type) {
-            case 'date':
-            case 'date-time':
-              fieldSchema = yup.date()
-              break
-            case 'time':
-              fieldSchema = yup.string()
-              break
-            case 'number':
-              fieldSchema = yup.number()
-              break
-            case 'belongs':
-              fieldSchema = yup.mixed()
-              break
-            case 'file':
-              fieldSchema = yup.mixed()
-              break
-            default:
-              fieldSchema = yup.string()
-          }
+  const snakeCase = rawName.replace(/([A-Z])/g, '_$1').toLowerCase()
+  if (fieldNames.value.includes(snakeCase))
+    return snakeCase
 
-          config.rules.forEach(rule => {
-            if (rule === 'required') {
-              fieldSchema = fieldSchema.required('Este campo es requerido')
-            }
-            else if (rule === 'email') {
-              if (fieldSchema instanceof yup.StringSchema)
-                fieldSchema = fieldSchema.email('Ingrese un correo electrónico válido')
-            }
-            else if (rule === 'numeric') {
-              if (!(fieldSchema instanceof yup.NumberSchema))
-                fieldSchema = yup.number().typeError('Este campo debe ser numérico')
-            }
-            else if (rule === 'time') {
-              if (fieldSchema instanceof yup.StringSchema)
-                fieldSchema = fieldSchema.matches(/^([01]?\d|2[0-3]):[0-5]\d$/, 'Ingrese una hora válida (HH:mm)')
-            }
-            else if (rule.startsWith('min:')) {
-              const minLength = Number.parseInt(rule.split(':')[1])
-              if (fieldSchema instanceof yup.StringSchema)
-                fieldSchema = fieldSchema.min(minLength, `Mínimo ${minLength} caracteres`)
+  const camelCase = rawName.replace(/_([a-z])/g, (_, char) => char.toUpperCase())
+  if (fieldNames.value.includes(camelCase))
+    return camelCase
 
-              else if (fieldSchema instanceof yup.NumberSchema)
-                fieldSchema = fieldSchema.min(minLength, `El valor mínimo es ${minLength}`)
-            }
-          })
+  return null
+}
 
-          if (fieldSchema instanceof yup.DateSchema)
-            fieldSchema = fieldSchema.typeError('Ingrese una fecha válida')
+const buildInitialValues = () => {
+  const values: Record<string, any> = {}
 
-          schema[name] = fieldSchema
-        }
-      })
+  fieldEntries.value.forEach(([name, field]) => {
+    const defaultValue = props.mode === 'create'
+      ? field.create?.defaultValue
+      : props.initialData?.[name]
 
-      return yup.object().shape(schema)
+    const fallback = field.type === 'file' ? null : ''
+    values[name] = props.initialData?.[name] ?? defaultValue ?? fallback
+  })
+
+  return values
+}
+
+const buildValidationSchema = () => {
+  const schema: Record<string, any> = {}
+
+  visibleFields.value.forEach(([name, field]) => {
+    const rules = (props.mode === 'create' ? field.create : field.edit)?.rules
+
+    if (!rules || !rules.length)
+      return
+
+    let fieldSchema: any
+
+    switch (field.type) {
+      case 'date':
+      case 'date-time':
+        fieldSchema = yup.date()
+        break
+      case 'time':
+        fieldSchema = yup.string()
+        break
+      case 'number':
+        fieldSchema = yup.number()
+        break
+      case 'belongs':
+      case 'file':
+        fieldSchema = yup.mixed()
+        break
+      default:
+        fieldSchema = yup.string()
     }
 
-    const { values, errors, setFieldValue, validate, validateField, setFieldError } = useForm({
-      validationSchema: generateValidationSchema(),
-      initialValues: props.initialData || {},
-      validateOnMount: false,
+    rules.forEach(rule => {
+      if (rule === 'required') {
+        fieldSchema = fieldSchema.required('Este campo es requerido')
+      }
+      else if (rule === 'email' && fieldSchema instanceof yup.StringSchema) {
+        fieldSchema = fieldSchema.email('Ingrese un correo electrónico válido')
+      }
+      else if (rule === 'numeric') {
+        fieldSchema = yup.number().typeError('Este campo debe ser numérico')
+      }
+      else if (rule === 'time' && fieldSchema instanceof yup.StringSchema) {
+        fieldSchema = fieldSchema.matches(/^([01]?\d|2[0-3]):[0-5]\d$/, 'Ingrese una hora válida (HH:mm)')
+      }
+      else if (rule.startsWith('min:')) {
+        const minLength = Number.parseInt(rule.split(':')[1])
+        if (fieldSchema instanceof yup.StringSchema)
+          fieldSchema = fieldSchema.min(minLength, `Mínimo ${minLength} caracteres`)
+
+        if (fieldSchema instanceof yup.NumberSchema)
+          fieldSchema = fieldSchema.min(minLength, `El valor mínimo es ${minLength}`)
+      }
     })
 
-    // Observar cambios en los errores del servidor
-    watch(() => props.serverErrors, newErrors => {
-      if (newErrors && Object.keys(newErrors).length > 0) {
-        hasAttemptedSubmit.value = true
+    if (fieldSchema instanceof yup.DateSchema)
+      fieldSchema = fieldSchema.typeError('Ingrese una fecha válida')
 
-        // Actualizar los errores en el formulario usando setFieldError
-        Object.entries(newErrors).forEach(([field, message]) => {
-          setFieldError(field, message)
-        })
-      }
-    }, { immediate: true, deep: true })
+    schema[name] = fieldSchema
+  })
 
-    const onFieldInput = async (name: string, value: any) => {
-      setFieldValue(name, value)
-      if (hasAttemptedSubmit.value) {
-        // Limpiar el error cuando el usuario modifica el campo
-        setFieldError(name, undefined)
-        await validateField(name)
-      }
-    }
+  return yup.object().shape(schema)
+}
 
-    const onFieldBlur = async (name: string) => {
-      if (hasAttemptedSubmit.value)
-        await validateField(name)
-    }
+const validationSchema = computed(() => buildValidationSchema())
+const initialValues = ref(buildInitialValues())
 
-    const onSubmit = async (e: Event) => {
-      e.preventDefault()
-      hasAttemptedSubmit.value = true
-
-      // Limpiar errores anteriores
-      Object.keys(errors.value).forEach(field => {
-        setFieldError(field, undefined)
-      })
-
-      const validationResult = await validate()
-      if (validationResult.valid) {
-        console.log('FormGenerator - Datos antes de emit:', values)
-        console.log('FormGenerator - Hay archivos:', Object.values(values).some(v => v instanceof File))
-        emit('submit', values)
-      }
-    }
-
-    const getFieldComponent = (type: FieldType) => {
-      switch (type) {
-        case 'enum':
-          return 'AppSelect'
-        case 'text':
-          return 'AppTextField'
-        case 'date':
-        case 'time':
-        case 'date-time':
-          return 'AppDateTimePicker'
-        case 'belongs':
-          return 'AppBelongsField'
-        case 'file':
-          return 'AppFileField'
-        default:
-          return 'AppTextField'
-      }
-    }
-
-    const getFieldProps = (field: FieldDefinition) => {
-      const fieldProps: Record<string, any> = {
-        label: field.label,
-        placeholder: field.placeholder || `Seleccione ${field.label.toLowerCase()}`,
-      }
-
-      if (field.type === 'enum' && field.options?.items)
-        fieldProps.items = field.options.items
-
-      if (field.type === 'belongs' && field.options?.apiEndpoint) {
-        fieldProps.apiEndpoint = field.options.apiEndpoint
-        fieldProps.displayField = field.options.displayField || 'value'
-        fieldProps.valueField = field.options.valueField || 'key'
-      }
-
-      if (field.type === 'file') {
-        fieldProps.accept = field.options?.accept || ''
-        fieldProps.maxSize = field.options?.maxSize || 10240
-        fieldProps.placeholder = field.placeholder || 'Seleccionar archivo'
-      }
-
-      if (field.type === 'text' && field.label.toLowerCase().includes('contraseña'))
-        fieldProps.type = 'password'
-
-      if (field.type === 'time') {
-        fieldProps.config = {
-          enableTime: true,
-          noCalendar: true,
-          dateFormat: 'H:i',
-        }
-      }
-      else if (field.type === 'date-time') {
-        fieldProps.config = {
-          enableTime: true,
-          dateFormat: 'Y-m-d H:i',
-        }
-      }
-
-      return fieldProps
-    }
-
-    const displayError = (fieldName: string): string | undefined => {
-      if (!hasAttemptedSubmit.value)
-        return undefined
-
-      return errors.value[fieldName]
-    }
-
-    return {
-      values,
-      displayError,
-      visibleFields,
-      getFieldComponent,
-      getFieldProps,
-      onSubmit,
-      onFieldInput,
-      onFieldBlur,
-    }
+watch(
+  () => [props.initialData, props.mode, props.modelDefinition],
+  () => {
+    initialValues.value = buildInitialValues()
   },
+  { deep: true },
+)
+
+const { values, errors, setFieldValue, validate, validateField, setFieldError, resetForm } = useForm({
+  validationSchema,
+  initialValues: initialValues.value,
+  validateOnMount: false,
 })
+
+watch(initialValues, newValues => {
+  resetForm({
+    values: newValues,
+    errors: {},
+  })
+  hasAttemptedSubmit.value = false
+  clearServerErrors()
+})
+
+const clearServerErrors = () => {
+  const fieldsWithErrors = Object.keys(serverErrorBag.value)
+  serverErrorBag.value = {}
+  fieldsWithErrors.forEach(name => setFieldError(name, undefined))
+}
+
+const applyServerErrors = (errorMap: Record<string, string>) => {
+  clearServerErrors()
+
+  Object.entries(errorMap).forEach(([rawField, message]) => {
+    const normalized = normalizeFieldName(rawField)
+    if (!normalized)
+      return
+
+    serverErrorBag.value[normalized] = message
+    setFieldError(normalized, message)
+  })
+}
+
+watch(() => props.serverErrors, newErrors => {
+  if (newErrors && Object.keys(newErrors).length > 0) {
+    hasAttemptedSubmit.value = true
+    applyServerErrors(newErrors)
+  }
+  else {
+    clearServerErrors()
+  }
+}, { immediate: true, deep: true })
+
+const onFieldInput = async (name: string, value: any) => {
+  setFieldValue(name, value)
+
+  if (serverErrorBag.value[name]) {
+    delete serverErrorBag.value[name]
+    setFieldError(name, undefined)
+  }
+
+  if (hasAttemptedSubmit.value)
+    await validateField(name)
+}
+
+const onFieldBlur = async (name: string) => {
+  if (hasAttemptedSubmit.value)
+    await validateField(name)
+}
+
+const submitForm = async (event?: Event) => {
+  if (event)
+    event.preventDefault()
+
+  hasAttemptedSubmit.value = true
+  clearServerErrors()
+
+  const validationResult = await validate()
+  if (validationResult.valid)
+    emit('submit', { ...toRaw(values) })
+}
+
+const getFieldComponent = (type: FieldType) => {
+  switch (type) {
+    case 'enum':
+      return AppSelect
+    case 'date':
+    case 'time':
+    case 'date-time':
+      return AppDateTimePicker
+    case 'belongs':
+      return AppBelongsField
+    case 'file':
+      return AppFileField
+    default:
+      return AppTextField
+  }
+}
+
+const getFieldProps = (field: FieldDefinition, fieldName: string) => {
+  const fieldProps: Record<string, any> = {
+    label: field.label,
+    required: field.create?.rules?.includes('required') || field.edit?.rules?.includes('required') || false,
+  }
+
+  if (field.placeholder && field.type !== 'file')
+    fieldProps.placeholder = field.placeholder
+
+  if (field.type === 'enum' && field.options?.items)
+    fieldProps.items = field.options.items
+
+  if (field.type === 'belongs' && field.options?.apiEndpoint) {
+    fieldProps.apiEndpoint = field.options.apiEndpoint
+    fieldProps.displayField = field.options.displayField || 'value'
+    fieldProps.valueField = field.options.valueField || 'key'
+  }
+
+  if (field.type === 'file') {
+    fieldProps.accept = field.options?.accept || '.pdf'
+    fieldProps.maxSize = field.options?.maxSize || 10240
+    fieldProps.placeholder = field.placeholder || 'Seleccionar archivo'
+  }
+
+  if (fieldName.toLowerCase().includes('password'))
+    fieldProps.type = 'password'
+
+  if (field.type === 'time') {
+    fieldProps.config = {
+      enableTime: true,
+      noCalendar: true,
+      dateFormat: 'H:i',
+    }
+  }
+  else if (field.type === 'date-time') {
+    fieldProps.config = {
+      enableTime: true,
+      dateFormat: 'Y-m-d H:i',
+    }
+  }
+
+  return fieldProps
+}
+
+const displayError = (fieldName: string): string | undefined => {
+  if (serverErrorBag.value[fieldName])
+    return serverErrorBag.value[fieldName]
+
+  if (!hasAttemptedSubmit.value)
+    return undefined
+
+  return errors.value[fieldName]
+}
 </script>
 
 <template>
   <form
     novalidate
-    @submit="onSubmit"
+    @submit.prevent="submitForm"
   >
     <VRow>
       <VCol
@@ -263,7 +301,7 @@ export default defineComponent({
         <component
           :is="getFieldComponent(field.type)"
           :model-value="values[name]"
-          v-bind="getFieldProps(field)"
+          v-bind="getFieldProps(field, name)"
           :error-messages="displayError(name)"
           :error="!!displayError(name)"
           @update:model-value="onFieldInput(name, $event)"

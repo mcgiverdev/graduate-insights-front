@@ -196,6 +196,12 @@ export abstract class Resource {
           valueField: fieldData.props?.valueField || 'key',
         }
       }
+      else if (fieldData.component === 'file-field') {
+        fieldOptions = {
+          accept: fieldData.props?.accept,
+          maxSize: fieldData.props?.maxSize,
+        }
+      }
 
       fieldsObject[fieldData.name] = {
         type: this.getFieldType(fieldData.component) as import('../types/FieldType').FieldType,

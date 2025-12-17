@@ -1,0 +1,93 @@
+import { watchDebounced } from '@vueuse/core'
+import { computed, onMounted, ref } from 'vue'
+import { useSnackbar } from '@/composables/useSnackbar'
+import { graduateService } from '../services/GraduateService'
+import type { Graduate } from '../types'
+
+export const useGraduateList = () => {
+  const items = ref<Graduate[]>([])
+  const loading = ref(false)
+  const page = ref(1)
+  const itemsPerPage = ref(10)
+  const totalItems = ref(0)
+  const search = ref('')
+
+  const { showSnackbar } = useSnackbar()
+
+  const fetchGraduates = async () => {
+    loading.value = true
+    try {
+      const { items: data, paginate } = await graduateService.fetchList({
+        page: page.value,
+        size: itemsPerPage.value,
+        search: search.value,
+      })
+
+      items.value = data
+      totalItems.value = paginate?.totalElements ?? data.length
+    }
+    catch (error: any) {
+      console.error('Error al cargar graduados:', error)
+      showSnackbar({ text: 'No se pudieron cargar los graduados', color: 'error' })
+    }
+    finally {
+      loading.value = false
+    }
+  }
+
+  onMounted(fetchGraduates)
+
+  watchDebounced(search, () => {
+    page.value = 1
+    fetchGraduates()
+  }, { debounce: 400, maxWait: 800 })
+
+  const setPage = (value: number) => {
+    page.value = value
+    fetchGraduates()
+  }
+
+  const setItemsPerPage = (value: number) => {
+    itemsPerPage.value = value
+    page.value = 1
+    fetchGraduates()
+  }
+
+  const setSearch = (value: string) => {
+    search.value = value
+  }
+
+  const deleteGraduate = async (graduateId: number) => {
+    loading.value = true
+    try {
+      await graduateService.remove(graduateId)
+      showSnackbar({ text: 'Graduado eliminado correctamente', color: 'success' })
+      await fetchGraduates()
+    }
+    catch (error: any) {
+      console.error('Error al eliminar graduado:', error)
+      showSnackbar({ text: error?.data?.message || 'No se pudo eliminar el graduado', color: 'error' })
+    }
+    finally {
+      loading.value = false
+    }
+  }
+
+  const pagination = computed(() => ({
+    page: page.value,
+    itemsPerPage: itemsPerPage.value,
+    totalItems: totalItems.value,
+  }))
+
+  return {
+    items,
+    loading,
+    search,
+    pagination,
+    fetchGraduates,
+    setPage,
+    setItemsPerPage,
+    setSearch,
+    deleteGraduate,
+  }
+}
