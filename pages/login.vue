@@ -47,13 +47,19 @@ const handleLogin = async () => {
     color: result.success ? 'success' : 'error',
   })
 
-  if (result.success) {
-    // Pequeño delay para asegurar que el token se guarde
-    await nextTick()
+  if (!result.success)
+    return
 
-    // Redirigir al dashboard
-    await navigateTo('/', { replace: true })
+  // Pequeño delay para asegurar que el token se guarde
+  await nextTick()
+
+  if (result.redirectTo) {
+    await navigateTo(result.redirectTo, { replace: true })
+    return
   }
+
+  // Redirigir al dashboard
+  await navigateTo('/', { replace: true })
 }
 
 console.log('version v1.0.4')

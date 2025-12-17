@@ -14,7 +14,7 @@ export default defineNuxtConfig({
 
   // Configuración del servidor de desarrollo
   devServer: {
-    port: 80,
+    port: 3000,
     host: '0.0.0.0', // Permite conexiones desde cualquier IP
   },
 
@@ -115,7 +115,7 @@ export default defineNuxtConfig({
   vite: {
     server: {
       host: '0.0.0.0',
-      port: 80,
+      port: 3000,
       allowedHosts: [
         'panel.unu.test',
         'localhost',

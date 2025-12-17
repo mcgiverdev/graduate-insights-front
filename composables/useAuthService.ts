@@ -16,10 +16,19 @@ interface AuthError {
   errors: string[]
 }
 
+interface LoginResult {
+  success: boolean
+  message: string
+  redirectTo?: {
+    path: string
+    query?: Record<string, unknown>
+  }
+}
+
 export const useAuthService = () => {
   const loading = ref(false)
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<LoginResult> => {
     try {
       loading.value = true
 
@@ -36,13 +45,14 @@ export const useAuthService = () => {
 
       if (loginData.success) {
         // Guardar el token en una cookie
-        const isProduction = process.env.NODE_ENV === 'production'
+        // En producción, solo usar secure si estamos en HTTPS
+        const isSecure = process.client && window.location.protocol === 'https:'
 
         const token = useCookie('accessToken', {
           maxAge: 60 * 60 * 24, // 24 horas
           path: '/',
-          secure: isProduction,
-          sameSite: isProduction ? 'strict' : 'lax',
+          secure: isSecure,
+          sameSite: isSecure ? 'strict' : 'lax',
         })
 
         // Guardar el token
@@ -59,12 +69,14 @@ export const useAuthService = () => {
 
           // Si el usuario no está verificado, redirigir a la página de validación
           if (!userResponse.data.verified) {
-            return navigateTo({
-              path: '/validate-code',
-              query: {
-                email,
+            return {
+              success: true,
+              message: loginData.message || 'Completa la verificación de tu cuenta.',
+              redirectTo: {
+                path: '/validate-code',
+                query: { email },
               },
-            })
+            }
           }
 
           // Si está verificado, no hacer redirección desde aquí
@@ -103,13 +115,15 @@ export const useAuthService = () => {
         // Obtener la ruta actual antes de eliminar el token
         const currentRoute = useRoute()
         const currentPath = currentRoute.fullPath
-        const isProduction = process.env.NODE_ENV === 'production'
+
+        // En producción, solo usar secure si estamos en HTTPS
+        const isSecure = process.client && window.location.protocol === 'https:'
 
         // Eliminar el token
         const token = useCookie('accessToken', {
           path: '/',
-          secure: isProduction,
-          sameSite: isProduction ? 'strict' : 'lax',
+          secure: isSecure,
+          sameSite: isSecure ? 'strict' : 'lax',
         })
 
         token.value = null
@@ -117,8 +131,8 @@ export const useAuthService = () => {
         // Guardar la ruta actual en una cookie
         const returnTo = useCookie('returnTo', {
           path: '/',
-          secure: isProduction,
-          sameSite: isProduction ? 'strict' : 'lax',
+          secure: isSecure,
+          sameSite: isSecure ? 'strict' : 'lax',
         })
 
         returnTo.value = currentPath
@@ -134,12 +148,13 @@ export const useAuthService = () => {
   }
 
   const logout = () => {
-    const isProduction = process.env.NODE_ENV === 'production'
+    // En producción, solo usar secure si estamos en HTTPS
+    const isSecure = process.client && window.location.protocol === 'https:'
 
     const token = useCookie('accessToken', {
       path: '/',
-      secure: isProduction,
-      sameSite: isProduction ? 'strict' : 'lax',
+      secure: isSecure,
+      sameSite: isSecure ? 'strict' : 'lax',
     })
 
     // Limpiar el token
@@ -148,8 +163,8 @@ export const useAuthService = () => {
     // También limpiar la cookie returnTo si existe
     const returnTo = useCookie('returnTo', {
       path: '/',
-      secure: isProduction,
-      sameSite: isProduction ? 'strict' : 'lax',
+      secure: isSecure,
+      sameSite: isSecure ? 'strict' : 'lax',
     })
 
     returnTo.value = null
