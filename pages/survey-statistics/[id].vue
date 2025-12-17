@@ -9,7 +9,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { Doughnut } from 'vue-chartjs'
 import { useRoute } from 'vue-router'
 import { useSnackbar } from '@/composables/useSnackbar'
-import { useSurveyStatisticsService } from '@/composables/useSurveyStatisticsService'
+import { useSurveyStatisticsService } from '@/modules/survey-statistics/composables/useSurveyStatisticsService'
 import QuestionChartViewer from '@/modules/survey-statistics/components/QuestionChartViewer.vue'
 import QuestionStatistics from '@/modules/survey-statistics/components/QuestionStatistics.vue'
 import SimpleTrendsViewer from '@/modules/survey-statistics/components/SimpleTrendsViewer.vue'
@@ -603,3 +603,4 @@ useHead({
     </div>
   </div>
 </template>
+

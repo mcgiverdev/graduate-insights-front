@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { useAuthService } from '@/composables/useAuthService'
-import { useSnackbar } from '@/composables/useSnackbar'
+import LoginForm from '@/modules/auth/components/LoginForm.vue'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
 import authV2LoginIllustrationBorderedLight from '@images/pages/auth-v2-login-illustration-bordered-light.png'
@@ -17,16 +16,6 @@ definePageMeta({
   middleware: ['guest'],
 })
 
-const form = ref({
-  email: 'xmcgiver12@gmail.com',
-  password: '123456abC',
-  remember: false,
-})
-
-const isPasswordVisible = ref(false)
-const { loading, login } = useAuthService()
-const { showSnackbar, snackbar } = useSnackbar()
-
 const authThemeImg = useGenerateImageVariant(
   authV2LoginIllustrationLight,
   authV2LoginIllustrationDark,
@@ -35,46 +24,9 @@ const authThemeImg = useGenerateImageVariant(
   true)
 
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
-
-const handleLogin = async () => {
-  console.log('handleLogin')
-
-  const result = await login(form.value.email, form.value.password)
-
-  console.log('postLogin', result)
-  showSnackbar({
-    text: result.message,
-    color: result.success ? 'success' : 'error',
-  })
-
-  if (!result.success)
-    return
-
-  // Pequeño delay para asegurar que el token se guarde
-  await nextTick()
-
-  if (result.redirectTo) {
-    await navigateTo(result.redirectTo, { replace: true })
-    return
-  }
-
-  // Redirigir al dashboard
-  await navigateTo('/', { replace: true })
-}
-
-console.log('version v1.0.4')
 </script>
 
 <template>
-  <VSnackbar
-    v-model="snackbar.show"
-    :color="snackbar.color"
-    :timeout="snackbar.timeout"
-    location="top"
-  >
-    {{ snackbar.text }}
-  </VSnackbar>
-
   <a href="javascript:void(0)">
     <div class="auth-logo d-flex align-center gap-x-3">
       <VNodeRenderer :nodes="themeConfig.app.logo" />
@@ -133,70 +85,7 @@ console.log('version v1.0.4')
           </p>
         </VCardText>
         <VCardText>
-          <VForm @submit.prevent="handleLogin">
-            <VRow>
-              <!-- email -->
-              <VCol cols="12">
-                <AppTextField
-                  v-model="form.email"
-                  autofocus
-                  label="Correo electrónico"
-                  type="email"
-                  placeholder="usuario@ejemplo.com"
-                />
-              </VCol>
-
-              <!-- password -->
-              <VCol cols="12">
-                <AppTextField
-                  v-model="form.password"
-                  label="Contraseña"
-                  placeholder="············"
-                  :type="isPasswordVisible ? 'text' : 'password'"
-                  autocomplete="password"
-                  :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
-                  @click:append-inner="isPasswordVisible = !isPasswordVisible"
-                />
-
-                <div class="d-flex align-center flex-wrap justify-space-between my-6">
-                  <VCheckbox
-                    v-model="form.remember"
-                    label="Recordarme"
-                  />
-                  <a
-                    class="text-primary"
-                    href="javascript:void(0)"
-                  >
-                    ¿Olvidaste tu contraseña?
-                  </a>
-                </div>
-
-                <VBtn
-                  block
-                  type="submit"
-                  :loading="loading"
-                >
-                  Iniciar Sesión
-                </VBtn>
-              </VCol>
-
-              <!-- create account -->
-              <VCol
-                cols="12"
-                class="text-body-1 text-center mt-4"
-              >
-                <span class="d-inline-block">
-                  ¿Nuevo en la plataforma?
-                </span>
-                <a
-                  class="text-primary ms-1 d-inline-block text-body-1"
-                  href="javascript:void(0)"
-                >
-                  Crear una cuenta
-                </a>
-              </VCol>
-            </VRow>
-          </VForm>
+          <LoginForm @success="() => navigateTo('/', { replace: true })" />
         </VCardText>
       </VCard>
     </VCol>

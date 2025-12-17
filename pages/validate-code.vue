@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import VerificationForm from '@/modules/auth/components/VerificationForm.vue'
+import { computed, h } from 'vue'
+import { navigateTo, useRoute } from '#imports'
 import authV1BottomShape from '@images/svg/auth-v1-bottom-shape.svg?raw'
 import authV1TopShape from '@images/svg/auth-v1-top-shape.svg?raw'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
@@ -9,116 +12,10 @@ definePageMeta({
   public: true,
 })
 
-const router = useRouter()
-const otp = ref('')
-const isOtpInserted = ref(false)
-const email = ref('')
-const loading = ref(false)
-const resendLoading = ref(false)
-const error = ref('')
-const resendMessage = ref('')
-const resendCooldown = ref(0)
+const route = useRoute()
+const email = computed(() => route.query.email?.toString() || '')
 
-// Obtener el email de la query string
-onMounted(() => {
-  const route = useRoute()
-
-  email.value = route.query.email?.toString() || ''
-})
-
-// Countdown timer para el reenvío
-const startResendCooldown = () => {
-  resendCooldown.value = 60 // 60 segundos de cooldown
-
-  const interval = setInterval(() => {
-    resendCooldown.value--
-    if (resendCooldown.value <= 0)
-      clearInterval(interval)
-  }, 1000)
-}
-
-const onFinish = async () => {
-  if (!email.value) {
-    error.value = 'No se proporcionó un correo electrónico'
-
-    return
-  }
-
-  try {
-    loading.value = true
-    error.value = ''
-
-    const response = await useApi('/graduate-insights/v1/api/mail/validate-code', {
-      method: 'POST',
-      body: {
-        email: email.value,
-        code: otp.value,
-      },
-    })
-
-    // Si el status es 200, consideramos que fue exitoso aunque no tenga cuerpo
-    if (response.status === 200) {
-      isOtpInserted.value = true
-      error.value = ''
-
-      // Esperar 2 segundos y redirigir
-      setTimeout(() => {
-        isOtpInserted.value = false
-        router.push('/')
-      }, 2000)
-    }
-    else {
-      error.value = 'El código ingresado no es válido'
-    }
-  }
-  catch (e: any) {
-    error.value = e.data?.message || 'El código ingresado no es válido'
-  }
-  finally {
-    loading.value = false
-  }
-}
-
-const resendCode = async () => {
-  if (!email.value) {
-    error.value = 'No se proporcionó un correo electrónico'
-
-    return
-  }
-
-  if (resendCooldown.value > 0)
-    return
-
-  try {
-    resendLoading.value = true
-    error.value = ''
-    resendMessage.value = ''
-
-    const response = await useApi('/graduate-insights/v1/api/mail/send-code', {
-      method: 'POST',
-      body: {
-        email: email.value,
-      },
-    })
-
-    if (response.status === 200) {
-      resendMessage.value = 'Código reenviado correctamente. Revisa tu correo electrónico.'
-      startResendCooldown()
-
-      // Limpiar el OTP actual para que el usuario ingrese el nuevo código
-      otp.value = ''
-    }
-    else {
-      error.value = 'Error al reenviar el código. Intenta nuevamente.'
-    }
-  }
-  catch (e: any) {
-    error.value = e.data?.message || 'Error al reenviar el código. Intenta nuevamente.'
-  }
-  finally {
-    resendLoading.value = false
-  }
-}
+const handleVerified = () => navigateTo('/', { replace: true })
 </script>
 
 <template>
@@ -163,86 +60,12 @@ const resendCode = async () => {
             Hemos enviado un código de verificación a tu correo electrónico. Ingresa el código para validar tu cuenta.
           </p>
           <h6 class="text-h6">
-            {{ email }}
+            {{ email || 'Correo no especificado' }}
           </h6>
         </VCardText>
 
         <VCardText>
-          <VForm @submit.prevent="onFinish">
-            <VRow>
-              <!-- código -->
-              <VCol cols="12">
-                <h6 class="text-body-1">
-                  Ingresa el código de 6 dígitos
-                </h6>
-                <VOtpInput
-                  v-model="otp"
-                  :disabled="isOtpInserted || loading"
-                  type="number"
-                  class="pa-0"
-                  @finish="onFinish"
-                />
-
-                <!-- Mostrar mensaje de éxito al reenviar -->
-                <VAlert
-                  v-if="resendMessage"
-                  type="success"
-                  class="mt-4"
-                  variant="tonal"
-                >
-                  {{ resendMessage }}
-                </VAlert>
-
-                <!-- Mostrar error si existe -->
-                <VAlert
-                  v-if="error"
-                  type="error"
-                  class="mt-4"
-                  variant="tonal"
-                >
-                  {{ error }}
-                </VAlert>
-              </VCol>
-
-              <!-- botón validar -->
-              <VCol cols="12">
-                <VBtn
-                  :loading="loading || isOtpInserted"
-                  :disabled="loading || isOtpInserted || otp.length !== 6"
-                  block
-                  type="submit"
-                >
-                  <span v-if="isOtpInserted">
-                    ✓ Código verificado
-                  </span>
-                  <span v-else>
-                    Verificar mi cuenta
-                  </span>
-                </VBtn>
-              </VCol>
-
-              <!-- reenviar código -->
-              <VCol cols="12">
-                <div class="d-flex justify-center align-center flex-wrap">
-                  <span class="me-1">¿No recibiste el código?</span>
-                  <VBtn
-                    variant="text"
-                    size="small"
-                    :loading="resendLoading"
-                    :disabled="resendLoading || resendCooldown > 0 || isOtpInserted"
-                    @click="resendCode"
-                  >
-                    <span v-if="resendCooldown > 0">
-                      Reenviar en {{ resendCooldown }}s
-                    </span>
-                    <span v-else>
-                      Reenviar código
-                    </span>
-                  </VBtn>
-                </div>
-              </VCol>
-            </VRow>
-          </VForm>
+          <VerificationForm @verified="handleVerified" />
         </VCardText>
       </VCard>
     </div>

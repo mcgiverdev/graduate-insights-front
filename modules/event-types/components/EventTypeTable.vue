@@ -89,16 +89,16 @@ const getStatusColor = (estado?: string) => estado === '1' ? 'success' : 'error'
       @update:items-per-page="value => emit('update:items-per-page', Number(value))"
     >
       <template #item.eventTypeId="{ item }">
-        <span class="text-body-2 font-weight-medium">{{ item.raw.eventTypeId }}</span>
+        <span class="text-body-2 font-weight-medium">{{ item.eventTypeId }}</span>
       </template>
 
       <template #item.estado="{ item }">
         <VChip
-          :color="getStatusColor(item.raw.estado)"
+          :color="getStatusColor(item.estado)"
           size="small"
           variant="tonal"
         >
-          {{ getStatusLabel(item.raw.estado) }}
+          {{ getStatusLabel(item.estado) }}
         </VChip>
       </template>
 
@@ -108,7 +108,7 @@ const getStatusColor = (estado?: string) => estado === '1' ? 'success' : 'error'
             icon
             variant="text"
             size="small"
-            @click="emit('edit', item.raw as EventType)"
+            @click="emit('edit', item as EventType)"
           >
             <VIcon icon="tabler-edit" />
           </VBtn>
@@ -117,7 +117,7 @@ const getStatusColor = (estado?: string) => estado === '1' ? 'success' : 'error'
             variant="text"
             size="small"
             color="error"
-            @click="emit('delete', item.raw as EventType)"
+            @click="emit('delete', item as EventType)"
           >
             <VIcon icon="tabler-trash" />
           </VBtn>

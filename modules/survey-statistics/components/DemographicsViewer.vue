@@ -10,7 +10,7 @@ import { computed, ref, watch } from 'vue'
 import { Doughnut, Pie } from 'vue-chartjs'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import { useSnackbar } from '@/composables/useSnackbar'
-import { useSurveyStatisticsService } from '@/composables/useSurveyStatisticsService'
+import { useSurveyStatisticsService } from '@/modules/survey-statistics/composables/useSurveyStatisticsService'
 
 // Chart.js imports
 
@@ -287,3 +287,4 @@ loadDemographics()
   position: relative;
 }
 </style>
+

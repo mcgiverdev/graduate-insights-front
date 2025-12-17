@@ -13,7 +13,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { Line } from 'vue-chartjs'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import { useSnackbar } from '@/composables/useSnackbar'
-import { useSurveyStatisticsService } from '@/composables/useSurveyStatisticsService'
+import { useSurveyStatisticsService } from '@/modules/survey-statistics/composables/useSurveyStatisticsService'
 
 // Chart.js imports
 
@@ -351,3 +351,4 @@ onMounted(() => {
   position: relative;
 }
 </style>
+

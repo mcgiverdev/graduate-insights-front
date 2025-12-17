@@ -16,7 +16,7 @@ import { Bar, Line, Pie } from 'vue-chartjs'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import { useRoles } from '@/composables/useRoles'
 import { useSnackbar } from '@/composables/useSnackbar'
-import { useSurveyStatisticsService } from '@/composables/useSurveyStatisticsService'
+import { useSurveyStatisticsService } from '@/modules/survey-statistics/composables/useSurveyStatisticsService'
 import StatisticsButton from '@/modules/survey-statistics/components/StatisticsButton.vue'
 
 // Chart.js registration
@@ -1050,3 +1050,4 @@ watch(isDirector, newIsDirector => {
   -webkit-line-clamp: 2;
 }
 </style>
+

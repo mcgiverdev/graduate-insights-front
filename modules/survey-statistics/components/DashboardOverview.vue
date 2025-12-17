@@ -15,8 +15,8 @@ import { computed, onMounted, ref } from 'vue'
 import { Bar, Line, Pie } from 'vue-chartjs'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import { useSnackbar } from '@/composables/useSnackbar'
-import type { DashboardChart } from '@/composables/useSurveyStatisticsService'
-import { useSurveyStatisticsService } from '@/composables/useSurveyStatisticsService'
+import type { DashboardChart } from '@/modules/survey-statistics/composables/useSurveyStatisticsService'
+import { useSurveyStatisticsService } from '@/modules/survey-statistics/composables/useSurveyStatisticsService'
 
 // Chart.js imports
 
@@ -414,3 +414,4 @@ onMounted(() => {
   position: relative;
 }
 </style>
+

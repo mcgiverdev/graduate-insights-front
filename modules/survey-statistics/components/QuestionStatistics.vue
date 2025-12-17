@@ -13,7 +13,7 @@ import { computed } from 'vue'
 import { Bar, Doughnut, Pie } from 'vue-chartjs'
 import { useTheme } from 'vuetify'
 import { getDoughnutChartConfig } from '@core/libs/chartjs/chartjsConfig'
-import type { QuestionStatistic, SurveyStatistics } from '@/composables/useSurveyStatisticsService'
+import type { QuestionStatistic, SurveyStatistics } from '@/modules/survey-statistics/composables/useSurveyStatisticsService'
 
 interface Props {
   statistics: SurveyStatistics | null
@@ -488,3 +488,4 @@ function formatOptionName(option: string): string {
     </VRow>
   </div>
 </template>
+

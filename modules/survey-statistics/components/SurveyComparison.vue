@@ -12,7 +12,7 @@ import { computed, onMounted, ref } from 'vue'
 import { Bar } from 'vue-chartjs'
 import { useSnackbar } from '@/composables/useSnackbar'
 import { useSurveyService } from '@/composables/useSurveyService'
-import { useSurveyStatisticsService } from '@/composables/useSurveyStatisticsService'
+import { useSurveyStatisticsService } from '@/modules/survey-statistics/composables/useSurveyStatisticsService'
 
 // Chart.js imports
 
@@ -395,3 +395,4 @@ onMounted(() => {
 <style scoped>
 /* Add any custom styles here */
 </style>
+

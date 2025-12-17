@@ -121,7 +121,7 @@ interface SurveyStatistics {
 ### En una página
 ```vue
 <script setup>
-import { useSurveyStatisticsService } from '@/composables/useSurveyStatisticsService'
+import { useSurveyStatisticsService } from '@/modules/survey-statistics/composables/useSurveyStatisticsService'
 import StatisticsOverview from '@/modules/survey-statistics/components/StatisticsOverview.vue'
 import StatisticsCharts from '@/modules/survey-statistics/components/StatisticsCharts.vue'
 import QuestionStatistics from '@/modules/survey-statistics/components/QuestionStatistics.vue'
@@ -169,3 +169,4 @@ El acceso a las estadísticas requiere uno de los siguientes roles:
 - [ ] Comparación entre múltiples encuestas
 - [ ] Alertas automáticas por baja participación
 - [ ] Integración con herramientas de BI externas 
+

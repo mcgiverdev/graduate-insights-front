@@ -13,7 +13,7 @@ import {
 import { computed, onMounted, ref, watch } from 'vue'
 import { Bar, Doughnut, Pie } from 'vue-chartjs'
 import TextQuestionViewer from './TextQuestionViewer.vue'
-import { useSurveyStatisticsService } from '@/composables/useSurveyStatisticsService'
+import { useSurveyStatisticsService } from '@/modules/survey-statistics/composables/useSurveyStatisticsService'
 import { useSnackbar } from '@/composables/useSnackbar'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 
@@ -463,3 +463,4 @@ onMounted(() => {
   position: relative;
 }
 </style>
+

@@ -15,7 +15,7 @@ import { computed, onMounted, ref } from 'vue'
 import { Bar, Line, Pie } from 'vue-chartjs'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import { useSnackbar } from '@/composables/useSnackbar'
-import { useSurveyStatisticsService } from '@/composables/useSurveyStatisticsService'
+import { useSurveyStatisticsService } from '@/modules/survey-statistics/composables/useSurveyStatisticsService'
 import StatisticsButton from '@/modules/survey-statistics/components/StatisticsButton.vue'
 
 // Chart.js registration
@@ -669,3 +669,4 @@ onMounted(() => {
   -webkit-line-clamp: 2;
 }
 </style>
+

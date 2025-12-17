@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SurveyStatistics } from '@/composables/useSurveyStatisticsService'
+import type { SurveyStatistics } from '@/modules/survey-statistics/composables/useSurveyStatisticsService'
 
 interface Props {
   statistics: SurveyStatistics | null
@@ -165,3 +165,4 @@ function getStatusDisplayColor(status: string): string {
     </VCardText>
   </VCard>
 </template>
+

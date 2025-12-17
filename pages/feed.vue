@@ -1,75 +1,17 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import FeedFilters from '@/components/feed/FeedFilters.vue'
-import FeedList from '@/components/feed/FeedList.vue'
-import { type FeedItem, useFeedService } from '@/composables/useFeedService'
-import { useSnackbar } from '@/composables/useSnackbar'
+import FeedFilters from '@/modules/feed/components/FeedFilters.vue'
+import FeedList from '@/modules/feed/components/FeedList.vue'
+import { useFeedList } from '@/modules/feed/composables/useFeedList'
 
-const feedItems = ref<FeedItem[]>([])
-const loading = ref(false)
-const currentPage = ref(1)
-const totalPages = ref(0)
-const showEvents = ref(true)
-const showJobs = ref(true)
-
-const feedService = useFeedService()
-const snackbar = useSnackbar()
-
-const loadFeed = async (page = 1, append = false) => {
-  try {
-    loading.value = true
-
-    const response = await feedService.getFeed(page)
-
-    if (append)
-      feedItems.value = [...feedItems.value, ...response.data]
-
-    else
-      feedItems.value = response.data
-
-    totalPages.value = response.paginate.total_pages
-    currentPage.value = response.paginate.current_page
-  }
-  catch (error) {
-    snackbar.show({
-      text: 'Error al cargar el feed',
-      color: 'error',
-    })
-  }
-  finally {
-    loading.value = false
-  }
-}
-
-const handleLoadMore = () => {
-  if (currentPage.value < totalPages.value)
-    loadFeed(currentPage.value + 1, true)
-}
-
-const filteredItems = computed(() => {
-  return feedItems.value.filter(item => {
-    if (item.tipo === 'EVENT' && !showEvents.value)
-      return false
-    if (item.tipo === 'JOB_OFFER' && !showJobs.value)
-      return false
-
-    return true
-  })
-})
-
-const hasMore = computed(() => {
-  return currentPage.value < totalPages.value
-})
-
-// Cargar datos iniciales
-loadFeed()
-
-// Manejar cambios en los filtros
-watch([showEvents, showJobs], () => {
-  // Reiniciar la paginación cuando cambian los filtros
-  currentPage.value = 1
-  loadFeed()
-})
+const {
+  filters,
+  items,
+  loading,
+  hasMore,
+  loadMore,
+  setShowEvents,
+  setShowJobs,
+} = useFeedList()
 
 definePageMeta({
   middleware: ['auth'],
@@ -94,10 +36,10 @@ definePageMeta({
         lg="9"
       >
         <FeedList
-          :items="filteredItems"
+          :items="items"
           :loading="loading"
           :has-more="hasMore"
-          @load-more="handleLoadMore"
+          @load-more="loadMore"
         />
       </VCol>
 
@@ -108,10 +50,10 @@ definePageMeta({
         lg="3"
       >
         <FeedFilters
-          :show-events="showEvents"
-          :show-jobs="showJobs"
-          @update:show-events="showEvents = $event"
-          @update:show-jobs="showJobs = $event"
+          :show-events="filters.showEvents"
+          :show-jobs="filters.showJobs"
+          @update:show-events="setShowEvents"
+          @update:show-jobs="setShowJobs"
         />
       </VCol>
     </VRow>

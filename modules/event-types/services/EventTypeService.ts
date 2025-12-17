@@ -1,6 +1,12 @@
 import { BaseApiService } from '@/infrastructure/http/BaseApiService'
 import type { ApiEnvelope, ListResponse } from '@/infrastructure/http/types'
-import type { EventType, EventTypeFilters, EventTypePayload } from '../types'
+import type {
+  EventType,
+  EventTypeApiResponse,
+  EventTypeFilters,
+  EventTypePayload,
+} from '../types'
+import { toEventType } from '../utils/mappers'
 
 const BASE_ENDPOINT = '/graduate-insights/v1/api/event_types'
 
@@ -12,18 +18,19 @@ class EventTypeService extends BaseApiService {
       size: filters.size ?? 10,
     }
 
-    const response = await this.get<ApiEnvelope<EventType[]>>(BASE_ENDPOINT, { params })
+    const response = await this.get<ApiEnvelope<EventTypeApiResponse[]>>(BASE_ENDPOINT, { params })
+    const items = (response.data || []).map(toEventType)
 
     return {
-      items: response.data || [],
+      items,
       paginate: response.paginate,
     }
   }
 
   async getById(id: number): Promise<EventType | null> {
-    const response = await this.get<ApiEnvelope<EventType>>(`${BASE_ENDPOINT}/${id}`)
+    const response = await this.get<ApiEnvelope<EventTypeApiResponse>>(`${BASE_ENDPOINT}/${id}`)
 
-    return response.data || null
+    return response.data ? toEventType(response.data) : null
   }
 
   async create(payload: EventTypePayload) {

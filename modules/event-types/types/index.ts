@@ -4,6 +4,12 @@ export interface EventType {
   estado?: string
 }
 
+export interface EventTypeApiResponse {
+  event_type_id: number
+  nombre: string
+  estado?: string
+}
+
 export interface EventTypeFilters {
   page?: number
   size?: number

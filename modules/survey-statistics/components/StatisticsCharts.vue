@@ -15,7 +15,7 @@ import { computed } from 'vue'
 import { Bar, Doughnut, Line } from 'vue-chartjs'
 import { useTheme } from 'vuetify'
 import { getDoughnutChartConfig, getHorizontalBarChartConfig, getLineChartConfig } from '@core/libs/chartjs/chartjsConfig'
-import type { SurveyStatistics } from '@/composables/useSurveyStatisticsService'
+import type { SurveyStatistics } from '@/modules/survey-statistics/composables/useSurveyStatisticsService'
 
 const props = defineProps<Props>()
 
@@ -396,3 +396,4 @@ const monthlyChartData = computed(() => {
     </VRow>
   </div>
 </template>
+

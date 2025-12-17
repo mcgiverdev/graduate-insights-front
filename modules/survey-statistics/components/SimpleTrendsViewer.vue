@@ -11,7 +11,7 @@ import {
 } from 'chart.js'
 import { computed } from 'vue'
 import { Line } from 'vue-chartjs'
-import { useSurveyStatisticsService } from '@/composables/useSurveyStatisticsService'
+import { useSurveyStatisticsService } from '@/modules/survey-statistics/composables/useSurveyStatisticsService'
 
 defineProps<Props>()
 
@@ -171,3 +171,4 @@ const hasData = computed(() => {
   position: relative;
 }
 </style>
+
