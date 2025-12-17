@@ -85,7 +85,10 @@ onMounted(() => {
           <VDivider class="my-2" />
 
           <!-- 👉 Profile -->
-          <VListItem link>
+          <VListItem
+            link
+            :to="{ path: '/profile' }"
+          >
             <template #prepend>
               <VIcon
                 class="me-2"
