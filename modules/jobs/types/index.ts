@@ -26,7 +26,6 @@ export interface JobFormValues {
   fechaInicio: string
   fechaFin: string
   graduateId: number | null
-  estado: JobStatus
 }
 
 export interface JobPayload {
@@ -36,7 +35,6 @@ export interface JobPayload {
   fecha_inicio: string
   fecha_fin: string
   graduate_id: number
-  estado: JobStatus
 }
 
 export interface JobApiResponse {

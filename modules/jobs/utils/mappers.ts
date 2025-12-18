@@ -31,7 +31,6 @@ export const toFormValues = (job?: Job | null): JobFormValues => ({
   fechaInicio: normalizeDate(job?.fechaInicio),
   fechaFin: normalizeDate(job?.fechaFin),
   graduateId: job?.graduateId ?? null,
-  estado: job?.estado ?? '1',
 })
 
 export const toPayload = (values: JobFormValues): JobPayload => ({
@@ -41,5 +40,4 @@ export const toPayload = (values: JobFormValues): JobPayload => ({
   fecha_inicio: values.fechaInicio,
   fecha_fin: values.fechaFin,
   graduate_id: Number(values.graduateId),
-  estado: values.estado,
 })

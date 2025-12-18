@@ -28,11 +28,6 @@ const formRef = ref<FormContext<MyJobFormValues> | null>(null)
 
 const dialogTitle = computed(() => props.job ? 'Editar Trabajo' : 'Nuevo Trabajo')
 
-const statusOptions = [
-  { title: 'Activo', value: '1' },
-  { title: 'Inactivo', value: '0' },
-]
-
 const modeOptions = [
   { title: 'Presencial', value: 'Presencial' },
   { title: 'Remoto', value: 'Remoto' },
@@ -134,23 +129,6 @@ const closeDialog = () => {
                   :model-value="field.value"
                   :items="modeOptions"
                   label="Modalidad"
-                  item-title="title"
-                  item-value="value"
-                  :error-messages="errorMessage"
-                  @update:model-value="field.onChange"
-                />
-              </Field>
-            </VCol>
-
-            <VCol cols="12" md="6">
-              <Field
-                name="estado"
-                v-slot="{ field, errorMessage }"
-              >
-                <AppSelect
-                  :model-value="field.value"
-                  :items="statusOptions"
-                  label="Estado"
                   item-title="title"
                   item-value="value"
                   :error-messages="errorMessage"

@@ -18,14 +18,12 @@ export interface MyJobOfferFormValues {
   titulo: string
   link: string
   descripcion: string
-  estado: MyJobOfferStatus
 }
 
 export interface MyJobOfferPayload {
   titulo: string
   link: string
   descripcion: string
-  estado: MyJobOfferStatus
 }
 
 export interface MyJobOfferApiResponse {

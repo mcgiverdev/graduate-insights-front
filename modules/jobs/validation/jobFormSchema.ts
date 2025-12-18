@@ -12,5 +12,4 @@ export const jobFormSchema = yup.object({
     .number()
     .typeError('Seleccione un graduado')
     .required('El graduado es obligatorio'),
-  estado: yup.mixed<'0' | '1'>().oneOf(['0', '1']).required('Seleccione un estado'),
 })

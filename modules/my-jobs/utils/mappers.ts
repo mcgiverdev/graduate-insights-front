@@ -28,7 +28,6 @@ export const toFormValues = (job?: MyJob | null): MyJobFormValues => ({
   modalidad: job?.modalidad ?? '',
   fechaInicio: normalizeDate(job?.fechaInicio),
   fechaFin: normalizeDate(job?.fechaFin),
-  estado: job?.estado ?? '1',
 })
 
 export const toPayload = (values: MyJobFormValues): MyJobPayload => ({
@@ -37,5 +36,4 @@ export const toPayload = (values: MyJobFormValues): MyJobPayload => ({
   modalidad: values.modalidad as MyJobPayload['modalidad'],
   fecha_inicio: values.fechaInicio,
   fecha_fin: values.fechaFin,
-  estado: values.estado,
 })

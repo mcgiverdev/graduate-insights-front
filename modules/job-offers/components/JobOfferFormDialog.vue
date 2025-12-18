@@ -32,11 +32,6 @@ const formRef = ref<FormContext<JobOfferFormValues> | null>(null)
 
 const dialogTitle = computed(() => props.jobOffer ? 'Editar Oferta' : 'Nueva Oferta')
 
-const statusOptions = [
-  { title: 'Activo', value: '1' },
-  { title: 'Inactivo', value: '0' },
-]
-
 const computedInitialValues = computed(() => toFormValues(props.jobOffer))
 
 watch(() => props.modelValue, isOpen => {
@@ -103,23 +98,6 @@ const closeDialog = () => {
                 <AppTextField
                   :model-value="field.value"
                   label="Título"
-                  :error-messages="errorMessage"
-                  @update:model-value="field.onChange"
-                />
-              </Field>
-            </VCol>
-
-            <VCol cols="12" md="6">
-              <Field
-                name="estado"
-                v-slot="{ field, errorMessage }"
-              >
-                <AppSelect
-                  :model-value="field.value"
-                  :items="statusOptions"
-                  label="Estado"
-                  item-title="title"
-                  item-value="value"
                   :error-messages="errorMessage"
                   @update:model-value="field.onChange"
                 />

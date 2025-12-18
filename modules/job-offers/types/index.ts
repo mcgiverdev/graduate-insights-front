@@ -20,7 +20,6 @@ export interface JobOfferFormValues {
   titulo: string
   link: string
   descripcion: string
-  estado: JobOfferStatus
   employerId: number | null
 }
 
@@ -28,7 +27,6 @@ export interface JobOfferPayload {
   titulo: string
   link: string
   descripcion: string
-  estado: JobOfferStatus
   employer_id: number
 }
 

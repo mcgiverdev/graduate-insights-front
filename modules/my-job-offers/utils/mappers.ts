@@ -17,12 +17,10 @@ export const toFormValues = (offer?: MyJobOffer | null): MyJobOfferFormValues =>
   titulo: offer?.titulo ?? '',
   link: offer?.link ?? '',
   descripcion: offer?.descripcion ?? '',
-  estado: offer?.estado ?? '1',
 })
 
 export const toPayload = (values: MyJobOfferFormValues): MyJobOfferPayload => ({
   titulo: values.titulo.trim(),
   link: values.link.trim(),
   descripcion: values.descripcion.trim(),
-  estado: values.estado,
 })

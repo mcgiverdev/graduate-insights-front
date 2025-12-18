@@ -20,7 +20,6 @@ export interface EventFilters {
 export interface EventFormValues {
   nombre: string
   contenido: string
-  estado: EventStatus
   directorId: number | null
   eventTypeId: number | null
 }
@@ -28,7 +27,6 @@ export interface EventFormValues {
 export interface EventPayload {
   nombre: string
   contenido: string
-  estado: EventStatus
   director_id: number
   event_type_id: number
 }

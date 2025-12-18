@@ -8,5 +8,4 @@ export const myJobFormSchema = yup.object({
     .required('Seleccione una modalidad'),
   fechaInicio: yup.string().required('La fecha de inicio es obligatoria'),
   fechaFin: yup.string(),
-  estado: yup.mixed<'0' | '1'>().oneOf(['0', '1']).required('Seleccione un estado'),
 })

@@ -23,7 +23,6 @@ export interface MyJobFormValues {
   modalidad: MyJobMode | ''
   fechaInicio: string
   fechaFin: string
-  estado: MyJobStatus
 }
 
 export interface MyJobPayload {
@@ -32,7 +31,6 @@ export interface MyJobPayload {
   modalidad: MyJobMode
   fecha_inicio: string
   fecha_fin: string
-  estado: MyJobStatus
 }
 
 export interface MyJobApiResponse {

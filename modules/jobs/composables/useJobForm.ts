@@ -4,7 +4,7 @@ import type { RequestResult } from '@/infrastructure/http/types'
 import { jobService } from '../services/JobService'
 import type { JobPayload } from '../types'
 
-const formFields = ['compania', 'cargo', 'modalidad', 'fechaInicio', 'fechaFin', 'graduateId', 'estado']
+const formFields = ['compania', 'cargo', 'modalidad', 'fechaInicio', 'fechaFin', 'graduateId']
 
 const normalizeFieldName = (field: string): string | null => {
   if (formFields.includes(field))
