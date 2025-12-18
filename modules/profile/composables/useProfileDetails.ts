@@ -9,7 +9,7 @@ import { toFormValues, toPayload } from '../utils/mappers'
 const cloneFormValues = (values: ProfileFormValues) => ({ ...values })
 
 export const useProfileDetails = () => {
-  const { user, fetchUser } = useUser()
+  const { fetchUser } = useUser()
   const form = reactive<ProfileFormValues>(toFormValues())
   const loading = ref(false)
   const saving = ref(false)
@@ -25,12 +25,9 @@ export const useProfileDetails = () => {
   }
 
   const loadProfile = async () => {
-    if (!user.value?.id)
-      return
-
     loading.value = true
     try {
-      const profile = await profileService.fetchById(user.value.id)
+      const profile = await profileService.fetchOwnProfile()
       currentProfile.value = profile
       hydrateForm(profile)
     }
@@ -64,15 +61,16 @@ export const useProfileDetails = () => {
     if (!currentProfile.value)
       return { success: false, message: 'Perfil no disponible' }
 
+    const existingProfile = currentProfile.value
     saving.value = true
     serverErrors.value = {}
 
     try {
-      const payload = toPayload(form, currentProfile.value.contrasena ?? '')
-      await profileService.update(currentProfile.value.userId, payload)
+      const payload = toPayload(form)
+      await profileService.updateOwnProfile(payload)
 
       currentProfile.value = {
-        ...currentProfile.value,
+        ...existingProfile,
         nombres: form.nombres,
         apellidos: form.apellidos,
         correo: form.correo,
@@ -108,9 +106,7 @@ export const useProfileDetails = () => {
   }
 
   const initialize = async () => {
-    if (!user.value)
-      await fetchUser()
-
+    await fetchUser()
     await loadProfile()
   }
 

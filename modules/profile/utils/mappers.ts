@@ -31,7 +31,7 @@ export const toFormValues = (profile?: Profile | null): ProfileFormValues => ({
   fechaNacimiento: normalizeDateInput(profile?.fechaNacimiento),
 })
 
-export const toPayload = (values: ProfileFormValues, password: string): ProfilePayload => ({
+export const toPayload = (values: ProfileFormValues): ProfilePayload => ({
   nombres: values.nombres.trim(),
   apellidos: values.apellidos.trim(),
   correo: values.correo.trim(),
@@ -39,5 +39,4 @@ export const toPayload = (values: ProfileFormValues, password: string): ProfileP
   celular: values.celular.trim(),
   genero: values.genero,
   fecha_nacimiento: values.fechaNacimiento ? values.fechaNacimiento : null,
-  contrasena: password,
 })

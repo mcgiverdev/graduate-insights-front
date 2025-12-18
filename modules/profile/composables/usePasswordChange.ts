@@ -1,7 +1,6 @@
 import { reactive, ref } from 'vue'
 import { useSnackbar } from '@/composables/useSnackbar'
 import type { RequestResult } from '@/infrastructure/http/types'
-import { useUser } from '@/composables/useUser'
 import { profileService } from '../services/ProfileService'
 
 interface PasswordForm {
@@ -14,6 +13,14 @@ const createInitialForm = (): PasswordForm => ({
   confirmPassword: '',
 })
 
+const PASSWORD_REQUIREMENTS = {
+  minLength: 8,
+  digit: /[0-9]/,
+  lower: /[a-z]/,
+  upper: /[A-Z]/,
+  special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?]/,
+}
+
 export const usePasswordChange = () => {
   const form = reactive<PasswordForm>(createInitialForm())
   const errors = ref<Record<keyof PasswordForm, string | undefined>>({
@@ -22,7 +29,6 @@ export const usePasswordChange = () => {
   })
   const submitting = ref(false)
   const { showSnackbar } = useSnackbar()
-  const { user } = useUser()
 
   const reset = () => {
     const initialValues = createInitialForm()
@@ -36,8 +42,16 @@ export const usePasswordChange = () => {
 
     if (!form.newPassword)
       errors.value.newPassword = 'La nueva contraseña es obligatoria'
-    else if (form.newPassword.length < 8)
+    else if (form.newPassword.length < PASSWORD_REQUIREMENTS.minLength)
       errors.value.newPassword = 'Debe tener al menos 8 caracteres'
+    else if (!PASSWORD_REQUIREMENTS.digit.test(form.newPassword))
+      errors.value.newPassword = 'Debe incluir al menos un dígito'
+    else if (!PASSWORD_REQUIREMENTS.lower.test(form.newPassword))
+      errors.value.newPassword = 'Debe incluir al menos una letra minúscula'
+    else if (!PASSWORD_REQUIREMENTS.upper.test(form.newPassword))
+      errors.value.newPassword = 'Debe incluir al menos una letra mayúscula'
+    else if (!PASSWORD_REQUIREMENTS.special.test(form.newPassword))
+      errors.value.newPassword = 'Debe incluir al menos un carácter especial'
 
     if (!form.confirmPassword)
       errors.value.confirmPassword = 'Confirma tu nueva contraseña'
@@ -51,21 +65,20 @@ export const usePasswordChange = () => {
     if (!validate())
       return { success: false, message: 'Datos inválidos' }
 
-    const email = user.value?.email
-    if (!email) {
-      showSnackbar({ text: 'No se pudo determinar el correo del usuario', color: 'error' })
-      return { success: false, message: 'Usuario no disponible' }
-    }
-
     submitting.value = true
 
     try {
-      await profileService.changePassword({ email, newPassword: form.newPassword })
+      await profileService.changePassword(form.newPassword)
       showSnackbar({ text: 'Contraseña actualizada', color: 'success' })
       reset()
       return { success: true }
     }
     catch (error: any) {
+      const apiErrors = error?.data?.errors
+      if (apiErrors?.newPassword) {
+        errors.value.newPassword = apiErrors.newPassword
+      }
+
       const message = error?.data?.message || 'No se pudo cambiar la contraseña'
       showSnackbar({ text: message, color: 'error' })
       return { success: false, message }

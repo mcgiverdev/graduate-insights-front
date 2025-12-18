@@ -44,10 +44,4 @@ export interface ProfilePayload {
   celular: string
   genero: Gender
   fecha_nacimiento: string | null
-  contrasena: string
-}
-
-export interface PasswordChangePayload {
-  email: string
-  newPassword: string
 }

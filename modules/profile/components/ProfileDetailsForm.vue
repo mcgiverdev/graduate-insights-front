@@ -2,6 +2,7 @@
 import { onMounted } from 'vue'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
+import { useSnackbar } from '@/composables/useSnackbar'
 import { useProfileDetails } from '../composables/useProfileDetails'
 
 const {
@@ -14,6 +15,8 @@ const {
   submit,
   resetForm,
 } = useProfileDetails()
+
+const { snackbar } = useSnackbar()
 
 const genderItems = [
   { title: 'Masculino', value: 'M' },
@@ -138,4 +141,13 @@ onMounted(() => {
       </VForm>
     </VCardText>
   </VCard>
+
+  <VSnackbar
+    v-model="snackbar.show"
+    :color="snackbar.color"
+    :timeout="snackbar.timeout"
+    location="top right"
+  >
+    {{ snackbar.text }}
+  </VSnackbar>
 </template>

@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { navigateTo } from '#imports'
 import { useAuthService } from '@/composables/useAuthService'
 import { useUser } from '@/composables/useUser'
 
 const { user, fetchUser, initials } = useUser()
 const { logout } = useAuthService()
+
+const goToProfile = () => {
+  navigateTo('/profile')
+}
 
 onMounted(() => {
   fetchUser()
@@ -87,7 +92,7 @@ onMounted(() => {
           <!-- 👉 Profile -->
           <VListItem
             link
-            :to="{ path: '/profile' }"
+            @click="goToProfile"
           >
             <template #prepend>
               <VIcon
