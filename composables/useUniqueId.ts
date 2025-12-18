@@ -1,5 +1,5 @@
 let idCounter = 0
 
-export function useId() {
+export function useUniqueId() {
   return `id-${++idCounter}`
 }

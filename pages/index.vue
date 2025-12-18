@@ -14,10 +14,12 @@ import {
 import { computed, ref, watch } from 'vue'
 import { Bar, Line, Pie } from 'vue-chartjs'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
+import { useGraduateDashboard } from '@/composables/useGraduateDashboard'
 import { useRoles } from '@/composables/useRoles'
 import { useSnackbar } from '@/composables/useSnackbar'
 import { useSurveyStatisticsService } from '@/modules/survey-statistics/composables/useSurveyStatisticsService'
 import StatisticsButton from '@/modules/survey-statistics/components/StatisticsButton.vue'
+import { formatReadableDate } from '@/utils/dateUtils'
 
 // Chart.js registration
 ChartJS.register(
@@ -47,6 +49,17 @@ useHead({
 const { dashboardData, loadingDashboard, fetchDashboard } = useSurveyStatisticsService()
 const { showSnackbar } = useSnackbar()
 const { isDirector, isEmployer, isGraduate, role, user } = useRoles()
+const {
+  loadGraduateDashboard,
+  graduateDashboardLoading,
+  surveyStats,
+  pendingSurveys,
+  completedSurveys,
+  jobs,
+  jobOffers,
+  activeJobsCount,
+  totalJobsCount,
+} = useGraduateDashboard()
 
 // Filtros - solo año de graduación para directores
 const filters = ref({
@@ -62,6 +75,50 @@ const graduationYears = ref([
   { title: '2021', value: 2021 },
   { title: '2020', value: 2020 },
 ])
+
+const graduateDashboardLoaded = ref(false)
+const surveyPreview = computed(() => {
+  const upcoming = pendingSurveys.value.slice(0, 3)
+  if (upcoming.length >= 3)
+    return upcoming
+
+  const remaining = 3 - upcoming.length
+
+  return [...upcoming, ...completedSurveys.value.slice(0, remaining)]
+})
+
+const jobTimeline = computed(() => jobs.value.slice(0, 4))
+const jobOfferPreview = computed(() => jobOffers.value.slice(0, 3))
+
+function surveyCompletionLabel(completed: boolean) {
+  return completed ? 'Completada' : 'Pendiente'
+}
+
+function surveyCompletionColor(completed: boolean) {
+  return completed ? 'success' : 'warning'
+}
+
+function formatJobRange(job: { fechaInicio: string; fechaFin: string }) {
+  const start = formatReadableDate(job.fechaInicio)
+  const end = job.fechaFin ? formatReadableDate(job.fechaFin) : 'Presente'
+
+  return `${start} - ${end}`
+}
+
+function openJobOffer(link: string) {
+  if (!link)
+    return
+
+  const normalized = link.startsWith('http') ? link : `https://${link}`
+  window.open(normalized, '_blank')
+}
+
+function summarize(text: string, limit = 140) {
+  if (!text)
+    return 'Sin descripción disponible'
+
+  return text.length > limit ? `${text.slice(0, limit)}…` : text
+}
 
 // Chart options mejoradas
 const chartOptions = computed(() => ({
@@ -213,6 +270,13 @@ watch(isDirector, newIsDirector => {
   if (newIsDirector)
     loadDashboard(false) // Cargar sin filtros al inicio
 }, { immediate: true })
+
+watch(isGraduate, async newIsGraduate => {
+  if (newIsGraduate && !graduateDashboardLoaded.value) {
+    await loadGraduateDashboard()
+    graduateDashboardLoaded.value = true
+  }
+})
 </script>
 
 <template>
@@ -875,144 +939,409 @@ watch(isDirector, newIsDirector => {
     <!-- DASHBOARD PARA GRADUADOS -->
     <div v-else-if="isGraduate">
       <VRow>
-        <!-- Welcome Card -->
         <VCol cols="12">
           <VCard
-            color="success"
-            variant="tonal"
-            class="mb-6"
+            class="graduate-hero-card mb-6"
+            elevation="4"
           >
             <VCardText class="pa-6">
-              <div class="d-flex align-center">
-                <VAvatar
-                  color="success"
-                  size="64"
-                  class="me-4"
-                >
-                  <VIcon
-                    icon="tabler-graduation-cap"
-                    size="32"
-                  />
-                </VAvatar>
+              <div class="d-flex flex-column flex-lg-row justify-space-between gap-6">
                 <div>
-                  <h2 class="text-h5 font-weight-bold mb-2">
-                    ¡Bienvenido {{ user?.name }}!
-                  </h2>
-                  <p class="text-body-1 mb-0">
-                    Tu plataforma para el desarrollo profesional continuo
+                  <p class="hero-subtitle mb-2">
+                    Resumen personal
                   </p>
+                  <h2 class="text-h4 font-weight-bold mb-2">
+                    Hola, {{ user?.name || 'Graduado' }}
+                  </h2>
+                  <p class="text-body-1 mb-4">
+                    {{ surveyStats.pending ? `Tienes ${surveyStats.pending} encuestas pendientes` : 'Estás al día con tus encuestas' }} y {{ activeJobsCount }} {{ activeJobsCount === 1 ? 'experiencia activa' : 'experiencias activas' }}.
+                  </p>
+                  <div class="d-flex flex-wrap gap-3">
+                    <VBtn
+                      color="white"
+                      class="text-primary"
+                      prepend-icon="tabler-refresh"
+                      :loading="graduateDashboardLoading"
+                      @click="loadGraduateDashboard"
+                    >
+                      Actualizar datos
+                    </VBtn>
+                    <VBtn
+                      color="primary"
+                      variant="tonal"
+                      prepend-icon="tabler-edit"
+                      to="/my-surveys"
+                    >
+                      Gestionar encuestas
+                    </VBtn>
+                  </div>
+                </div>
+                <div class="d-flex flex-wrap justify-end gap-4">
+                  <div class="hero-metric">
+                    <span class="text-caption">Avance en encuestas</span>
+                    <strong class="text-h3">{{ surveyStats.completionRate }}%</strong>
+                  </div>
+                  <div class="hero-metric">
+                    <span class="text-caption">Trabajos activos</span>
+                    <strong class="text-h3">{{ activeJobsCount }}</strong>
+                  </div>
                 </div>
               </div>
             </VCardText>
           </VCard>
         </VCol>
+      </VRow>
 
-        <!-- Quick Actions for Graduates -->
+      <VRow class="mb-6">
         <VCol
           cols="12"
           md="6"
-          lg="4"
+          lg="3"
         >
-          <VCard class="text-center h-100">
-            <VCardText class="pa-6">
+          <VCard class="dashboard-stat-card h-100">
+            <VCardText class="pa-5 d-flex justify-space-between align-center">
+              <div>
+                <p class="text-caption text-medium-emphasis mb-1">
+                  Total de encuestas
+                </p>
+                <h3 class="text-h4 mb-2">
+                  {{ surveyStats.total }}
+                </h3>
+                <VProgressLinear
+                  :model-value="surveyStats.completionRate"
+                  color="white"
+                  height="6"
+                  rounded
+                />
+              </div>
               <VAvatar
-                color="primary"
+                color="white"
                 variant="tonal"
-                size="56"
-                class="mb-4"
               >
                 <VIcon
-                  icon="tabler-file-text"
-                  size="28"
+                  icon="tabler-forms"
+                  color="primary"
                 />
               </VAvatar>
-              <h3 class="text-h6 mb-2">
-                Mis Encuestas
-              </h3>
-              <p class="text-body-2 text-medium-emphasis mb-4">
-                Participa en encuestas y comparte tu experiencia profesional
-              </p>
-              <VBtn
-                color="primary"
-                variant="outlined"
-                to="/my-surveys"
-              >
-                Ver Encuestas
-              </VBtn>
             </VCardText>
           </VCard>
         </VCol>
-
         <VCol
           cols="12"
           md="6"
-          lg="4"
+          lg="3"
         >
-          <VCard class="text-center h-100">
-            <VCardText class="pa-6">
+          <VCard class="dashboard-stat-card h-100">
+            <VCardText class="pa-5 d-flex justify-space-between align-center">
+              <div>
+                <p class="text-caption text-medium-emphasis mb-1">
+                  Encuestas pendientes
+                </p>
+                <h3 class="text-h4 mb-0">
+                  {{ surveyStats.pending }}
+                </h3>
+              </div>
               <VAvatar
-                color="success"
+                color="warning"
                 variant="tonal"
-                size="56"
-                class="mb-4"
               >
-                <VIcon
-                  icon="tabler-user"
-                  size="28"
-                />
+                <VIcon icon="tabler-alert-circle" />
               </VAvatar>
-              <h3 class="text-h6 mb-2">
-                Mi Perfil
-              </h3>
-              <p class="text-body-2 text-medium-emphasis mb-4">
-                Actualiza tu información personal y profesional
-              </p>
-              <VBtn
-                color="success"
-                variant="outlined"
-                disabled
-              >
-                Próximamente
-              </VBtn>
             </VCardText>
           </VCard>
         </VCol>
-
         <VCol
           cols="12"
           md="6"
-          lg="4"
+          lg="3"
         >
-          <VCard class="text-center h-100">
-            <VCardText class="pa-6">
+          <VCard class="dashboard-stat-card h-100">
+            <VCardText class="pa-5 d-flex justify-space-between align-center">
+              <div>
+                <p class="text-caption text-medium-emphasis mb-1">
+                  Encuestas completadas
+                </p>
+                <h3 class="text-h4 mb-0">
+                  {{ surveyStats.completed }}
+                </h3>
+              </div>
+              <VAvatar
+                color="success"
+                variant="tonal"
+              >
+                <VIcon icon="tabler-check" />
+              </VAvatar>
+            </VCardText>
+          </VCard>
+        </VCol>
+        <VCol
+          cols="12"
+          md="6"
+          lg="3"
+        >
+          <VCard class="dashboard-stat-card h-100">
+            <VCardText class="pa-5 d-flex justify-space-between align-center">
+              <div>
+                <p class="text-caption text-medium-emphasis mb-1">
+                  Historias laborales
+                </p>
+                <h3 class="text-h4 mb-0">
+                  {{ totalJobsCount }}
+                </h3>
+              </div>
               <VAvatar
                 color="info"
                 variant="tonal"
-                size="56"
-                class="mb-4"
               >
-                <VIcon
-                  icon="tabler-briefcase"
-                  size="28"
-                />
+                <VIcon icon="tabler-briefcase" />
               </VAvatar>
-              <h3 class="text-h6 mb-2">
-                Oportunidades
-              </h3>
-              <p class="text-body-2 text-medium-emphasis mb-4">
-                Explora oportunidades laborales y de desarrollo profesional
-              </p>
-              <VBtn
-                color="info"
-                variant="outlined"
-                disabled
-              >
-                Próximamente
-              </VBtn>
             </VCardText>
           </VCard>
         </VCol>
       </VRow>
+
+      <VRow class="align-stretch">
+        <VCol
+          cols="12"
+          lg="7"
+        >
+          <VCard class="mb-6 h-100">
+            <VCardTitle class="d-flex align-center justify-space-between">
+              <div class="d-flex align-center">
+                <VIcon
+                  icon="tabler-notebook"
+                  class="me-2"
+                />
+                Mis Encuestas
+              </div>
+              <VChip
+                color="primary"
+                variant="tonal"
+                size="small"
+              >
+                {{ pendingSurveys.length }} pendientes
+              </VChip>
+            </VCardTitle>
+            <VCardText>
+              <template v-if="surveyPreview.length">
+                <VList
+                  lines="three"
+                  density="comfortable"
+                >
+                  <VListItem
+                    v-for="survey in surveyPreview"
+                    :key="survey.survey_id"
+                  >
+                    <template #prepend>
+                      <VAvatar
+                        color="primary"
+                        variant="tonal"
+                      >
+                        <VIcon :icon="getSurveyTypeIcon(survey.survey_type?.name || '')" />
+                      </VAvatar>
+                    </template>
+                    <VListItemTitle class="font-weight-medium">
+                      {{ survey.title }}
+                    </VListItemTitle>
+                    <VListItemSubtitle>
+                      {{ survey.survey_type?.name }} · {{ survey.question_count }} preguntas · {{ formatReadableDate(survey.created_date) }}
+                    </VListItemSubtitle>
+                    <template #append>
+                      <div class="d-flex flex-column align-end gap-2">
+                        <VChip
+                          :color="surveyCompletionColor(survey.completed)"
+                          size="small"
+                          variant="tonal"
+                        >
+                          {{ surveyCompletionLabel(survey.completed) }}
+                        </VChip>
+                        <VBtn
+                          color="primary"
+                          variant="text"
+                          size="small"
+                          to="/my-surveys"
+                        >
+                          {{ survey.completed ? 'Ver resultados' : 'Responder' }}
+                        </VBtn>
+                      </div>
+                    </template>
+                  </VListItem>
+                </VList>
+              </template>
+              <div
+                v-else
+                class="empty-state"
+              >
+                <VIcon
+                  icon="tabler-calendar-off"
+                  size="48"
+                  class="mb-3"
+                />
+                <p class="text-body-1">
+                  No tienes encuestas asignadas por ahora.
+                </p>
+                <p class="text-body-2 text-medium-emphasis">
+                  Te avisaremos cuando haya nuevas evaluaciones disponibles.
+                </p>
+              </div>
+              <div class="text-end mt-4">
+                <VBtn
+                  variant="text"
+                  color="primary"
+                  to="/my-surveys"
+                  append-icon="tabler-arrow-right"
+                >
+                  Ver todas las encuestas
+                </VBtn>
+              </div>
+            </VCardText>
+          </VCard>
+        </VCol>
+
+        <VCol
+          cols="12"
+          lg="5"
+        >
+          <VCard class="mb-6 h-100">
+            <VCardTitle class="d-flex align-center">
+              <VIcon
+                icon="tabler-timeline"
+                class="me-2"
+              />
+              Mi trayectoria laboral
+            </VCardTitle>
+            <VCardText>
+              <template v-if="jobTimeline.length">
+                <VTimeline
+                  density="comfortable"
+                  side="end"
+                >
+                  <VTimelineItem
+                    v-for="job in jobTimeline"
+                    :key="job.jobId"
+                    :dot-color="job.fechaFin ? 'primary' : 'success'"
+                    fill-dot
+                  >
+                    <div class="text-subtitle-1 font-weight-medium">
+                      {{ job.cargo }} · {{ job.compania }}
+                    </div>
+                    <div class="text-caption text-medium-emphasis mb-2">
+                      {{ job.modalidad }} · {{ formatJobRange(job) }}
+                    </div>
+                    <VChip
+                      size="x-small"
+                      :color="job.fechaFin ? 'primary' : 'success'"
+                      variant="tonal"
+                    >
+                      {{ job.fechaFin ? 'Finalizado' : 'En curso' }}
+                    </VChip>
+                  </VTimelineItem>
+                </VTimeline>
+              </template>
+              <div
+                v-else
+                class="empty-state"
+              >
+                <VIcon
+                  icon="tabler-briefcase-off"
+                  size="48"
+                  class="mb-3"
+                />
+                <p class="text-body-1">
+                  Aún no registras experiencias laborales.
+                </p>
+                <p class="text-body-2 text-medium-emphasis">
+                  Usa la sección "Mis Trabajos" para documentar tu crecimiento profesional.
+                </p>
+              </div>
+              <div class="text-end mt-4">
+                <VBtn
+                  variant="text"
+                  color="primary"
+                  to="/my-jobs"
+                  append-icon="tabler-arrow-right"
+                >
+                  Administrar mis trabajos
+                </VBtn>
+              </div>
+            </VCardText>
+          </VCard>
+        </VCol>
+      </VRow>
+
+      <VCard>
+        <VCardTitle class="d-flex align-center justify-space-between">
+          <div class="d-flex align-center">
+            <VIcon
+              icon="tabler-target"
+              class="me-2"
+            />
+            Oportunidades recomendadas
+          </div>
+          <VChip
+            color="info"
+            variant="tonal"
+            size="small"
+          >
+            {{ jobOfferPreview.length }} activas
+          </VChip>
+        </VCardTitle>
+        <VCardText>
+          <VRow v-if="jobOfferPreview.length">
+            <VCol
+              v-for="offer in jobOfferPreview"
+              :key="offer.jobOfferId"
+              cols="12"
+              md="4"
+            >
+              <VCard class="recommended-offer-card h-100" variant="flat">
+                <VCardText>
+                  <div class="d-flex align-center justify-space-between mb-3">
+                    <h3 class="text-h6 mb-0">
+                      {{ offer.titulo }}
+                    </h3>
+                    <VChip
+                      size="x-small"
+                      :color="offer.estado === '1' ? 'success' : 'grey'
+                      "
+                      variant="tonal"
+                    >
+                      {{ offer.estado === '1' ? 'Activa' : 'Inactiva' }}
+                    </VChip>
+                  </div>
+                  <p class="text-body-2 text-medium-emphasis mb-4">
+                    {{ summarize(offer.descripcion) }}
+                  </p>
+                  <VBtn
+                    color="info"
+                    variant="outlined"
+                    block
+                    @click="openJobOffer(offer.link)"
+                  >
+                    Postular
+                  </VBtn>
+                </VCardText>
+              </VCard>
+            </VCol>
+          </VRow>
+          <div
+            v-else
+            class="empty-state"
+          >
+            <VIcon
+              icon="tabler-search"
+              size="48"
+              class="mb-3"
+            />
+            <p class="text-body-1">
+              No hay ofertas recomendadas por ahora.
+            </p>
+            <p class="text-body-2 text-medium-emphasis">
+              Vuelve pronto para descubrir nuevas oportunidades.
+            </p>
+          </div>
+        </VCardText>
+      </VCard>
     </div>
 
     <!-- DASHBOARD GENÉRICO (fallback) -->
@@ -1048,6 +1377,112 @@ watch(isDirector, newIsDirector => {
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.graduate-hero-card {
+  border-radius: 1.5rem;
+  overflow: hidden;
+}
+
+.graduate-hero-card .hero-subtitle {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.graduate-hero-card .hero-metric {
+  min-width: 150px;
+  padding: 1rem 1.5rem;
+  border-radius: 1rem;
+  text-align: right;
+}
+
+.dashboard-stat-card {
+  border-radius: 1.25rem;
+  border: 1px solid transparent;
+  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  border: 1px dashed transparent;
+  border-radius: 1rem;
+}
+
+.recommended-offer-card {
+  border-radius: 1.25rem;
+  border: 1px solid transparent;
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+
+.recommended-offer-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+}
+
+:deep(.v-theme--dark) .graduate-hero-card {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--v-theme-primary) 65%, #000) 0%, color-mix(in srgb, var(--v-theme-surface) 85%, #000) 100%);
+  color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+:deep(.v-theme--light) .graduate-hero-card {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--v-theme-primary) 25%, #fff) 0%, color-mix(in srgb, var(--v-theme-surface) 90%, #fff) 100%);
+  color: rgba(17, 24, 39, 0.95);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+:deep(.v-theme--dark) .graduate-hero-card .hero-subtitle {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+:deep(.v-theme--light) .graduate-hero-card .hero-subtitle {
+  color: rgba(15, 23, 42, 0.65);
+}
+
+:deep(.v-theme--dark) .graduate-hero-card .hero-metric {
+  background-color: color-mix(in srgb, var(--v-theme-primary) 25%, #000);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+:deep(.v-theme--light) .graduate-hero-card .hero-metric {
+  background-color: color-mix(in srgb, var(--v-theme-primary) 10%, #fff);
+  color: rgba(15, 23, 42, 0.9);
+}
+
+:deep(.v-theme--dark) .dashboard-stat-card {
+  background: color-mix(in srgb, var(--v-theme-surface) 90%, #000);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+:deep(.v-theme--light) .dashboard-stat-card {
+  background: color-mix(in srgb, var(--v-theme-surface) 92%, #fff);
+  border-color: rgba(79, 70, 229, 0.12);
+}
+
+:deep(.v-theme--dark) .empty-state {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: color-mix(in srgb, var(--v-theme-surface) 85%, #000);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+:deep(.v-theme--light) .empty-state {
+  border-color: rgba(79, 70, 229, 0.2);
+  background: color-mix(in srgb, var(--v-theme-surface) 98%, #fff);
+  color: rgba(15, 23, 42, 0.6);
+}
+
+:deep(.v-theme--dark) .recommended-offer-card {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--v-theme-surface) 85%, #000);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+:deep(.v-theme--light) .recommended-offer-card {
+  border-color: rgba(99, 102, 241, 0.18);
+  background: color-mix(in srgb, var(--v-theme-surface) 98%, #fff);
 }
 </style>
 

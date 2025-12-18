@@ -7,7 +7,7 @@ import { useSurveyService } from '@/composables/useSurveyService'
 import StatisticsButton from '@/modules/survey-statistics/components/StatisticsButton.vue'
 import type { Survey } from '@/modules/surveys/types'
 import { SurveyStatus, SurveyType } from '@/modules/surveys/types'
-import { formatDate } from '@/utils/dateUtils'
+import { formatReadableDate } from '@/utils/dateUtils'
 
 // Emits
 defineEmits<{
@@ -244,12 +244,12 @@ onMounted(() => {
 
       <!-- Fecha de inicio -->
       <template #item.start_date="{ item }">
-        {{ formatDate(item.start_date) }}
+        {{ formatReadableDate(item.start_date) }}
       </template>
 
       <!-- Fecha de fin -->
       <template #item.end_date="{ item }">
-        {{ item.end_date ? formatDate(item.end_date) : '-' }}
+        {{ item.end_date ? formatReadableDate(item.end_date) : '-' }}
       </template>
 
       <!-- Número de preguntas -->

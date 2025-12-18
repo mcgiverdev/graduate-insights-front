@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { FeedItem } from '../../types'
-import { formatDate } from '@/utils/dateUtils'
+import { formatReadableDate } from '@/utils/dateUtils'
 
 interface Props {
   jobOffer: FeedItem
@@ -25,7 +25,7 @@ defineProps<Props>()
         {{ jobOffer.titulo }}
       </VCardTitle>
       <VCardSubtitle v-if="jobOffer.empresa">
-        {{ jobOffer.empresa }} · {{ formatDate(jobOffer.fecha_creacion) }}
+        {{ jobOffer.empresa }} · {{ formatReadableDate(jobOffer.fecha_creacion) }}
       </VCardSubtitle>
     </VCardItem>
 

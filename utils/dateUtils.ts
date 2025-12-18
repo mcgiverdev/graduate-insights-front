@@ -6,7 +6,7 @@
  * @param options - Opciones de formateo (opcional)
  * @returns Fecha formateada o '-' si no hay fecha
  */
-export const formatDate = (dateString: string | null | undefined): string => {
+export const formatReadableDate = (dateString: string | null | undefined): string => {
   if (!dateString)
     return '-'
 

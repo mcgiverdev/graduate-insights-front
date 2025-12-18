@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { FeedItem } from '../../types'
-import { formatDate } from '@/utils/dateUtils'
+import { formatReadableDate } from '@/utils/dateUtils'
 
 interface Props {
   event: FeedItem
@@ -25,7 +25,7 @@ defineProps<Props>()
         {{ event.titulo }}
       </VCardTitle>
       <VCardSubtitle v-if="event.tipo_evento">
-        {{ event.tipo_evento }} · {{ formatDate(event.fecha_creacion) }}
+        {{ event.tipo_evento }} · {{ formatReadableDate(event.fecha_creacion) }}
       </VCardSubtitle>
     </VCardItem>
 
