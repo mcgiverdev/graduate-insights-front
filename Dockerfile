@@ -21,7 +21,7 @@ COPY package.json pnpm-lock.yaml ./
 COPY plugins/ ./plugins/
 
 # Instalar todas las dependencias (incluye devDependencies necesarias para build)
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 # ====================================
 # Etapa de construcción
@@ -39,6 +39,10 @@ COPY . .
 # Configurar variables de entorno para el build
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 ENV NODE_ENV=production
+ARG NUXT_PUBLIC_API_BASE_URL=http://api.unudev.genesyslite.com
+ARG NUXT_APP_BASE_URL=/
+ENV NUXT_PUBLIC_API_BASE_URL=${NUXT_PUBLIC_API_BASE_URL}
+ENV NUXT_APP_BASE_URL=${NUXT_APP_BASE_URL}
 
 # Variables de versión para la aplicación
 ARG APP_VERSION=v1.0.3
@@ -59,72 +63,21 @@ RUN pnpm run generate
 # ====================================
 FROM nginx:alpine AS runner
 
-# Crear directorio para archivos estáticos
-RUN mkdir -p /usr/share/nginx/html
+# Crear directorio para archivos estáticos y herramientas necesarias
+RUN apk add --no-cache curl && mkdir -p /usr/share/nginx/html
 
 # Copiar archivos estáticos desde build SPA
 COPY --from=builder /app/.output/public /usr/share/nginx/html
 
-# Fallback: crear un index.html básico si no existe
-RUN if [ ! -f "/usr/share/nginx/html/index.html" ]; then \
-  echo '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Sistema de Egresados</title><script type="module" crossorigin src="/_nuxt/entry.js"></script></head><body><div id="__nuxt"></div></body></html>' > /usr/share/nginx/html/index.html; \
-  fi
-
-# Crear configuración de Nginx para SPA
-RUN echo 'server { \
-  listen 80; \
-  server_name _; \
-  root /usr/share/nginx/html; \
-  index index.html; \
-  \
-  # Configuración para proxy reverso \
-  port_in_redirect off; \
-  absolute_redirect off; \
-  \
-  # Manejo de rutas SPA - todas las rutas van a index.html \
-  location / { \
-  try_files $uri $uri/ @fallback; \
-  } \
-  \
-  # Fallback para SPA routing \
-  location @fallback { \
-  rewrite ^.*$ /index.html last; \
-  } \
-  \
-  # Servir archivos estáticos de _nuxt \
-  location /_nuxt/ { \
-  expires 1y; \
-  add_header Cache-Control "public, immutable"; \
-  try_files $uri =404; \
-  } \
-  \
-  # Caching para otros assets estáticos \
-  location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ { \
-  expires 1y; \
-  add_header Cache-Control "public, immutable"; \
-  } \
-  \
-  # Security headers \
-  add_header X-Frame-Options "SAMEORIGIN" always; \
-  add_header X-Content-Type-Options "nosniff" always; \
-  add_header X-XSS-Protection "1; mode=block" always; \
-  \
-  # Headers para proxy reverso \
-  add_header X-Forwarded-Proto $scheme always; \
-  \
-  # Gzip compression \
-  gzip on; \
-  gzip_vary on; \
-  gzip_min_length 1024; \
-  gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json; \
-  }' > /etc/nginx/conf.d/default.conf
+# Copiar configuración de Nginx para SPA
+COPY infrastructure/nginx/default.conf /etc/nginx/conf.d/default.conf
 
 # Exponer el puerto
 EXPOSE 80
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
+  CMD curl -f http://localhost:80/ || exit 1
 
 # Comando para iniciar nginx
 CMD ["nginx", "-g", "daemon off;"]
