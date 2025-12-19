@@ -1,5 +1,6 @@
 import { defu } from 'defu'
 import { useAuthService } from './useAuthService'
+import { useSnackbar } from './useSnackbar'
 
 export interface ApiResponse<T> {
   data: T
@@ -21,6 +22,7 @@ export const useApi = async <T = any>(url: string, options: any = {}): Promise<A
   })
 
   const { handleAuthError } = useAuthService()
+  const { showSnackbar } = useSnackbar()
 
   const defaults = {
     baseURL: config.public.apiBaseUrl,
@@ -48,9 +50,18 @@ export const useApi = async <T = any>(url: string, options: any = {}): Promise<A
 
     // Si es un error de la API, incluir el status code y los datos de error
     if (error.response) {
+      const payload = error.response._data
+
+      if (payload?.errors?.length) {
+        showSnackbar({ text: payload.errors[0], color: 'error' })
+      }
+      else if (payload?.message) {
+        showSnackbar({ text: payload.message, color: 'error' })
+      }
+
       const apiError = new Error(error.message || 'Error en la petición') as ApiError
 
-      apiError.data = error.response._data
+      apiError.data = payload
       apiError.status = error.response.status
       throw apiError
     }
