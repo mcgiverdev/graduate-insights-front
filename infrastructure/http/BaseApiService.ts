@@ -14,6 +14,10 @@ export abstract class BaseApiService {
     return this.request<T>(url, { ...options, method: 'put' })
   }
 
+  protected async patch<T>(url: string, options: FetchOptions<'json'> = {}): Promise<T> {
+    return this.request<T>(url, { ...options, method: 'patch' })
+  }
+
   protected async delete<T>(url: string, options: FetchOptions<'json'> = {}): Promise<T> {
     return this.request<T>(url, { ...options, method: 'delete' })
   }

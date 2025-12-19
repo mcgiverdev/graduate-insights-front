@@ -1,6 +1,13 @@
 import { useRuntimeConfig } from '#imports'
 import { useApi } from '@/composables/useApi'
-import type { LoginResult, VerificationPayload, VerificationResult } from '../types'
+import type { ApiError } from '@/composables/useApi'
+import type {
+  LoginResult,
+  PasswordChangePayload,
+  RegisterFormValues,
+  VerificationPayload,
+  VerificationResult,
+} from '../types'
 
 interface LoginResponse {
   success: boolean
@@ -8,10 +15,18 @@ interface LoginResponse {
   data: string
 }
 
+interface ApiResponseWrapper<T> {
+  success: boolean
+  message?: string
+  data: T
+}
+
 const LOGIN_ENDPOINT = '/graduate-insights/v1/api/auth/login'
 const VALIDATE_ENDPOINT = '/graduate-insights/v1/api/mail/validate-code'
 const RESEND_ENDPOINT = '/graduate-insights/v1/api/mail/send-code'
+const CHANGE_PASSWORD_ENDPOINT = '/graduate-insights/v1/api/mail/change-password'
 const ME_ENDPOINT = '/graduate-insights/v1/api/auth/me'
+const REGISTER_GRADUATE_ENDPOINT = '/graduate-insights/v1/api/graduate/register'
 
 const updateTokenCookie = (token?: string | null) => {
   const isSecure = process.client && window.location.protocol === 'https:'
@@ -36,12 +51,87 @@ const fetchVerificationStatus = (token: string) => {
   })
 }
 
+interface ParsedApiError {
+  message: string
+  fieldErrors?: Record<string, string>
+}
+
 class AuthModuleService {
+  private parseApiError(error: unknown, fallback: string): ParsedApiError {
+    const apiError = error as ApiError | undefined
+    const data = apiError?.data as { errors?: unknown; message?: unknown } | undefined
+    const errors = data?.errors
+
+    if (errors) {
+      if (Array.isArray(errors) && errors.length > 0)
+        return { message: errors[0] ?? fallback }
+
+      if (typeof errors === 'object') {
+        const fieldErrors = errors as Record<string, string>
+        const firstMessage = Object.values(fieldErrors)[0]
+        return {
+          message: (firstMessage?.length ? firstMessage : fallback) ?? fallback,
+          fieldErrors,
+        }
+      }
+    }
+
+    if (typeof data?.message === 'string')
+      return { message: data.message }
+
+    if (apiError?.message)
+      return { message: apiError.message }
+
+    return { message: fallback }
+  }
+
+  private async sendCode(email: string, type: string): Promise<VerificationResult> {
+    try {
+      const response = await useApi(RESEND_ENDPOINT, {
+        method: 'POST',
+        body: { email, type },
+      })
+
+      const success = response.status === 200
+
+      return {
+        success,
+        message: success
+            ? 'Código enviado correctamente. Revisa tu bandeja de correo.'
+            : 'No pudimos enviar el código. Intenta nuevamente en unos minutos.',
+      }
+    }
+    catch (error) {
+      const parsedError = this.parseApiError(
+        error,
+        'No pudimos enviar el código. Intenta nuevamente en unos minutos.',
+      )
+
+      return {
+        success: false,
+        message: parsedError.message,
+        fieldErrors: parsedError.fieldErrors,
+      }
+    }
+  }
+
   async login(email: string, password: string): Promise<LoginResult> {
-    const response = await useApi<LoginResponse>(LOGIN_ENDPOINT, {
-      method: 'POST',
-      body: { email, password },
-    })
+    let response: ApiResponse<LoginResponse>
+
+    try {
+      response = await useApi<LoginResponse>(LOGIN_ENDPOINT, {
+        method: 'POST',
+        body: { email, password },
+      })
+    }
+    catch (error) {
+      const parsedError = this.parseApiError(
+        error,
+        'Credenciales inválidas. Verifica tu correo y contraseña.',
+      )
+
+      return { success: false, message: parsedError.message }
+    }
 
     const loginData = response.data
 
@@ -88,18 +178,88 @@ class AuthModuleService {
   }
 
   async resendCode(email: string): Promise<VerificationResult> {
-    const response = await useApi(RESEND_ENDPOINT, {
-      method: 'POST',
-      body: { email },
-    })
-
-    const success = response.status === 200
+    const result = await this.sendCode(email, '2')
 
     return {
-      success,
-      message: success
+      ...result,
+      message: result.success
         ? 'Código reenviado correctamente. Revisa tu correo electrónico.'
-        : 'Error al reenviar el código. Intenta nuevamente.',
+        : result.message,
+    }
+  }
+
+  async requestPasswordReset(email: string): Promise<VerificationResult> {
+    const result = await this.sendCode(email, '1')
+
+    return {
+      ...result,
+      message: result.success
+        ? 'Hemos enviado un código para restablecer tu contraseña.'
+        : result.message || 'No pudimos enviar el código de recuperación.',
+    }
+  }
+
+  async resetPassword(payload: PasswordChangePayload): Promise<VerificationResult> {
+    try {
+      const response = await useApi(CHANGE_PASSWORD_ENDPOINT, {
+        method: 'POST',
+        body: {
+          email: payload.email,
+          code: payload.code,
+          new_password: payload.newPassword,
+        },
+      })
+
+      const success = response.status === 200
+
+      return {
+        success,
+        message: success
+          ? 'Tu contraseña se actualizó correctamente.'
+          : 'No pudimos actualizar tu contraseña. Verifica el código ingresado.',
+      }
+    }
+    catch (error) {
+      const parsedError = this.parseApiError(
+        error,
+        'No pudimos actualizar tu contraseña. Verifica el código ingresado.',
+      )
+
+      return {
+        success: false,
+        message: parsedError.message,
+        fieldErrors: parsedError.fieldErrors,
+      }
+    }
+  }
+
+  async registerGraduate(payload: RegisterFormValues): Promise<VerificationResult> {
+    try {
+      const response = await useApi<ApiResponseWrapper<null>>(REGISTER_GRADUATE_ENDPOINT, {
+        method: 'POST',
+        body: payload,
+      })
+
+      const registerData = response.data
+      const message = registerData?.message
+        || 'Registro exitoso. Revisa tu correo y espera la validación del director.'
+
+      return {
+        success: registerData?.success ?? true,
+        message,
+      }
+    }
+    catch (error) {
+      const parsedError = this.parseApiError(
+        error,
+        'No pudimos crear tu cuenta. Intenta nuevamente en unos minutos.',
+      )
+
+      return {
+        success: false,
+        message: parsedError.message,
+        fieldErrors: parsedError.fieldErrors,
+      }
     }
   }
 }

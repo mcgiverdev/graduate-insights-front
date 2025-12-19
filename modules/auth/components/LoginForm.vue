@@ -57,12 +57,12 @@ const submit = async () => {
             v-model="form.remember"
             label="Recordarme"
           />
-          <a
+          <NuxtLink
             class="text-primary"
-            href="javascript:void(0)"
+            to="/forgot-password"
           >
             ¿Olvidaste tu contraseña?
-          </a>
+          </NuxtLink>
         </div>
 
         <VBtn
@@ -81,12 +81,12 @@ const submit = async () => {
         <span class="d-inline-block">
           ¿Nuevo en la plataforma?
         </span>
-        <a
+        <NuxtLink
           class="text-primary ms-1 d-inline-block text-body-1"
-          href="javascript:void(0)"
+          to="/register"
         >
           Crear una cuenta
-        </a>
+        </NuxtLink>
       </VCol>
     </VRow>
   </VForm>

@@ -11,6 +11,7 @@ export const useGraduateList = () => {
   const itemsPerPage = ref(10)
   const totalItems = ref(0)
   const search = ref('')
+  const showOnlyPending = ref(false)
 
   const { showSnackbar } = useSnackbar()
 
@@ -21,6 +22,7 @@ export const useGraduateList = () => {
         page: page.value,
         size: itemsPerPage.value,
         search: search.value,
+        validated: showOnlyPending.value ? false : undefined,
       })
 
       items.value = data
@@ -57,6 +59,12 @@ export const useGraduateList = () => {
     search.value = value
   }
 
+  const setShowOnlyPending = (value: boolean) => {
+    showOnlyPending.value = value
+    page.value = 1
+    fetchGraduates()
+  }
+
   const deleteGraduate = async (graduateId: number) => {
     loading.value = true
     try {
@@ -67,6 +75,22 @@ export const useGraduateList = () => {
     catch (error: any) {
       console.error('Error al eliminar graduado:', error)
       showSnackbar({ text: error?.data?.message || 'No se pudo eliminar el graduado', color: 'error' })
+    }
+    finally {
+      loading.value = false
+    }
+  }
+
+  const activateGraduate = async (graduateId: number) => {
+    loading.value = true
+    try {
+      await graduateService.activate(graduateId)
+      showSnackbar({ text: 'Cuenta activada correctamente', color: 'success' })
+      await fetchGraduates()
+    }
+    catch (error: any) {
+      console.error('Error al activar graduado:', error)
+      showSnackbar({ text: error?.data?.message || 'No se pudo activar la cuenta', color: 'error' })
     }
     finally {
       loading.value = false
@@ -84,10 +108,13 @@ export const useGraduateList = () => {
     loading,
     search,
     pagination,
+    showOnlyPending,
     fetchGraduates,
     setPage,
     setItemsPerPage,
     setSearch,
+    setShowOnlyPending,
     deleteGraduate,
+    activateGraduate,
   }
 }

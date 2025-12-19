@@ -28,6 +28,7 @@ export const toGraduate = (graduate: GraduateApiResponse): Graduate => ({
   cv: graduate.cv ?? undefined,
   cvPath: graduate.cv_path ?? null,
   contrasena: graduate.contrasena ?? undefined,
+  validated: Boolean(graduate.validated ?? true),
 })
 
 export const toFormValues = (graduate?: Graduate | null): GraduateFormValues => ({

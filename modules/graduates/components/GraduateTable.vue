@@ -9,6 +9,7 @@ interface Props {
   itemsPerPage: number
   totalItems: number
   search: string
+  showOnlyPending: boolean
 }
 
 const props = defineProps<Props>()
@@ -17,9 +18,11 @@ const emit = defineEmits<{
   (e: 'update:page', value: number): void
   (e: 'update:items-per-page', value: number): void
   (e: 'update:search', value: string): void
+  (e: 'update:show-only-pending', value: boolean): void
   (e: 'create'): void
   (e: 'edit', graduateId: number): void
   (e: 'delete', graduateId: number): void
+  (e: 'activate', graduateId: number): void
 }>()
 
 const headers = [
@@ -31,6 +34,7 @@ const headers = [
   { title: 'Celular', key: 'celular' },
   { title: 'Inicio', key: 'fechaInicio' },
   { title: 'Fin', key: 'fechaFin' },
+  { title: 'Estado', key: 'validated' },
   { title: 'Acciones', key: 'actions', sortable: false },
 ]
 
@@ -52,8 +56,13 @@ const formatDate = (value?: string | null) => {
   return datePart || normalized
 }
 
-const getRowGraduateId = (tableItem: { raw?: Graduate | null }): number | null => {
-  const rawValue = tableItem?.graduateId
+const getRowGraduateId = (tableItem: { raw?: Graduate | null } | Graduate | null): number | null => {
+  const rawEntry = (tableItem && 'raw' in (tableItem as any) ? (tableItem as any).raw : tableItem) as
+    | Graduate
+    | undefined
+    | null
+
+  const rawValue = rawEntry?.graduateId ?? (tableItem as any)?.graduateId
   if (rawValue === undefined || rawValue === null)
     return null
 
@@ -72,6 +81,30 @@ const handleDeleteClick = (tableItem: any) => {
   if (graduateId !== null)
     emit('delete', graduateId)
 }
+
+const handleActivateClick = (tableItem: any) => {
+  const graduateId = getRowGraduateId(tableItem)
+  if (graduateId !== null)
+    emit('activate', graduateId)
+}
+
+const isPending = (tableItem: any) => {
+  const rawEntry = (tableItem && 'raw' in (tableItem as any) ? (tableItem as any).raw : tableItem) as
+    | Graduate
+    | undefined
+    | null
+
+  return Boolean(rawEntry && rawEntry.validated === false)
+}
+
+const onTogglePending = (value: boolean) => {
+  emit('update:show-only-pending', value)
+}
+
+const getStatusProps = (validated: boolean) => ({
+  color: validated ? 'success' : 'warning',
+  text: validated ? 'Activo' : 'Pendiente',
+})
 </script>
 
 <template>
@@ -99,6 +132,14 @@ const handleDeleteClick = (tableItem: any) => {
         label="Por página"
         style="max-inline-size: 8.75rem;"
         @update:model-value="value => emit('update:items-per-page', Number(value))"
+      />
+
+      <VSwitch
+        :model-value="props.showOnlyPending"
+        label="Solo no activos"
+        inset
+        hide-details
+        @update:model-value="value => onTogglePending(Boolean(value))"
       />
 
       <VBtn
@@ -137,8 +178,29 @@ const handleDeleteClick = (tableItem: any) => {
         {{ formatDate(value as string) }}
       </template>
 
+      <template #item.validated="{ value }">
+        <VChip
+          :color="getStatusProps(Boolean(value)).color"
+          variant="tonal"
+          size="small"
+        >
+          {{ getStatusProps(Boolean(value)).text }}
+        </VChip>
+      </template>
+
       <template #item.actions="{ item }">
         <div class="d-flex gap-2">
+          <VBtn
+            v-if="isPending(item)"
+            variant="tonal"
+            size="small"
+            color="success"
+            prepend-icon="tabler-check"
+            :disabled="getRowGraduateId(item) === null"
+            @click="handleActivateClick(item)"
+          >
+            Activar
+          </VBtn>
           <VBtn
             icon
             variant="text"

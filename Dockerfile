@@ -39,7 +39,7 @@ COPY . .
 # Configurar variables de entorno para el build
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 ENV NODE_ENV=production
-ARG NUXT_PUBLIC_API_BASE_URL=http://api.unudev.genesyslite.com
+ARG NUXT_PUBLIC_API_BASE_URL=http://localhost:8080
 ARG NUXT_APP_BASE_URL=/
 ENV NUXT_PUBLIC_API_BASE_URL=${NUXT_PUBLIC_API_BASE_URL}
 ENV NUXT_APP_BASE_URL=${NUXT_APP_BASE_URL}

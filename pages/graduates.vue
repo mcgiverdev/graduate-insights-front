@@ -23,7 +23,10 @@ const {
   setPage,
   setItemsPerPage,
   setSearch,
+  showOnlyPending,
+  setShowOnlyPending,
   deleteGraduate,
+  activateGraduate,
   fetchGraduates,
 } = useGraduateList()
 
@@ -104,12 +107,15 @@ const confirmDelete = async () => {
       :items-per-page="pagination.itemsPerPage"
       :total-items="pagination.totalItems"
       :search="search"
+      :show-only-pending="showOnlyPending"
       @update:page="setPage"
       @update:items-per-page="setItemsPerPage"
       @update:search="setSearch"
+      @update:show-only-pending="setShowOnlyPending"
       @create="openCreateForm"
       @edit="openEditForm"
       @delete="requestDelete"
+      @activate="activateGraduate"
     />
 
     <GraduateFormDialog

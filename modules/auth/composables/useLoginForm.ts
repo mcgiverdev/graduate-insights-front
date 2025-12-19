@@ -4,8 +4,8 @@ import { authModuleService } from '../services/AuthService'
 import type { LoginFormValues, LoginResult } from '../types'
 
 const DEFAULT_VALUES: LoginFormValues = {
-  email: 'xmcgiver12@gmail.com',
-  password: '123456abC',
+  email: '',
+  password: '',
   remember: false,
 }
 

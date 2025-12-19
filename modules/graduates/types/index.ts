@@ -16,6 +16,7 @@ export interface Graduate {
   cv?: string
   cvPath?: string | null
   contrasena?: string
+  validated: boolean
 }
 
 export interface GraduateApiResponse {
@@ -34,12 +35,14 @@ export interface GraduateApiResponse {
   cv?: string | null
   cv_path?: string | null
   contrasena?: string | null
+  validated?: boolean | null
 }
 
 export interface GraduateFilters {
   page?: number
   size?: number
   search?: string
+  validated?: boolean
 }
 
 export interface GraduateFormValues {

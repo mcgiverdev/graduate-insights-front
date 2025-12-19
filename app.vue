@@ -2,6 +2,7 @@
 import { onMounted } from 'vue'
 import { useTheme } from 'vuetify'
 import { useUser } from '@/composables/useUser'
+import AppSnackbar from '@/components/common/AppSnackbar.vue'
 import ScrollToTop from '@core/components/ScrollToTop.vue'
 import initCore from '@core/initCore'
 import { initConfigStore, useConfigStore } from '@core/stores/config'
@@ -51,6 +52,7 @@ definePageMeta({
         <NuxtPage />
       </NuxtLayout>
 
+      <AppSnackbar />
       <ScrollToTop />
     </VApp>
   </VLocaleProvider>

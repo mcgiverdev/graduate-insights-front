@@ -12,11 +12,14 @@ const BASE_ENDPOINT = '/graduate-insights/v1/api/graduate'
 
 class GraduateService extends BaseApiService {
   async fetchList(filters: GraduateFilters = {}): Promise<ListResponse<Graduate>> {
-    const params = {
+    const params: Record<string, string | number | boolean> = {
       search: filters.search ?? '',
       page: filters.page ?? 1,
       size: filters.size ?? 10,
     }
+
+    if (filters.validated !== undefined)
+      params.validated = filters.validated
 
     const response = await this.get<ApiEnvelope<GraduateApiResponse[]>>(BASE_ENDPOINT, { params })
 
@@ -44,6 +47,10 @@ class GraduateService extends BaseApiService {
 
   async remove(id: number) {
     return this.delete<ApiEnvelope<void>>(`${BASE_ENDPOINT}/${id}`)
+  }
+
+  async activate(id: number) {
+    return this.patch<ApiEnvelope<void>>(`${BASE_ENDPOINT}/${id}/activate`)
   }
 }
 
