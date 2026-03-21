@@ -1,0 +1,33 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Estructura de la Librería CRUD
+
+Esta librería implementa un sistema CRUD similar a Laravel Nova/Filament para Vue.js. La estructura principal es:
+
+## Directorios Principales
+
+- `core/`: Contiene las clases base y la lógica principal
+  - [Resource.ts](mdc:library/core/Resource.ts): Clase base para todos los recursos
+  
+- `components/`: Componentes Vue reutilizables
+  - [ResourceManager.vue](mdc:library/components/ResourceManager.vue): Componente principal para gestionar recursos
+  - [FormGenerator.vue](mdc:library/components/FormGenerator.vue): Generador de formularios
+  - [TableGenerator.vue](mdc:library/components/TableGenerator.vue): Generador de tablas
+
+- `fields/`: Definiciones de campos y tipos
+  - [FormField.ts](mdc:library/fields/FormField.ts): Clase base para campos de formulario
+  - [index.ts](mdc:library/fields/index.ts): Exporta todos los tipos de campos disponibles
+
+- `resources/`: Recursos específicos organizados por entidad
+  - `directors/`: Recursos relacionados con directores
+    - [DirectorResource.ts](mdc:library/resources/directors/DirectorResource.ts): Implementación del recurso Director
+
+- `repository/`: Implementación del patrón repositorio
+  - [GenericRepository.ts](mdc:library/repository/GenericRepository.ts): Repositorio genérico para operaciones CRUD
+
+## Punto de Entrada
+
+El archivo [index.ts](mdc:library/index.ts) exporta todos los componentes y tipos necesarios para usar la librería.

@@ -4,6 +4,20 @@ import svgLoader from 'vite-svg-loader'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  // Enable SPA mode for static deployment with nginx
+  ssr: false,
+  nitro: {
+    prerender: {
+      routes: ['/'],
+    },
+  },
+
+  // Configuración del servidor de desarrollo
+  devServer: {
+    port: 3000,
+    host: '0.0.0.0', // Permite conexiones desde cualquier IP
+  },
+
   runtimeConfig: {
     public: {
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:8080',
@@ -11,8 +25,8 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      titleTemplate: '%s - NuxtJS Admin Template',
-      title: 'Vuexy',
+      titleTemplate: '%s - Sistema de Egresados',
+      title: 'Sistema de Egresados',
 
       link: [{
         rel: 'icon',
@@ -20,6 +34,10 @@ export default defineNuxtConfig({
         href: `${process.env.NUXT_APP_BASE_URL}/favicon.ico`,
       }],
     },
+
+    // Configuración para SPA con proxy reverso
+    baseURL: process.env.NUXT_APP_BASE_URL || '/',
+    buildAssetsDir: '/_nuxt/',
   },
 
   devtools: {
@@ -30,6 +48,7 @@ export default defineNuxtConfig({
     '@core/scss/template/index.scss',
     '@styles/styles.scss',
     '@/plugins/iconify/icons.css',
+    'vuetify/lib/styles/main.sass',
   ],
 
   components: {
@@ -45,7 +64,10 @@ export default defineNuxtConfig({
     }],
   },
 
-  plugins: ['@/plugins/vuetify/index.ts', '@/plugins/iconify/index.ts'],
+  plugins: [
+    '@/plugins/vuetify/index.ts',
+    '@/plugins/iconify/index.ts',
+  ],
 
   imports: {
     dirs: ['./@core/utils', './@core/composable/', './plugins/*/composables/*'],
@@ -91,7 +113,16 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    define: { 'process.env': {} },
+    server: {
+      host: '0.0.0.0',
+      port: 3000,
+      allowedHosts: [
+        'panel.unu.test',
+        'localhost',
+        '127.0.0.1',
+        '.unu.test', // Permite cualquier subdominio de unu.test
+      ],
+    },
 
     resolve: {
       alias: {
@@ -122,20 +153,37 @@ export default defineNuxtConfig({
     plugins: [
       svgLoader(),
       vuetify({
+        autoImport: true,
         styles: {
           configFile: 'assets/styles/variables/_vuetify.scss',
         },
       }),
     ],
+
+    ssr: {
+      noExternal: ['vuetify'],
+    },
   },
 
   build: {
     transpile: ['vuetify'],
   },
 
-  modules: ['@vueuse/nuxt', '@nuxtjs/i18n', '@nuxtjs/device', '@pinia/nuxt'],
+  modules: [
+    '@vueuse/nuxt',
+    '@nuxtjs/i18n',
+    '@nuxtjs/device',
+    '@pinia/nuxt',
+    async (options, nuxt) => {
+      nuxt.hooks.hook('vite:extendConfig', config => {
+        if (config.plugins)
+          config.plugins.push(vuetify())
+      })
+    },
+  ],
 
-  router: {
-    middleware: ['auth'],
-  },
+  // Remover middleware global para SPA mode
+  // router: {
+  //   middleware: ['auth'],
+  // },
 })

@@ -40,7 +40,9 @@ export default defineNuxtPlugin(nuxtApp => {
     defaults,
     icons,
     theme: optionTheme,
-
+    date: {
+      adapter: 'vuetify',
+    },
   })
 
   nuxtApp.vueApp.use(vuetify)

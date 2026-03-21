@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { useApi } from '@/composables/useApi'
+import { useUser } from '@/composables/useUser'
 
 interface LoginResponse {
   success: boolean
@@ -15,10 +16,19 @@ interface AuthError {
   errors: string[]
 }
 
+interface LoginResult {
+  success: boolean
+  message: string
+  redirectTo?: {
+    path: string
+    query?: Record<string, unknown>
+  }
+}
+
 export const useAuthService = () => {
   const loading = ref(false)
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<LoginResult> => {
     try {
       loading.value = true
 
@@ -30,38 +40,64 @@ export const useAuthService = () => {
         },
       })
 
-      if (response.success) {
+      // Acceder a los datos de la respuesta correctamente
+      const loginData = response.data
+
+      if (loginData.success) {
         // Guardar el token en una cookie
+        // En producción, solo usar secure si estamos en HTTPS
+        const isSecure = process.client && window.location.protocol === 'https:'
+
         const token = useCookie('accessToken', {
           maxAge: 60 * 60 * 24, // 24 horas
           path: '/',
-          secure: true,
-          sameSite: 'strict',
+          secure: isSecure,
+          sameSite: isSecure ? 'strict' : 'lax',
         })
 
-        token.value = response.data
+        // Guardar el token
+        token.value = loginData.data
 
-        // Obtener la ruta guardada o redirigir al dashboard
-        const returnTo = useCookie('returnTo', {
-          path: '/',
-          secure: true,
-          sameSite: 'strict',
-        })
+        try {
+          // Hacer una nueva instancia de useApi con el token actualizado
+          const userResponse = await $fetch<{ data: { verified: boolean } }>('/graduate-insights/v1/api/auth/me', {
+            baseURL: useRuntimeConfig().public.apiBaseUrl,
+            headers: {
+              Authorization: `Bearer ${loginData.data}`,
+            },
+          })
 
-        const redirectPath = returnTo.value || '/'
+          // Si el usuario no está verificado, redirigir a la página de validación
+          if (!userResponse.data.verified) {
+            return {
+              success: true,
+              message: loginData.message || 'Completa la verificación de tu cuenta.',
+              redirectTo: {
+                path: '/validate-code',
+                query: { email },
+              },
+            }
+          }
 
-        // Limpiar la cookie de retorno
-        returnTo.value = null
+          // Si está verificado, no hacer redirección desde aquí
+          // La redirección se manejará desde la página de login
+          return { success: true, message: loginData.message }
+        }
+        catch (meError) {
+          console.error('Error al obtener información del usuario:', meError)
 
-        // Redirigir a la ruta guardada o al dashboard
-        await navigateTo(redirectPath)
+          // Si falla la obtención del usuario, limpiar el token y mostrar error
+          token.value = null
 
-        return { success: true, message: response.message }
+          return { success: false, message: 'Error al obtener información del usuario' }
+        }
       }
 
-      return { success: false, message: 'Error al iniciar sesión' }
+      return { success: false, message: loginData.message || 'Error al iniciar sesión' }
     }
     catch (error: any) {
+      console.error('Error en login:', error)
+
       const errorData = error.data as LoginError
 
       return { success: false, message: errorData?.error || 'Error al iniciar sesión' }
@@ -80,11 +116,14 @@ export const useAuthService = () => {
         const currentRoute = useRoute()
         const currentPath = currentRoute.fullPath
 
+        // En producción, solo usar secure si estamos en HTTPS
+        const isSecure = process.client && window.location.protocol === 'https:'
+
         // Eliminar el token
         const token = useCookie('accessToken', {
           path: '/',
-          secure: true,
-          sameSite: 'strict',
+          secure: isSecure,
+          sameSite: isSecure ? 'strict' : 'lax',
         })
 
         token.value = null
@@ -92,8 +131,8 @@ export const useAuthService = () => {
         // Guardar la ruta actual en una cookie
         const returnTo = useCookie('returnTo', {
           path: '/',
-          secure: true,
-          sameSite: 'strict',
+          secure: isSecure,
+          sameSite: isSecure ? 'strict' : 'lax',
         })
 
         returnTo.value = currentPath
@@ -109,14 +148,34 @@ export const useAuthService = () => {
   }
 
   const logout = () => {
+    // En producción, solo usar secure si estamos en HTTPS
+    const isSecure = process.client && window.location.protocol === 'https:'
+
     const token = useCookie('accessToken', {
       path: '/',
-      secure: true,
-      sameSite: 'strict',
+      secure: isSecure,
+      sameSite: isSecure ? 'strict' : 'lax',
     })
 
+    // Limpiar el token
     token.value = null
-    navigateTo('/login')
+
+    // También limpiar la cookie returnTo si existe
+    const returnTo = useCookie('returnTo', {
+      path: '/',
+      secure: isSecure,
+      sameSite: isSecure ? 'strict' : 'lax',
+    })
+
+    returnTo.value = null
+
+    // Limpiar información del usuario
+    const { clearUser } = useUser()
+
+    clearUser()
+
+    // Redirigir al login
+    navigateTo('/login', { replace: true, external: false })
   }
 
   return {

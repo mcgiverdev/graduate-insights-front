@@ -1,0 +1,91 @@
+# Autenticación y Roles - Graduate Insights
+
+## Sistema de Roles
+
+El sistema utiliza roles definidos en [composables/useRoles.ts](composables/useRoles.ts):
+
+```typescript
+export const ROLES = {
+  DIRECTOR: 'director',
+  ADMINISTRADOR: 'administrador', 
+  EMPLEADOR: 'empleador',
+  GRADUADO: 'graduado',
+} as const
+```
+
+## Middleware de Autenticación
+
+### Middleware Auth ([middleware/auth.ts](middleware/auth.ts))
+- Verifica que el usuario esté autenticado
+- Redirige a `/login` si no hay token válido
+- Maneja la verificación de usuario
+
+### Middleware Role ([middleware/role.ts](middleware/role.ts))
+- Verifica que el usuario tenga el rol requerido
+- Se usa en páginas específicas por rol
+
+## Navegación Basada en Roles
+
+En [navigation/vertical/index.ts](navigation/vertical/index.ts), usar `requiredRoles`:
+
+```typescript
+{
+  title: 'Página',
+  to: { name: 'page' },
+  icon: { icon: 'tabler-icon' },
+  requiredRoles: [ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
+}
+```
+
+## Patrones de Autenticación
+
+### Login Flow
+1. Usuario envía credenciales
+2. Backend valida y retorna token
+3. Token se guarda en cookie `accessToken`
+4. Se verifica si usuario está verificado
+5. Redirección a página de validación o dashboard
+
+### Token Management
+- Cookie: `accessToken` con 24 horas de vida
+- Configuración: `secure: true, sameSite: 'strict'`
+- Auto-refresh: No implementado (manual refresh)
+
+### Error Handling
+- Error 401: Token inválido, redirigir a login
+- Guardar ruta actual en cookie `returnTo`
+- Limpiar token en logout
+
+## Verificación de Roles en Componentes
+
+```vue
+<script setup>
+import { useRoles } from '@/composables/useRoles'
+
+const { hasRole } = useRoles()
+
+// Verificar rol específico
+if (hasRole(ROLES.DIRECTOR)) {
+  // Lógica para director
+}
+</script>
+```
+
+## Protección de Recursos
+
+Los recursos pueden especificar roles requeridos:
+
+```typescript
+export class MyResource extends Resource {
+  constructor() {
+    super({
+      // ... configuración
+      roles: ['director'], // Solo directores pueden acceder
+    })
+  }
+}
+```
+description:
+globs:
+alwaysApply: false
+---

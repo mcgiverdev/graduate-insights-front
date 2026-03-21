@@ -1,0 +1,93 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Form Generator System Guide
+
+## Core Components
+
+The form generation system consists of three main parts:
+
+1. **Form Generator Component**: [FormGenerator.vue](mdc:library/components/FormGenerator.vue)
+   - Handles form rendering and validation
+   - Uses vee-validate and yup for validation
+   - Supports dynamic field generation based on model definitions
+
+2. **Model Definitions**: Example: [DirectorModel.ts](mdc:library/models/DirectorModel.ts)
+   - Define field types and validation rules
+   - Configure display options for create/edit/list views
+   - Specify API endpoints and data mapping
+
+3. **Type Definitions**: [ModelDefinition.ts](mdc:library/types/ModelDefinition.ts)
+   - Contains TypeScript interfaces for model configuration
+   - Defines field types and display options
+   - Includes API configuration types
+
+## Field Types
+
+The system supports three field types:
+
+1. `text` - Text input fields
+   - Used for general text input
+   - Can be configured as password fields
+   - Supports validation rules like required, email, numeric
+
+2. `date` - Date input fields
+   - Uses native date picker
+   - Validates date format
+   - Supports required validation
+
+3. `enum` - Selection fields
+   - Dropdown selection with predefined options
+   - Options defined in model as items array
+   - Supports required validation
+
+## Validation Rules
+
+Validation rules are defined in the model using the `rules` property:
+
+```typescript
+{
+  correo: {
+    type: 'text',
+    label: 'Correo',
+    create: { 
+      visible: true,
+      rules: ['required', 'email']
+    }
+  }
+}
+```
+
+Available validation rules:
+- `required` - Field cannot be empty
+- `email` - Must be valid email format
+- `numeric` - Must be a number
+- `date` - Must be valid date
+- `min:n` - Minimum length validation
+
+## Usage Example
+
+1. Define your model following [DirectorModel.ts](mdc:library/models/DirectorModel.ts) structure
+2. Use FormGenerator component in your view:
+
+```vue
+<FormGenerator
+  :model-definition="DirectorModel"
+  :initial-data="data"
+  mode="create"
+  @submit="handleSubmit"
+  @cancel="handleCancel"
+/>
+```
+
+## Validation Behavior
+
+- No validation messages on initial render
+- Validates all fields on form submission
+- After first submission attempt:
+  - Shows all validation errors
+  - Validates fields on blur
+- Uses vee-validate + yup for robust validation
+- HTML5 validation is disabled

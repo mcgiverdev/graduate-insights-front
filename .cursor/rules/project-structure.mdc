@@ -1,24 +1,31 @@
----
-description: 
-globs: 
-alwaysApply: false
----
-# Guía de Estructura del Proyecto
+# Graduate Insights Frontend - Estructura del Proyecto
 
-El proyecto está organizado en los siguientes directorios principales:
+Este es un proyecto Nuxt 3 con Vue 3 y TypeScript para el sistema Graduate Insights.
 
-- `components/`: Componentes reutilizables de Vue.
-- `pages/`: Vistas principales y rutas de la aplicación.
-- `layouts/`: Plantillas de diseño para las páginas.
-- `plugins/`: Plugins personalizados de Nuxt.
-- `composables/`: Funciones reutilizables (composition API).
-- `assets/`: Archivos estáticos como imágenes y estilos globales.
-- `public/`: Archivos públicos accesibles directamente.
-- `utils/`: Utilidades y funciones auxiliares.
-- `server/`: Lógica del backend o endpoints API.
-- `@core/`, `@layouts/`, `iconify/`, `vuetify/`, `navigation/`, `views/`: Directorios personalizados para organización interna.
+## Estructura Principal
 
-El punto de entrada de configuración es [`nuxt.config.ts`](mdc:nuxt.config.ts).
+- **@core/**: Componentes y utilidades centrales del sistema
+- **@layouts/**: Configuración y componentes de layouts
+- **library/**: Sistema de recursos y componentes reutilizables
+  - **resources/**: Definiciones de recursos (CRUD)
+  - **components/**: Componentes de la librería (ResourceManager, TableGenerator, etc.)
+  - **core/**: Clases base como Resource
+  - **fields/**: Definiciones de campos de formulario
+- **pages/**: Páginas de la aplicación
+- **composables/**: Composables de Vue para lógica reutilizable
+- **navigation/**: Configuración de menús de navegación
+- **middleware/**: Middleware de autenticación y roles
+- **components/**: Componentes específicos de la aplicación
 
-Para más detalles sobre cada carpeta, consulta la documentación interna o los archivos README si existen.
+## Patrones de Desarrollo
+
+- Usar composables para lógica de negocio
+- Los recursos siguen el patrón Resource de la librería
+- Navegación basada en roles usando ROLES enum
+- Autenticación con tokens JWT en cookies
+
+
+   - Documentar el plan de extracción en el código
+   - Asegurar que los componentes sean lo más genéricos posible
+   - Considerar la retrocompatibilidad al extraer
 

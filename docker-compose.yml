@@ -1,0 +1,37 @@
+services:
+  graduate-insights-front:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: graduate-insights-frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    environment:
+      NODE_ENV: production
+      NUXT_PUBLIC_API_BASE_URL: ${NUXT_PUBLIC_API_BASE_URL:-http://localhost:8080}
+    restart: unless-stopped
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Opcional: Si necesitas una base de datos o otros servicios
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: graduate-insights-db
+  #   environment:
+  #     POSTGRES_DB: graduate_insights
+  #     POSTGRES_USER: admin
+  #     POSTGRES_PASSWORD: password
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+# volumes:
+#   postgres_data:

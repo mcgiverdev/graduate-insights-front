@@ -1,4 +1,7 @@
 <script lang="ts" setup>
+import { computed, useAttrs } from 'vue'
+import { useUniqueId } from '@/composables/useUniqueId'
+
 defineOptions({
   name: 'AppSelect',
   inheritAttrs: false,
@@ -7,7 +10,7 @@ defineOptions({
 const elementId = computed (() => {
   const attrs = useAttrs()
   const _elementIdToken = attrs.id
-  const _id = useId()
+  const _id = useUniqueId()
 
   return _elementIdToken ? `app-select-${_elementIdToken}` : _id
 })

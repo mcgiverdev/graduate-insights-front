@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { useAuthService } from '@/composables/useAuthService'
-import { useSnackbar } from '@/composables/useSnackbar'
-import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
+import LoginForm from '@/modules/auth/components/LoginForm.vue'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
 import authV2LoginIllustrationBorderedLight from '@images/pages/auth-v2-login-illustration-bordered-light.png'
@@ -18,16 +16,6 @@ definePageMeta({
   middleware: ['guest'],
 })
 
-const form = ref({
-  email: '',
-  password: '',
-  remember: false,
-})
-
-const isPasswordVisible = ref(false)
-const { loading, login } = useAuthService()
-const { showSnackbar, snackbar } = useSnackbar()
-
 const authThemeImg = useGenerateImageVariant(
   authV2LoginIllustrationLight,
   authV2LoginIllustrationDark,
@@ -36,49 +24,14 @@ const authThemeImg = useGenerateImageVariant(
   true)
 
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
-
-const handleLogin = async () => {
-  const result = await login(form.value.email, form.value.password)
-
-  showSnackbar({
-    text: result.message,
-    color: result.success ? 'success' : 'error',
-  })
-
-  if (result.success) {
-    // Obtener la ruta guardada o redirigir al dashboard
-    const returnTo = useCookie('returnTo', {
-      path: '/',
-      secure: true,
-      sameSite: 'strict',
-    })
-
-    const redirectPath = returnTo.value || '/'
-
-    // Limpiar la cookie de retorno
-    returnTo.value = null
-
-    // Redirigir a la ruta guardada o al dashboard
-    navigateTo(redirectPath)
-  }
-}
 </script>
 
 <template>
-  <VSnackbar
-    v-model="snackbar.show"
-    :color="snackbar.color"
-    :timeout="snackbar.timeout"
-    location="top"
-  >
-    {{ snackbar.text }}
-  </VSnackbar>
-
   <a href="javascript:void(0)">
     <div class="auth-logo d-flex align-center gap-x-3">
       <VNodeRenderer :nodes="themeConfig.app.logo" />
       <h1 class="auth-title">
-        {{ themeConfig.app.title }}
+        SYSGRAD
       </h1>
     </div>
   </a>
@@ -125,94 +78,14 @@ const handleLogin = async () => {
       >
         <VCardText>
           <h4 class="text-h4 mb-1">
-            Welcome to <span class="text-capitalize">{{ themeConfig.app.title }}</span>! 👋🏻
+            Bienvenido a <span class="text-capitalize">Sistema de Egresados</span>! 👋🏻
           </h4>
           <p class="mb-0">
-            Please sign-in to your account and start the adventure
+            Inicia sesión en tu cuenta para acceder al sistema
           </p>
         </VCardText>
         <VCardText>
-          <VForm @submit.prevent="handleLogin">
-            <VRow>
-              <!-- email -->
-              <VCol cols="12">
-                <AppTextField
-                  v-model="form.email"
-                  autofocus
-                  label="Email or Username"
-                  type="email"
-                  placeholder="johndoe@email.com"
-                />
-              </VCol>
-
-              <!-- password -->
-              <VCol cols="12">
-                <AppTextField
-                  v-model="form.password"
-                  label="Password"
-                  placeholder="············"
-                  :type="isPasswordVisible ? 'text' : 'password'"
-                  autocomplete="password"
-                  :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
-                  @click:append-inner="isPasswordVisible = !isPasswordVisible"
-                />
-
-                <div class="d-flex align-center flex-wrap justify-space-between my-6">
-                  <VCheckbox
-                    v-model="form.remember"
-                    label="Remember me"
-                  />
-                  <a
-                    class="text-primary"
-                    href="javascript:void(0)"
-                  >
-                    Forgot Password?
-                  </a>
-                </div>
-
-                <VBtn
-                  block
-                  type="submit"
-                  :loading="loading"
-                >
-                  Login
-                </VBtn>
-              </VCol>
-
-              <!-- create account -->
-              <VCol
-                cols="12"
-                class="text-body-1 text-center"
-              >
-                <span class="d-inline-block">
-                  New on our platform?
-                </span>
-                <a
-                  class="text-primary ms-1 d-inline-block text-body-1"
-                  href="javascript:void(0)"
-                >
-                  Create an account
-                </a>
-              </VCol>
-
-              <VCol
-                cols="12"
-                class="d-flex align-center"
-              >
-                <VDivider />
-                <span class="mx-4">or</span>
-                <VDivider />
-              </VCol>
-
-              <!-- auth providers -->
-              <VCol
-                cols="12"
-                class="text-center"
-              >
-                <AuthProvider />
-              </VCol>
-            </VRow>
-          </VForm>
+          <LoginForm @success="() => navigateTo('/', { replace: true })" />
         </VCardText>
       </VCard>
     </VCol>

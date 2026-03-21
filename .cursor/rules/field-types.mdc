@@ -1,0 +1,58 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Tipos de Campos Disponibles
+
+La librería proporciona varios tipos de campos para construir formularios y tablas. Todos los campos se importan desde [fields/index.ts](mdc:library/fields/index.ts).
+
+## Campos Básicos
+
+```typescript
+// Texto
+Fields.text('field_name')
+  .label('Label')
+  .required()
+  .placeholder('Placeholder')
+  .sortable()
+  .searchable()
+
+// Select
+Fields.select('field_name')
+  .label('Label')
+  .options([
+    { value: 'value', title: 'Title' }
+  ])
+  .required()
+
+// Fecha
+Fields.date('field_name')
+  .label('Label')
+  .required()
+```
+
+## Configuración de Visibilidad
+
+Cada campo puede configurar su visibilidad en diferentes contextos:
+
+```typescript
+Fields.text('field_name')
+  .hideOnCreate()   // Ocultar en formulario de creación
+  .hideOnUpdate()   // Ocultar en formulario de actualización
+  .hideOnIndex()    // Ocultar en tabla de listado
+```
+
+## Validación
+
+Los campos soportan validaciones básicas:
+
+```typescript
+Fields.text('field_name')
+  .required()       // Campo requerido
+  .email()         // Validar formato de email
+  .numeric()       // Solo números
+  .min(8)          // Longitud/valor mínimo
+```
+
+Ver [DirectorResource.ts](mdc:library/resources/directors/DirectorResource.ts) para ejemplos de uso de todos los tipos de campos.

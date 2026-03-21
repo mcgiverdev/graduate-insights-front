@@ -1,0 +1,112 @@
+# Patrón de Recursos - Graduate Insights
+
+## Estructura de Recursos
+
+Los recursos deben seguir este patrón basado en [JobOffersResource.ts](library/resources/jobs/JobOffersResource.ts):
+
+```typescript
+import { type ApiConfig, Resource } from '../../core/Resource'
+import { Fields } from '../../fields'
+import type { FormField } from '../../fields/FormField'
+
+export interface EntityName {
+  // Campos en snake_case
+  entity_id: number
+  field_name: string
+  // Relaciones
+  related_id: number
+  related_name: string
+}
+
+export class EntityResource extends Resource {
+  constructor() {
+    super({
+      name: 'entities',
+      resourcePath: '/graduate-insights/v1/api/entity',
+      idField: 'entity_id',
+      perPage: 10,
+      sortable: true,
+      filterable: true,
+    })
+
+    this.setLabels('Entidad', 'Entidades')
+  }
+
+  protected override form(): FormField[] {
+    return [
+      // ID field (hidden in create/update)
+      Fields.text('entity_id')
+        .label('ID')
+        .hideOnCreate()
+        .hideOnUpdate()
+        .sortable(),
+
+      // Text fields
+      Fields.text('field_name')
+        .label('Campo')
+        .required()
+        .sortable()
+        .searchable()
+        .placeholder('Ingrese el valor'),
+
+      // Textarea for content
+      Fields.textarea('content_field')
+        .label('Contenido')
+        .required()
+        .searchable()
+        .placeholder('Ingrese el contenido'),
+
+      // Belongs relationships
+      Fields.belongs('related_id')
+        .label('Relación')
+        .required()
+        .sortable()
+        .hideOnIndex()
+        .apiEndpoint('/graduate-insights/v1/api/related/list')
+        .displayField('value')
+        .valueField('key'),
+
+      // Select fields
+      Fields.select('estado')
+        .label('Estado')
+        .required()
+        .sortable()
+        .options([
+          { value: '1', title: 'Activo' },
+          { value: '0', title: 'Inactivo' },
+        ])
+        .default('1'),
+    ]
+  }
+
+  public override configureApi(): Partial<ApiConfig> {
+    return {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      mapResponse: (d: any): EntityName => ({
+        entity_id: d.entity_id,
+        field_name: d.field_name,
+        related_id: d.related_id,
+        related_name: d.related_name,
+      }),
+    }
+  }
+}
+```
+
+## Reglas Importantes
+
+1. **Campos en snake_case**: Todos los campos de la interfaz deben usar snake_case
+2. **Relaciones belongs**: Usar `Fields.belongs()` para relaciones foráneas
+3. **ID oculto**: El campo ID debe estar oculto en create/update
+4. **Estado estándar**: Usar select con opciones Activo/Inactivo
+5. **Labels en español**: Todas las etiquetas deben estar en español
+6. **Validaciones**: Campos requeridos deben tener `required: true`
+7. **Búsqueda**: Campos de texto deben ser `searchable()`
+8. **Ordenamiento**: Campos importantes deben ser `sortable()`
+description:
+globs:
+alwaysApply: false
+---

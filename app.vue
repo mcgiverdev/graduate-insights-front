@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { useTheme } from 'vuetify'
+import { useUser } from '@/composables/useUser'
+import AppSnackbar from '@/components/common/AppSnackbar.vue'
 import ScrollToTop from '@core/components/ScrollToTop.vue'
 import initCore from '@core/initCore'
 import { initConfigStore, useConfigStore } from '@core/stores/config'
@@ -16,6 +19,25 @@ const { isMobile } = useDevice()
 if (isMobile)
   configStore.appContentLayoutNav = 'vertical'
 
+// Inicializar información del usuario
+const { fetchUser } = useUser()
+
+onMounted(() => {
+  // Obtener información del usuario si está autenticado
+  const token = useCookie('accessToken', {
+    path: '/',
+    secure: true,
+    sameSite: 'strict',
+  })
+
+  if (token.value) {
+    fetchUser().catch(() => {
+      // Si falla la petición, posiblemente el token sea inválido
+      console.log('Error al obtener información del usuario')
+    })
+  }
+})
+
 // Middleware global
 definePageMeta({
   middleware: ['auth'],
@@ -30,6 +52,7 @@ definePageMeta({
         <NuxtPage />
       </NuxtLayout>
 
+      <AppSnackbar />
       <ScrollToTop />
     </VApp>
   </VLocaleProvider>

@@ -1,0 +1,38 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Estilos y Temas
+
+La aplicación utiliza un sistema de estilos basado en SCSS y Vuetify con soporte para temas personalizados.
+
+## Estructura de Estilos
+Los estilos se organizan en:
+
+1. [@core/scss](@core/scss):
+   - Base: Estilos fundamentales
+   - Libs: Personalizaciones de librerías
+   - Template: Estilos específicos de plantilla
+
+2. [assets/styles](assets/styles):
+   - Variables globales
+   - Estilos específicos de la aplicación
+
+## Temas Vuetify
+La configuración de Vuetify se encuentra en:
+- [vuetify/theme.ts](vuetify/theme.ts): Definición de temas
+- [vuetify/defaults.ts](vuetify/defaults.ts): Configuración por defecto
+- [vuetify/icons.ts](vuetify/icons.ts): Configuración de iconos
+
+## Convenciones de Estilo
+1. Usar variables SCSS definidas en _variables.scss
+2. Seguir la estructura de componentes de Vuetify
+3. Mantener la consistencia con los temas claro/oscuro
+4. Utilizar los mixins y utilidades proporcionados por @core
+
+## Personalización
+Para personalizar componentes Vuetify:
+1. Crear un archivo en @core/scss/libs/vuetify
+2. Importar en el índice principal
+3. Usar las variables de tema de Vuetify

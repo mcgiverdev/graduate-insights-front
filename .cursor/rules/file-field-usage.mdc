@@ -1,0 +1,67 @@
+# Campos de Archivo - Graduate Insights
+
+## Implementación de Campos de Archivo
+
+Para agregar un campo de archivo a un recurso, usa el método `Fields.file()`:
+
+```typescript
+Fields.file('campo_archivo')
+  .label('Archivo')
+  .accept(['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'])
+  .maxSize(5120) // 5MB en KB
+  .placeholder('Seleccionar archivo')
+  .hideOnIndex() // Ocultar en la tabla de listado
+```
+
+## Configuración de Campos de Archivo
+
+### Métodos disponibles:
+- `accept(mimeTypes: string[])`: Tipos de archivo aceptados
+- `maxSize(sizeInKB: number)`: Tamaño máximo en KB
+- `placeholder(text: string)`: Texto del placeholder
+- `hideOnIndex()`: Ocultar en la vista de tabla
+- `required()`: Campo obligatorio
+
+### Tipos de archivo comunes:
+- Documentos: `['.pdf', '.doc', '.docx']`
+- Imágenes: `['.jpg', '.jpeg', '.png', '.gif']`
+- Todos: `['*']`
+
+## Manejo en el Backend
+
+El archivo se enviará como `@RequestParam` en Spring Boot:
+
+```java
+@PostMapping
+public ResponseEntity<?> create(
+    @RequestParam("nombre") String nombre,
+    @RequestParam("contenido") String contenido,
+    @RequestParam(value = "archivo_adjunto", required = false) MultipartFile archivo
+) {
+    // Procesar archivo
+}
+```
+
+## Interfaz TypeScript
+
+Incluir el campo en la interfaz del recurso:
+
+```typescript
+export interface MyEntity {
+  id: number
+  nombre: string
+  archivo_adjunto?: File | string | null
+}
+```
+
+## Consideraciones
+
+1. **Tamaño máximo**: Configurar según necesidades (por defecto 10MB)
+2. **Tipos permitidos**: Especificar tipos específicos por seguridad
+3. **Validación**: El campo se valida automáticamente
+4. **FormData**: Se envía automáticamente como FormData cuando hay archivos
+5. **Headers**: El Content-Type se ajusta automáticamente para FormData
+description:
+globs:
+alwaysApply: false
+---

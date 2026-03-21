@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import FlatPickr from 'vue-flatpickr-component'
 import { useTheme } from 'vuetify'
+import { useUniqueId } from '@/composables/useUniqueId'
 
 // @ts-expect-error There won't be declaration file for it
 import { VField, filterFieldProps, makeVFieldProps } from 'vuetify/lib/components/VField/VField'
@@ -126,7 +127,7 @@ watch(() => props, () => {
 const elementId = computed (() => {
   const _elementIdToken = fieldProps.id || fieldProps.label || inputProps.value.id
 
-  const _id = useId()
+  const _id = useUniqueId()
 
   return _elementIdToken ? `app-picker-field-${_elementIdToken}` : _id
 })
@@ -214,10 +215,10 @@ const elementId = computed (() => {
 
 <style lang="scss">
 @use "@core/scss/template/mixins" as templateMixins;
+@use "@core/scss/base/mixins";
 
 /* stylelint-disable no-descending-specificity */
-@use "flatpickr/dist/flatpickr.css";
-@use "@core/scss/base/mixins";
+@import "flatpickr/dist/flatpickr.css";
 
 .flat-picker-custom-style {
   position: absolute;
