@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { navigateTo } from '#imports'
-import { useRegisterForm } from '@/modules/auth/composables/useRegisterForm'
+import { useRegisterForm } from '@/src/features/auth'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
 import authV2LoginIllustrationBorderedLight from '@images/pages/auth-v2-login-illustration-bordered-light.png'

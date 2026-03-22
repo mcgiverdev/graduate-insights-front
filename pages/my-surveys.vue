@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import RoleGuard from '@/components/RoleGuard.vue'
 import { ROLES } from '@/composables/useRoles'
 import { useSnackbar } from '@/composables/useSnackbar'
-import GraduateSurveyList from '@/modules/graduate-surveys/components/GraduateSurveyList.vue'
-import SurveyForm from '@/modules/graduate-surveys/components/SurveyForm.vue'
-import SurveyResults from '@/modules/graduate-surveys/components/SurveyResults.vue'
-import type { GraduateSurveyListItem } from '@/modules/graduate-surveys/types'
+import {
+  GraduateSurveyList,
+  SurveyForm,
+  SurveyResults,
+  useMySurveysPage,
+} from '@/src/features/graduate-surveys'
 
 definePageMeta({
   middleware: ['auth'],
@@ -15,32 +16,14 @@ definePageMeta({
 
 // Composables
 const { snackbar } = useSnackbar()
-
-// Estado de la página
-const currentView = ref<'list' | 'take' | 'results'>('list')
-const selectedSurvey = ref<GraduateSurveyListItem | null>(null)
-
-// Navegación entre vistas
-function showSurveyForm(survey: GraduateSurveyListItem) {
-  selectedSurvey.value = survey
-  currentView.value = 'take'
-}
-
-function showSurveyResults(survey: GraduateSurveyListItem) {
-  selectedSurvey.value = survey
-  currentView.value = 'results'
-}
-
-function backToList() {
-  currentView.value = 'list'
-  selectedSurvey.value = null
-}
-
-function handleSurveyCompleted() {
-  // El composable ya actualiza el estado automáticamente después del submit
-  // Solo necesitamos volver a la vista de lista
-  backToList()
-}
+const {
+  currentView,
+  selectedSurvey,
+  showSurveyForm,
+  showSurveyResults,
+  backToList,
+  handleSurveyCompleted,
+} = useMySurveysPage()
 </script>
 
 <template>

@@ -52,6 +52,9 @@ ENV APP_VERSION=$APP_VERSION
 ENV BUILD_DATE=$BUILD_DATE
 ENV GIT_COMMIT=$GIT_COMMIT
 
+# Regenera assets de iconify en la etapa de build para evitar faltantes en contenedor limpio.
+RUN pnpm run build:icons
+
 # Ejecutar nuxt prepare
 RUN pnpm nuxt prepare
 

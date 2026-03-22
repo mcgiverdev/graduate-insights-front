@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
 import VConfirmDialog from '@/components/dialogs/VConfirmDialog.vue'
-import EmployerFormDialog from '@/modules/employers/components/EmployerFormDialog.vue'
-import EmployerTable from '@/modules/employers/components/EmployerTable.vue'
-import { useEmployerForm } from '@/modules/employers/composables/useEmployerForm'
-import { useEmployerList } from '@/modules/employers/composables/useEmployerList'
-import type { Employer, EmployerFormValues } from '@/modules/employers/types'
-import { toPayload } from '@/modules/employers/utils/mappers'
-import { employerService } from '@/modules/employers/services/EmployerService'
+import {
+  EmployerFormDialog,
+  EmployerTable,
+  useEmployerEditor,
+  useEmployerForm,
+  useEmployerList,
+} from '@/src/features/employers'
 
 definePageMeta({
   middleware: ['auth', 'role'],
@@ -29,56 +28,20 @@ const {
 
 const { submitting, serverErrors, saveEmployer, clearServerErrors } = useEmployerForm()
 
-const isFormVisible = ref(false)
-const selectedEmployer = ref<Employer | null>(null)
 const isConfirmVisible = ref(false)
 const employerIdToDelete = ref<number | null>(null)
-const { showSnackbar } = useSnackbar()
-
-const openCreateForm = () => {
-  selectedEmployer.value = null
-  clearServerErrors()
-  isFormVisible.value = true
-}
-
-const openEditForm = async (employerId: number) => {
-  clearServerErrors()
-  selectedEmployer.value = null
-  isFormVisible.value = true
-
-  try {
-    const employer = await employerService.getById(employerId)
-
-    if (!employer) {
-      showSnackbar({ text: 'No se encontró el empleador seleccionado', color: 'error' })
-      isFormVisible.value = false
-      return
-    }
-
-    selectedEmployer.value = employer
-  }
-  catch (error) {
-    console.error('Error al obtener empleador', error)
-    showSnackbar({ text: 'No se pudo cargar el empleador', color: 'error' })
-    isFormVisible.value = false
-  }
-}
-
-const handleFormSubmit = async (values: EmployerFormValues) => {
-  const payload = toPayload(values)
-  const result = await saveEmployer(payload, selectedEmployer.value?.employerId)
-
-  if (result.success) {
-    isFormVisible.value = false
-    selectedEmployer.value = null
-    await fetchEmployers()
-  }
-}
-
-const handleDialogClosed = () => {
-  clearServerErrors()
-  selectedEmployer.value = null
-}
+const {
+  isFormVisible,
+  selectedEmployer,
+  openCreateForm,
+  openEditForm,
+  handleFormSubmit,
+  handleDialogClosed,
+} = useEmployerEditor({
+  fetchEmployers,
+  saveEmployer,
+  clearServerErrors,
+})
 
 const requestDelete = (employerId: number) => {
   employerIdToDelete.value = employerId

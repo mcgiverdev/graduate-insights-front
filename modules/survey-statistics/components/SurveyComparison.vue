@@ -11,7 +11,7 @@ import {
 import { computed, onMounted, ref } from 'vue'
 import { Bar } from 'vue-chartjs'
 import { useSnackbar } from '@/composables/useSnackbar'
-import { useSurveyService } from '@/composables/useSurveyService'
+import { useSurveyService } from '@/src/features/surveys'
 import { useSurveyStatisticsService } from '@/modules/survey-statistics/composables/useSurveyStatisticsService'
 
 // Chart.js imports
@@ -222,11 +222,21 @@ onMounted(() => {
           <VTable>
             <thead>
               <tr>
-                <th>Encuesta</th>
-                <th>Total Respuestas</th>
-                <th>Tasa de Respuesta</th>
-                <th>Tasa de Completitud</th>
-                <th>Estado</th>
+                <th scope="col">
+                  Encuesta
+                </th>
+                <th scope="col">
+                  Total Respuestas
+                </th>
+                <th scope="col">
+                  Tasa de Respuesta
+                </th>
+                <th scope="col">
+                  Tasa de Completitud
+                </th>
+                <th scope="col">
+                  Estado
+                </th>
               </tr>
             </thead>
             <tbody>

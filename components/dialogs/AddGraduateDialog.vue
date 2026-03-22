@@ -3,7 +3,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { Field, Form } from 'vee-validate'
 import { ref, watch } from 'vue'
 import * as z from 'zod'
-import { useGraduateService } from '@/composables/useGraduateService'
+import { useGraduateService } from '@/src/features/graduates'
 
 interface Emit {
   (e: 'update:isDialogOpen', value: boolean): void

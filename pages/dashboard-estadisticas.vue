@@ -11,12 +11,10 @@ import {
   Title,
   Tooltip,
 } from 'chart.js'
-import { computed, onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import { Bar, Line, Pie } from 'vue-chartjs'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
-import { useSnackbar } from '@/composables/useSnackbar'
-import { useSurveyStatisticsService } from '@/modules/survey-statistics/composables/useSurveyStatisticsService'
-import StatisticsButton from '@/modules/survey-statistics/components/StatisticsButton.vue'
+import { StatisticsButton, useSurveyStatisticsDashboard } from '@/src/features/survey-statistics'
 
 // Chart.js registration
 ChartJS.register(
@@ -43,137 +41,21 @@ useHead({
 })
 
 // Composables
-const { dashboardData, loadingDashboard, fetchDashboard } = useSurveyStatisticsService()
-const { showSnackbar } = useSnackbar()
-
-// Filtros - solo año de graduación
-const filters = ref({
-  graduation_year: undefined as number | undefined,
-})
-
-// Datos para el selector de años
-const graduationYears = ref([
-  { title: 'Todos los años', value: null },
-  { title: '2024', value: 2024 },
-  { title: '2023', value: 2023 },
-  { title: '2022', value: 2022 },
-  { title: '2021', value: 2021 },
-  { title: '2020', value: 2020 },
-])
-
-// Chart options mejoradas
-const chartOptions = computed(() => ({
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      position: 'top' as const,
-      labels: {
-        usePointStyle: true,
-        padding: 20,
-      },
-    },
-    tooltip: {
-      mode: 'index' as const,
-      intersect: false,
-    },
-  },
-  scales: {
-    y: {
-      beginAtZero: true,
-      grid: {
-        color: 'rgba(0, 0, 0, 0.1)',
-      },
-    },
-    x: {
-      grid: {
-        display: false,
-      },
-    },
-  },
-}))
-
-const pieChartOptions = computed(() => ({
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      position: 'right' as const,
-      labels: {
-        usePointStyle: true,
-        padding: 15,
-      },
-    },
-  },
-}))
-
-// Methods
-function formatChartData(chart: any) {
-  return {
-    labels: chart.labels,
-    datasets: chart.datasets.map((dataset: any) => ({
-      ...dataset,
-      backgroundColor: dataset.background_colors || dataset.background_color,
-      borderColor: dataset.border_color,
-      borderWidth: dataset.border_width || 2,
-      tension: chart.chart_type === 'line' ? 0.4 : undefined,
-    })),
-  }
-}
-
-function getTrendIcon(trend: string) {
-  switch (trend) {
-    case 'up': return 'tabler-trending-up'
-    case 'down': return 'tabler-trending-down'
-    default: return 'tabler-trending-up'
-  }
-}
-
-function getTrendColor(trend: string) {
-  switch (trend) {
-    case 'up': return 'success'
-    case 'down': return 'error'
-    default: return 'grey'
-  }
-}
-
-function getSurveyStatusColor(status: string) {
-  switch (status) {
-    case 'ACTIVE': return 'success'
-    case 'COMPLETED': return 'info'
-    case 'PAUSED': return 'warning'
-    case 'CLOSED': return 'error'
-    case 'DRAFT': return 'grey'
-    default: return 'grey'
-  }
-}
-
-function getSurveyTypeIcon(surveyType: string) {
-  switch (surveyType) {
-    case 'EMPLOYMENT': return 'tabler-briefcase'
-    case 'ACADEMIC': return 'tabler-school'
-    case 'SATISFACTION': return 'tabler-heart'
-    case 'ENTREPRENEURSHIP': return 'tabler-rocket'
-    default: return 'tabler-file-text'
-  }
-}
-
-async function loadDashboard() {
-  const result = await fetchDashboard(filters.value)
-  if (!result.success) {
-    showSnackbar({
-      text: result.message || 'Error al cargar el dashboard',
-      color: 'error',
-    })
-  }
-}
-
-function clearFilters() {
-  filters.value = {
-    graduation_year: undefined,
-  }
-  loadDashboard()
-}
+const {
+  dashboardData,
+  loadingDashboard,
+  filters,
+  graduationYears,
+  chartOptions,
+  pieChartOptions,
+  formatChartData,
+  getTrendIcon,
+  getTrendColor,
+  getSurveyStatusColor,
+  getSurveyTypeIcon,
+  loadDashboard,
+  clearFilters,
+} = useSurveyStatisticsDashboard()
 
 onMounted(() => {
   loadDashboard()

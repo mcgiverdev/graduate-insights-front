@@ -4,7 +4,7 @@ import QuestionBuilder from './QuestionBuilder.vue'
 import SurveyPreview from './SurveyPreview.vue'
 import AppDateTimePicker from '@/@core/components/app-form-elements/AppDateTimePicker.vue'
 import { useSnackbar } from '@/composables/useSnackbar'
-import { useSurveyService } from '@/composables/useSurveyService'
+import { useSurveyService } from '../composables/useSurveyService'
 import { type CreateSurveyRequest, type Survey, type SurveyQuestion, SurveyStatus, type SurveyTypeOption } from '@/modules/surveys/types'
 import { getCurrentDateISO } from '@/utils/dateUtils'
 

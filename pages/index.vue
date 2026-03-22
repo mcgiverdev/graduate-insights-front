@@ -14,11 +14,9 @@ import {
 import { computed, ref, watch } from 'vue'
 import { Bar, Line, Pie } from 'vue-chartjs'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
-import { useGraduateDashboard } from '@/composables/useGraduateDashboard'
+import { useGraduateDashboard } from '@/src/features/graduate-dashboard'
 import { useRoles } from '@/composables/useRoles'
-import { useSnackbar } from '@/composables/useSnackbar'
-import { useSurveyStatisticsService } from '@/modules/survey-statistics/composables/useSurveyStatisticsService'
-import StatisticsButton from '@/modules/survey-statistics/components/StatisticsButton.vue'
+import { StatisticsButton, useSurveyStatisticsDashboard } from '@/src/features/survey-statistics'
 import { formatReadableDate } from '@/utils/dateUtils'
 
 // Chart.js registration
@@ -46,8 +44,21 @@ useHead({
 })
 
 // Composables
-const { dashboardData, loadingDashboard, fetchDashboard } = useSurveyStatisticsService()
-const { showSnackbar } = useSnackbar()
+const {
+  dashboardData,
+  loadingDashboard,
+  filters,
+  graduationYears,
+  chartOptions,
+  pieChartOptions,
+  formatChartData,
+  getTrendIcon,
+  getTrendColor,
+  getSurveyStatusColor,
+  getSurveyTypeIcon,
+  loadDashboard: loadDirectorDashboard,
+  clearFilters: clearDirectorFilters,
+} = useSurveyStatisticsDashboard()
 const { isDirector, isEmployer, isGraduate, role, user } = useRoles()
 const {
   loadGraduateDashboard,
@@ -60,21 +71,6 @@ const {
   activeJobsCount,
   totalJobsCount,
 } = useGraduateDashboard()
-
-// Filtros - solo año de graduación para directores
-const filters = ref({
-  graduation_year: undefined as number | undefined,
-})
-
-// Datos para el selector de años
-const graduationYears = ref([
-  { title: 'Todos los años', value: null },
-  { title: '2024', value: 2024 },
-  { title: '2023', value: 2023 },
-  { title: '2022', value: 2022 },
-  { title: '2021', value: 2021 },
-  { title: '2020', value: 2020 },
-])
 
 const graduateDashboardLoaded = ref(false)
 const surveyPreview = computed(() => {
@@ -120,52 +116,6 @@ function summarize(text: string, limit = 140) {
   return text.length > limit ? `${text.slice(0, limit)}…` : text
 }
 
-// Chart options mejoradas
-const chartOptions = computed(() => ({
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      position: 'top' as const,
-      labels: {
-        usePointStyle: true,
-        padding: 20,
-      },
-    },
-    tooltip: {
-      mode: 'index' as const,
-      intersect: false,
-    },
-  },
-  scales: {
-    y: {
-      beginAtZero: true,
-      grid: {
-        color: 'rgba(0, 0, 0, 0.1)',
-      },
-    },
-    x: {
-      grid: {
-        display: false,
-      },
-    },
-  },
-}))
-
-const pieChartOptions = computed(() => ({
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      position: 'right' as const,
-      labels: {
-        usePointStyle: true,
-        padding: 15,
-      },
-    },
-  },
-}))
-
 // Dashboard title según el rol
 const dashboardTitle = computed(() => {
   if (isDirector.value)
@@ -190,79 +140,13 @@ const dashboardSubtitle = computed(() => {
   return 'Bienvenido al sistema Graduate Insights'
 })
 
-// Methods
-function formatChartData(chart: any) {
-  return {
-    labels: chart.labels,
-    datasets: chart.datasets.map((dataset: any) => ({
-      ...dataset,
-      backgroundColor: dataset.background_colors || dataset.background_color,
-      borderColor: dataset.border_color,
-      borderWidth: dataset.border_width || 2,
-      tension: chart.chart_type === 'line' ? 0.4 : undefined,
-    })),
-  }
-}
-
-function getTrendIcon(trend: string) {
-  switch (trend) {
-    case 'up': return 'tabler-trending-up'
-    case 'down': return 'tabler-trending-down'
-    default: return 'tabler-trending-up'
-  }
-}
-
-function getTrendColor(trend: string) {
-  switch (trend) {
-    case 'up': return 'success'
-    case 'down': return 'error'
-    default: return 'grey'
-  }
-}
-
-function getSurveyStatusColor(status: string) {
-  switch (status) {
-    case 'ACTIVE': return 'success'
-    case 'COMPLETED': return 'info'
-    case 'PAUSED': return 'warning'
-    case 'CLOSED': return 'error'
-    case 'DRAFT': return 'grey'
-    default: return 'grey'
-  }
-}
-
-function getSurveyTypeIcon(surveyType: string) {
-  switch (surveyType) {
-    case 'EMPLOYMENT': return 'tabler-briefcase'
-    case 'ACADEMIC': return 'tabler-school'
-    case 'SATISFACTION': return 'tabler-heart'
-    case 'ENTREPRENEURSHIP': return 'tabler-rocket'
-    default: return 'tabler-file-text'
-  }
-}
-
 async function loadDashboard(useFilters = false) {
-  if (isDirector.value) {
-    // Si useFilters es false, cargar sin filtros. Si es true, usar los filtros seleccionados
-    const filtersToApply = useFilters ? filters.value : {}
-    const result = await fetchDashboard(filtersToApply)
-
-    if (!result.success) {
-      showSnackbar({
-        text: result.message || 'Error al cargar el dashboard',
-        color: 'error',
-      })
-    }
-  }
+  if (isDirector.value)
+    await loadDirectorDashboard(useFilters)
 }
 
-function clearFilters() {
-  filters.value = {
-    graduation_year: undefined,
-  }
-
-  // Al limpiar filtros, cargar sin filtros
-  loadDashboard(false)
+async function clearFilters() {
+  await clearDirectorFilters()
 }
 
 // Watch para cargar dashboard cuando el rol se resuelve

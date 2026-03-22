@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import ProfileDetailsForm from '@/modules/profile/components/ProfileDetailsForm.vue'
-import PasswordChangeCard from '@/modules/profile/components/PasswordChangeCard.vue'
+import { PasswordChangeCard, ProfileDetailsForm } from '@/src/features/profile'
 
 definePageMeta({
   middleware: ['auth'],

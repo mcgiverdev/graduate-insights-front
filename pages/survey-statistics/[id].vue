@@ -9,11 +9,13 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { Doughnut } from 'vue-chartjs'
 import { useRoute } from 'vue-router'
 import { useSnackbar } from '@/composables/useSnackbar'
-import { useSurveyStatisticsService } from '@/modules/survey-statistics/composables/useSurveyStatisticsService'
-import QuestionChartViewer from '@/modules/survey-statistics/components/QuestionChartViewer.vue'
-import QuestionStatistics from '@/modules/survey-statistics/components/QuestionStatistics.vue'
-import SimpleTrendsViewer from '@/modules/survey-statistics/components/SimpleTrendsViewer.vue'
-import StatisticsOverview from '@/modules/survey-statistics/components/StatisticsOverview.vue'
+import {
+  QuestionChartViewer,
+  QuestionStatistics,
+  SimpleTrendsViewer,
+  StatisticsOverview,
+  useSurveyStatisticsService,
+} from '@/src/features/survey-statistics'
 import { formatDateTime } from '@/utils/dateUtils'
 import { getDoughnutChartConfig } from '@core/libs/chartjs/chartjsConfig'
 

@@ -3,7 +3,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { Field, Form } from 'vee-validate'
 import { ref, watch } from 'vue'
 import * as z from 'zod'
-import { useEmployerService } from '@/composables/useEmployerService'
+import { useEmployerService } from '@/src/features/employers'
 
 interface Emit {
   (e: 'update:isDialogOpen', value: boolean): void
@@ -115,6 +115,7 @@ const onSubmit = async (values: any, { resetForm, setErrors }: any) => {
     resetForm()
   }
   catch (error) {
+    console.error('Error al procesar formulario de empleador:', error)
     snackbarMessage.value = 'Error al procesar el formulario.'
     isSnackbarVisible.value = true
   }

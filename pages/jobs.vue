@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
 import VConfirmDialog from '@/components/dialogs/VConfirmDialog.vue'
-import JobFormDialog from '@/modules/jobs/components/JobFormDialog.vue'
-import JobTable from '@/modules/jobs/components/JobTable.vue'
-import { useJobForm } from '@/modules/jobs/composables/useJobForm'
-import { useJobList } from '@/modules/jobs/composables/useJobList'
-import { useJobOptions } from '@/modules/jobs/composables/useJobOptions'
-import type { Job, JobFormValues } from '@/modules/jobs/types'
-import { toPayload } from '@/modules/jobs/utils/mappers'
-import { jobService } from '@/modules/jobs/services/JobService'
+import {
+  JobFormDialog,
+  JobTable,
+  useJobEditor,
+  useJobForm,
+  useJobList,
+  useJobOptions,
+} from '@/src/features/jobs'
 
 definePageMeta({
   layout: 'default',
@@ -30,63 +29,22 @@ const {
 const { submitting, serverErrors, saveJob, clearServerErrors } = useJobForm()
 const { graduateOptions, loadingOptions, loadOptions } = useJobOptions()
 
-const isFormVisible = ref(false)
-const selectedJob = ref<Job | null>(null)
 const isConfirmVisible = ref(false)
 const jobIdToDelete = ref<number | null>(null)
-const { showSnackbar } = useSnackbar()
-
-const ensureOptionsLoaded = async () => {
-  if (!graduateOptions.value.length)
-    await loadOptions()
-}
-
-const openCreateForm = async () => {
-  await ensureOptionsLoaded()
-  selectedJob.value = null
-  clearServerErrors()
-  isFormVisible.value = true
-}
-
-const openEditForm = async (jobId: number) => {
-  await ensureOptionsLoaded()
-  clearServerErrors()
-  selectedJob.value = null
-  isFormVisible.value = true
-
-  try {
-    const job = await jobService.getById(jobId)
-
-    if (!job) {
-      showSnackbar({ text: 'No se encontró el trabajo seleccionado', color: 'error' })
-      isFormVisible.value = false
-      return
-    }
-
-    selectedJob.value = job
-  }
-  catch (error) {
-    console.error('Error al obtener trabajo', error)
-    showSnackbar({ text: 'No se pudo cargar el trabajo', color: 'error' })
-    isFormVisible.value = false
-  }
-}
-
-const handleFormSubmit = async (values: JobFormValues) => {
-  const payload = toPayload(values)
-  const result = await saveJob(payload, selectedJob.value?.jobId)
-
-  if (result.success) {
-    isFormVisible.value = false
-    selectedJob.value = null
-    await fetchJobs()
-  }
-}
-
-const handleDialogClosed = () => {
-  clearServerErrors()
-  selectedJob.value = null
-}
+const {
+  isFormVisible,
+  selectedJob,
+  openCreateForm,
+  openEditForm,
+  handleFormSubmit,
+  handleDialogClosed,
+} = useJobEditor({
+  fetchJobs,
+  saveJob,
+  clearServerErrors,
+  graduateOptionsCount: () => graduateOptions.value.length,
+  loadOptions,
+})
 
 const requestDelete = (jobId: number) => {
   jobIdToDelete.value = jobId

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
-import { useGraduateSurveyService } from '@/composables/useGraduateSurveyService'
 import { useSnackbar } from '@/composables/useSnackbar'
 import type { QuestionType } from '@/modules/graduate-surveys/types'
+import { useGraduateSurveyService } from '../composables/useGraduateSurveyService'
 
 interface Props {
   surveyId: number

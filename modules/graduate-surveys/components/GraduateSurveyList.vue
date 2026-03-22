@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
-import { useGraduateSurveyService } from '@/composables/useGraduateSurveyService'
 import { useSnackbar } from '@/composables/useSnackbar'
-import {type GraduateSurveyListItem, SurveyType, type SurveyTypeObject} from '@/modules/graduate-surveys/types'
+import { type GraduateSurveyListItem } from '@/modules/graduate-surveys/types'
+import { useGraduateSurveyService } from '../composables/useGraduateSurveyService'
 
 const emit = defineEmits<{
   takeSurvey: [survey: GraduateSurveyListItem]

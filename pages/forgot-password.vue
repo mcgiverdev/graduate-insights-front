@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { navigateTo } from '#imports'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import authV2ForgotPasswordIllustrationDark from '@images/pages/auth-v2-forgot-password-illustration-dark.png'
 import authV2ForgotPasswordIllustrationLight from '@images/pages/auth-v2-forgot-password-illustration-light.png'
@@ -8,8 +6,7 @@ import authV2MaskDark from '@images/pages/misc-mask-dark.png'
 import authV2MaskLight from '@images/pages/misc-mask-light.png'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
-import { authModuleService } from '@/modules/auth/services/AuthService'
-import { useSnackbar } from '@/composables/useSnackbar'
+import { useForgotPasswordForm } from '@/src/features/auth'
 
 definePageMeta({
   layout: 'blank',
@@ -23,45 +20,13 @@ const authThemeImg = useGenerateImageVariant(
 )
 
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
-const email = ref('')
-const loading = ref(false)
-const error = ref('')
-const success = ref('')
-const { showSnackbar } = useSnackbar()
-
-const handleSubmit = async () => {
-  error.value = ''
-  success.value = ''
-
-  if (!email.value) {
-    error.value = 'Ingresa el correo con el que te registraste.'
-    return
-  }
-
-  loading.value = true
-  const normalizedEmail = email.value.trim().toLowerCase()
-
-  try {
-    const result = await authModuleService.requestPasswordReset(normalizedEmail)
-
-    if (!result.success) {
-      error.value = result.message || 'No pudimos enviar el código. Intenta nuevamente.'
-      showSnackbar({ text: error.value, color: 'error' })
-      return
-    }
-
-    success.value = result.message || 'Te enviamos un código de recuperación a tu correo.'
-    showSnackbar({ text: success.value, color: 'success' })
-
-    await navigateTo({
-      path: '/reset-password',
-      query: { email: normalizedEmail },
-    })
-  }
-  finally {
-    loading.value = false
-  }
-}
+const {
+  email,
+  loading,
+  error,
+  success,
+  handleSubmit,
+} = useForgotPasswordForm()
 </script>
 
 <template>

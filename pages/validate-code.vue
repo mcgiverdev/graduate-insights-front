@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import VerificationForm from '@/modules/auth/components/VerificationForm.vue'
+import { VerificationForm } from '@/src/features/auth'
 import { computed, h } from 'vue'
 import { navigateTo, useRoute } from '#imports'
 import authV1BottomShape from '@images/svg/auth-v1-bottom-shape.svg?raw'

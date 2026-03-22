@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2026-03-21T00:00:00.000Z",
+  "ruleId": "no-cross-module-deep-imports",
+  "violations": [
+    {
+      "file": "modules/surveys/components/SurveyList.vue",
+      "line": 7,
+      "sourceModule": "surveys",
+      "targetModule": "survey-statistics",
+      "importPath": "@/modules/survey-statistics/components/StatisticsButton.vue",
+      "ruleId": "no-cross-module-deep-imports"
+    }
+  ]
+}

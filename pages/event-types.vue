@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import VConfirmDialog from '@/components/dialogs/VConfirmDialog.vue'
-import EventTypeFormDialog from '@/modules/event-types/components/EventTypeFormDialog.vue'
-import EventTypeTable from '@/modules/event-types/components/EventTypeTable.vue'
-import { useEventTypeForm } from '@/modules/event-types/composables/useEventTypeForm'
-import { useEventTypeList } from '@/modules/event-types/composables/useEventTypeList'
-import type { EventType, EventTypeFormValues } from '@/modules/event-types/types'
-import { toPayload } from '@/modules/event-types/utils/mappers'
+import {
+  EventTypeFormDialog,
+  EventTypeTable,
+  useEventTypeEditor,
+  useEventTypeForm,
+  useEventTypeList,
+} from '@/src/features/event-types'
 
 definePageMeta({
   middleware: ['auth', 'role'],
@@ -27,38 +28,20 @@ const {
 
 const { submitting, serverErrors, saveEventType, clearServerErrors } = useEventTypeForm()
 
-const isFormVisible = ref(false)
-const selectedEventType = ref<EventType | null>(null)
 const isConfirmVisible = ref(false)
 const eventTypeToDelete = ref<EventType | null>(null)
-
-const openCreateForm = () => {
-  selectedEventType.value = null
-  clearServerErrors()
-  isFormVisible.value = true
-}
-
-const openEditForm = (eventType: EventType) => {
-  selectedEventType.value = eventType
-  clearServerErrors()
-  isFormVisible.value = true
-}
-
-const handleFormSubmit = async (values: EventTypeFormValues) => {
-  const payload = toPayload(values)
-  const result = await saveEventType(payload, selectedEventType.value?.eventTypeId)
-
-  if (result.success) {
-    isFormVisible.value = false
-    selectedEventType.value = null
-    await fetchEventTypes()
-  }
-}
-
-const handleDialogClosed = () => {
-  clearServerErrors()
-  selectedEventType.value = null
-}
+const {
+  isFormVisible,
+  selectedEventType,
+  openCreateForm,
+  openEditForm,
+  handleFormSubmit,
+  handleDialogClosed,
+} = useEventTypeEditor({
+  fetchEventTypes,
+  saveEventType,
+  clearServerErrors,
+})
 
 const requestDelete = (eventType: EventType) => {
   eventTypeToDelete.value = eventType

@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import FeedFilters from '@/modules/feed/components/FeedFilters.vue'
-import FeedList from '@/modules/feed/components/FeedList.vue'
-import { useFeedList } from '@/modules/feed/composables/useFeedList'
+import { FeedFilters, FeedList, useFeedList } from '@/src/features/feed'
 
 const {
   filters,
