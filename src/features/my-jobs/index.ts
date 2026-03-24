@@ -4,7 +4,7 @@ export {
   useMyJobEditor,
   useMyJobForm,
   useMyJobList,
-} from '../../../modules/my-jobs'
+} from '../../../modules/my-jobs/public-api'
 
 export type {
   MyJob,
@@ -14,4 +14,4 @@ export type {
   MyJobMode,
   MyJobPayload,
   MyJobStatus,
-} from '../../../modules/my-jobs'
+} from '../../../modules/my-jobs/public-api'

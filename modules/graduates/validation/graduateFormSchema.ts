@@ -14,11 +14,11 @@ export const graduateFormSchema = yup.object({
     .string()
     .matches(phoneRegex, 'El celular debe iniciar con 9 y tener 9 dígitos')
     .required('El celular es obligatorio'),
-  contrasena: yup.string().min(6, 'La contraseña debe tener al menos 6 caracteres').required('La contraseña es obligatoria'),
-  fechaInicio: yup.string().required('La fecha de inicio es obligatoria'),
+  contrasena: yup.string().optional(),
+  fechaInicio: yup.string().optional(),
   fechaFin: yup
     .string()
-    .required('La fecha de fin es obligatoria')
+    .optional()
     .test('is-after-start', 'La fecha de fin debe ser mayor o igual a la fecha de inicio', function (value) {
       const { fechaInicio } = this.parent
       if (!value || !fechaInicio)
@@ -26,5 +26,5 @@ export const graduateFormSchema = yup.object({
 
       return new Date(value) >= new Date(fechaInicio)
     }),
-  cvPath: yup.string().required('Adjunta el archivo de CV'),
+  cvPath: yup.string().optional(),
 })

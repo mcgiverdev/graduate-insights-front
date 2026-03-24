@@ -3,7 +3,7 @@ export {
   SurveyList,
   useSurveysPage,
   useSurveyService,
-} from '../../../modules/surveys'
+} from '../../../modules/surveys/public-api'
 
 export type {
   CreateSurveyRequest,
@@ -18,4 +18,4 @@ export type {
   SurveyTypeObject,
   SurveyTypeOption,
   SurveyTypesResponse,
-} from '../../../modules/surveys'
+} from '../../../modules/surveys/public-api'

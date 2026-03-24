@@ -1,22 +1,9 @@
-export { default as GraduateSurveyList } from './components/GraduateSurveyList.vue'
-export { default as SurveyForm } from './components/SurveyForm.vue'
-export { default as SurveyResults } from './components/SurveyResults.vue'
-export { useGraduateSurveyService } from './composables/useGraduateSurveyService'
-export { useMySurveysPage } from './composables/useMySurveysPage'
+import { defineNuxtModule } from '@nuxt/kit'
 
-export type {
-  GraduateSurveyDetail,
-  GraduateSurveyDetailResponse,
-  GraduateSurveyListItem,
-  GraduateSurveyListResponse,
-  GraduateSurveyQuestion,
-  QuestionFormState,
-  QuestionType,
-  SurveyFormState,
-  SurveyOption,
-  SurveyQuestionResponse,
-  SurveySubmissionRequest,
-  SurveySubmissionResponse,
-  SurveyType,
-  SurveyTypeObject,
-} from './types'
+// No-op local Nuxt module to avoid collisions with business modules under modules/.
+export default defineNuxtModule({
+  meta: {
+    name: 'graduate-insights-graduate-surveys-local-module',
+  },
+  setup() {},
+})

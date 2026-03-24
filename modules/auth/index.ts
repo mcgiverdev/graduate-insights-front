@@ -1,19 +1,9 @@
-export { default as LoginForm } from './components/LoginForm.vue'
-export { default as VerificationForm } from './components/VerificationForm.vue'
+import { defineNuxtModule } from '@nuxt/kit'
 
-export { useLoginForm } from './composables/useLoginForm'
-export { useForgotPasswordForm } from './composables/useForgotPasswordForm'
-export { useRegisterForm } from './composables/useRegisterForm'
-export { useResetPasswordForm } from './composables/useResetPasswordForm'
-export { useVerificationForm } from './composables/useVerificationForm'
-export { authModuleService } from './services/AuthService'
-
-export type {
-  LoginFormValues,
-  LoginResult,
-  PasswordChangePayload,
-  RedirectTarget,
-  RegisterFormValues,
-  VerificationPayload,
-  VerificationResult,
-} from './types'
+// No-op local Nuxt module to avoid collisions with business modules under modules/.
+export default defineNuxtModule({
+  meta: {
+    name: 'graduate-insights-auth-local-module',
+  },
+  setup() {},
+})

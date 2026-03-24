@@ -4,7 +4,7 @@ export {
   useEventTypeEditor,
   useEventTypeForm,
   useEventTypeList,
-} from '../../../modules/event-types'
+} from '../../../modules/event-types/public-api'
 
 export type {
   EventType,
@@ -12,4 +12,4 @@ export type {
   EventTypeFilters,
   EventTypeFormValues,
   EventTypePayload,
-} from '../../../modules/event-types'
+} from '../../../modules/event-types/public-api'

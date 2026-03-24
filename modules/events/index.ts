@@ -1,16 +1,9 @@
-export { default as EventFormDialog } from './components/EventFormDialog.vue'
-export { default as EventTable } from './components/EventTable.vue'
+import { defineNuxtModule } from '@nuxt/kit'
 
-export { useEventForm } from './composables/useEventForm'
-export { useEventList } from './composables/useEventList'
-export { useEventOptions } from './composables/useEventOptions'
-export { useEventEditor } from './composables/useEventEditor'
-
-export type {
-  Event,
-  EventApiResponse,
-  EventFilters,
-  EventFormValues,
-  EventPayload,
-  EventStatus,
-} from './types'
+// No-op local Nuxt module to avoid collisions with business modules under modules/.
+export default defineNuxtModule({
+  meta: {
+    name: 'graduate-insights-events-local-module',
+  },
+  setup() {},
+})

@@ -1,2 +1,9 @@
-export { default as PasswordChangeCard } from './components/PasswordChangeCard.vue'
-export { default as ProfileDetailsForm } from './components/ProfileDetailsForm.vue'
+import { defineNuxtModule } from '@nuxt/kit'
+
+// No-op local Nuxt module to avoid collisions with business modules under modules/.
+export default defineNuxtModule({
+  meta: {
+    name: 'graduate-insights-profile-local-module',
+  },
+  setup() {},
+})

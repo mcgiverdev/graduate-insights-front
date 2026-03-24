@@ -5,7 +5,7 @@ export {
   useJobForm,
   useJobList,
   useJobOptions,
-} from '../../../modules/jobs'
+} from '../../../modules/jobs/public-api'
 
 export type {
   Job,
@@ -15,4 +15,4 @@ export type {
   JobMode,
   JobPayload,
   JobStatus,
-} from '../../../modules/jobs'
+} from '../../../modules/jobs/public-api'

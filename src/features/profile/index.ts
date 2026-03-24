@@ -1,4 +1,4 @@
 export {
   PasswordChangeCard,
   ProfileDetailsForm,
-} from '../../../modules/profile'
+} from '../../../modules/profile/public-api'

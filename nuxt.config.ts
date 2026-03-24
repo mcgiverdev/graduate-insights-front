@@ -8,6 +8,7 @@ export default defineNuxtConfig({
   ssr: false,
   nitro: {
     prerender: {
+      crawlLinks: false,
       routes: ['/'],
     },
   },
@@ -181,6 +182,9 @@ export default defineNuxtConfig({
       })
     },
   ],
+
+  // Avoid treating the business `modules/` directory as Nuxt local modules.
+  modulesDir: ['node_modules'],
 
   // Remover middleware global para SPA mode
   // router: {

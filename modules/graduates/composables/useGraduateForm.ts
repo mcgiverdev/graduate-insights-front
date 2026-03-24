@@ -1,18 +1,23 @@
 import { ref } from 'vue'
 import { useSnackbar } from '@/composables/useSnackbar'
-import type { RequestResult } from '@/infrastructure/http/types'
 import { graduateService } from '../services/GraduateService'
 import type { GraduatePayload } from '../types'
+
+export interface GraduateSaveResult {
+  success: boolean
+  message?: string
+  createdGraduateId?: number
+}
 
 const normalizeFieldName = (field: string, validFields: string[]): string | null => {
   if (validFields.includes(field))
     return field
 
-  const snakeCase = field.replace(/([A-Z])/g, '_$1').toLowerCase()
+  const snakeCase = field.replaceAll(/[A-Z]/g, match => `_${match}`).toLowerCase()
   if (validFields.includes(snakeCase))
     return snakeCase
 
-  const camelCase = field.replace(/_([a-z])/g, (_, char) => char.toUpperCase())
+  const camelCase = field.replaceAll(/_([a-z])/g, (_, char) => char.toUpperCase())
   if (validFields.includes(camelCase))
     return camelCase
 
@@ -26,19 +31,21 @@ export const useGraduateForm = () => {
   const serverErrors = ref<Record<string, string>>({})
   const { showSnackbar } = useSnackbar()
 
-  const saveGraduate = async (payload: GraduatePayload, graduateId?: number): Promise<RequestResult> => {
+  const saveGraduate = async (payload: GraduatePayload, graduateId?: number): Promise<GraduateSaveResult> => {
     submitting.value = true
     serverErrors.value = {}
 
     try {
+      let createdGraduateId: number | undefined
+
       if (graduateId !== undefined && graduateId !== null)
         await graduateService.update(graduateId, payload)
       else
-        await graduateService.create(payload)
+        createdGraduateId = (await graduateService.create(payload)) ?? undefined
 
       showSnackbar({ text: graduateId !== undefined && graduateId !== null ? 'Graduado actualizado' : 'Graduado creado', color: 'success' })
 
-      return { success: true }
+      return { success: true, createdGraduateId }
     }
     catch (error: any) {
       if (error?.data?.errors) {
@@ -46,8 +53,15 @@ export const useGraduateForm = () => {
 
         Object.entries(error.data.errors).forEach(([field, message]) => {
           const normalized = normalizeFieldName(field, formFields)
-          if (normalized)
-            mappedErrors[normalized] = String(message)
+          if (normalized) {
+            let normalizedMessage = 'Valor inválido'
+            if (typeof message === 'string')
+              normalizedMessage = message
+            else if (Array.isArray(message))
+              normalizedMessage = message.map(String).join(', ')
+
+            mappedErrors[normalized] = normalizedMessage
+          }
         })
 
         serverErrors.value = mappedErrors

@@ -1,15 +1,9 @@
-export { default as EducationCenterFormDialog } from './components/EducationCenterFormDialog.vue'
-export { default as EducationCenterTable } from './components/EducationCenterTable.vue'
+import { defineNuxtModule } from '@nuxt/kit'
 
-export { useEducationCenterForm } from './composables/useEducationCenterForm'
-export { useEducationCenterList } from './composables/useEducationCenterList'
-export { useEducationCenterEditor } from './composables/useEducationCenterEditor'
-export { useEducationCenterService } from './composables/useEducationCenterService'
-
-export type {
-  EducationCenter,
-  EducationCenterApiResponse,
-  EducationCenterFilters,
-  EducationCenterFormValues,
-  EducationCenterPayload,
-} from './types'
+// No-op local Nuxt module to avoid collisions with business modules under modules/.
+export default defineNuxtModule({
+  meta: {
+    name: 'graduate-insights-education-centers-local-module',
+  },
+  setup() {},
+})

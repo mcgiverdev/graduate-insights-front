@@ -1,13 +1,9 @@
-export { default as FeedFilters } from './components/FeedFilters.vue'
-export { default as FeedList } from './components/FeedList.vue'
+import { defineNuxtModule } from '@nuxt/kit'
 
-export { useFeedList } from './composables/useFeedList'
-
-export type {
-  FeedFiltersState,
-  FeedItem,
-  FeedListParams,
-  FeedListResult,
-  FeedPagination,
-  FeedType,
-} from './types'
+// No-op local Nuxt module to avoid collisions with business modules under modules/.
+export default defineNuxtModule({
+  meta: {
+    name: 'graduate-insights-feed-local-module',
+  },
+  setup() {},
+})

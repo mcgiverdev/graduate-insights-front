@@ -6,4 +6,4 @@ export {
   StatisticsOverview,
   useSurveyStatisticsDashboard,
   useSurveyStatisticsService,
-} from '../../../modules/survey-statistics'
+} from '../../../modules/survey-statistics/public-api'

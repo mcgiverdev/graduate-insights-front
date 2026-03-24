@@ -4,7 +4,7 @@ export {
   SurveyResults,
   useGraduateSurveyService,
   useMySurveysPage,
-} from '../../../modules/graduate-surveys'
+} from '../../../modules/graduate-surveys/public-api'
 
 export type {
   GraduateSurveyDetail,
@@ -21,4 +21,4 @@ export type {
   SurveySubmissionResponse,
   SurveyType,
   SurveyTypeObject,
-} from '../../../modules/graduate-surveys'
+} from '../../../modules/graduate-surveys/public-api'

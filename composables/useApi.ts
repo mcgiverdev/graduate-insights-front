@@ -15,21 +15,23 @@ export interface ApiError extends Error {
 export const useApi = async <T = any>(url: string, options: any = {}): Promise<ApiResponse<T>> => {
   const config = useRuntimeConfig()
 
-  const accessToken = useCookie('accessToken', {
-    path: '/',
-    secure: true,
-    sameSite: 'strict',
-  })
+  const accessToken = useCookie('accessToken')
 
   const { handleAuthError } = useAuthService()
   const { showSnackbar } = useSnackbar()
 
-  const defaults = {
-    baseURL: config.public.apiBaseUrl,
-    headers: accessToken.value ? { Authorization: `Bearer ${accessToken.value}` } : {},
+  const headers = options.headers ? { ...options.headers } : {}
+
+  if (accessToken.value && !headers.Authorization && !headers.authorization) {
+    headers.Authorization = `Bearer ${accessToken.value}`
   }
 
-  const params = defu(options, defaults)
+  const defaults = {
+    baseURL: config.public.apiBaseUrl,
+    credentials: 'include' as RequestCredentials,
+  }
+
+  const params = defu({ ...options, headers }, defaults)
 
   try {
     const response = await $fetch.raw<T>(url, params)

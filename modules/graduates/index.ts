@@ -1,16 +1,9 @@
-export { default as GraduateFormDialog } from './components/GraduateFormDialog.vue'
-export { default as GraduateTable } from './components/GraduateTable.vue'
+import { defineNuxtModule } from '@nuxt/kit'
 
-export { useGraduateEditor } from './composables/useGraduateEditor'
-export { useGraduateForm } from './composables/useGraduateForm'
-export { useGraduateList } from './composables/useGraduateList'
-export { useGraduateService } from './composables/useGraduateService'
-
-export type {
-  Gender,
-  Graduate,
-  GraduateApiResponse,
-  GraduateFilters,
-  GraduateFormValues,
-  GraduatePayload,
-} from './types'
+// No-op local Nuxt module to avoid collisions with business modules under modules/.
+export default defineNuxtModule({
+  meta: {
+    name: 'graduate-insights-graduates-local-module',
+  },
+  setup() {},
+})

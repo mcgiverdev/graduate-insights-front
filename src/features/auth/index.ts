@@ -7,7 +7,7 @@ export {
   useRegisterForm,
   useResetPasswordForm,
   useVerificationForm,
-} from '../../../modules/auth'
+} from '../../../modules/auth/public-api'
 
 export type {
   LoginFormValues,
@@ -17,4 +17,4 @@ export type {
   RegisterFormValues,
   VerificationPayload,
   VerificationResult,
-} from '../../../modules/auth'
+} from '../../../modules/auth/public-api'

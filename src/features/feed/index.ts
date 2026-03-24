@@ -2,7 +2,7 @@ export {
   FeedFilters,
   FeedList,
   useFeedList,
-} from '../../../modules/feed'
+} from '../../../modules/feed/public-api'
 
 export type {
   FeedFiltersState,
@@ -11,4 +11,4 @@ export type {
   FeedListResult,
   FeedPagination,
   FeedType,
-} from '../../../modules/feed'
+} from '../../../modules/feed/public-api'

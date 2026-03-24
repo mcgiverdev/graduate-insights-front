@@ -5,7 +5,7 @@ export {
   useEmployerForm,
   useEmployerList,
   useEmployerService,
-} from '../../../modules/employers'
+} from '../../../modules/employers/public-api'
 
 export type {
   Employer,
@@ -14,4 +14,4 @@ export type {
   EmployerFormValues,
   EmployerPayload,
   Gender,
-} from '../../../modules/employers'
+} from '../../../modules/employers/public-api'

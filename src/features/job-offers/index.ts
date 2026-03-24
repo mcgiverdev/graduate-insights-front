@@ -5,7 +5,7 @@ export {
   useJobOfferForm,
   useJobOfferList,
   useJobOfferOptions,
-} from '../../../modules/job-offers'
+} from '../../../modules/job-offers/public-api'
 
 export type {
   JobOffer,
@@ -14,4 +14,4 @@ export type {
   JobOfferFormValues,
   JobOfferPayload,
   JobOfferStatus,
-} from '../../../modules/job-offers'
+} from '../../../modules/job-offers/public-api'

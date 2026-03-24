@@ -1,4 +1,4 @@
-export default defineNuxtRouteMiddleware(to => {
+export default defineNuxtRouteMiddleware(async to => {
   const token = useCookie('accessToken', {
     path: '/',
     secure: true,
@@ -6,8 +6,24 @@ export default defineNuxtRouteMiddleware(to => {
   })
 
   // Si hay token y la ruta es pública (login, register, etc), redirigir al dashboard
-  if (token.value) {
-    // Verificar si el token es válido haciendo una petición al backend
+  if (!token.value)
+    return
+
+  try {
+    const { data } = await useApi('/graduate-insights/v1/api/auth/me')
+
+    if (!data?.data?.verified) {
+      return navigateTo({
+        path: '/validate-code',
+        query: {
+          email: data?.data?.email,
+        },
+      })
+    }
+
     return navigateTo('/')
+  }
+  catch {
+    token.value = null
   }
 })

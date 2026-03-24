@@ -5,7 +5,7 @@ export {
   useDirectorForm,
   useDirectorList,
   useDirectorService,
-} from '../../../modules/directors'
+} from '../../../modules/directors/public-api'
 
 export type {
   Director,
@@ -14,4 +14,4 @@ export type {
   DirectorFormValues,
   DirectorPayload,
   Gender,
-} from '../../../modules/directors'
+} from '../../../modules/directors/public-api'

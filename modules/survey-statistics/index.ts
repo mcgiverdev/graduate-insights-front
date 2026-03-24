@@ -1,8 +1,9 @@
-export { default as QuestionChartViewer } from './components/QuestionChartViewer.vue'
-export { default as QuestionStatistics } from './components/QuestionStatistics.vue'
-export { default as SimpleTrendsViewer } from './components/SimpleTrendsViewer.vue'
-export { default as StatisticsButton } from './components/StatisticsButton.vue'
-export { default as StatisticsOverview } from './components/StatisticsOverview.vue'
+import { defineNuxtModule } from '@nuxt/kit'
 
-export { useSurveyStatisticsService } from './composables/useSurveyStatisticsService'
-export { useSurveyStatisticsDashboard } from './composables/useSurveyStatisticsDashboard'
+// No-op local Nuxt module to avoid collisions with business modules under modules/.
+export default defineNuxtModule({
+  meta: {
+    name: 'graduate-insights-survey-statistics-local-module',
+  },
+  setup() {},
+})

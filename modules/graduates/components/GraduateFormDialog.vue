@@ -3,8 +3,8 @@ import { Form, Field } from 'vee-validate'
 import type { FormContext } from 'vee-validate'
 import { computed, ref, watch } from 'vue'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
-import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import AppDateTimePicker from '@/@core/components/app-form-elements/AppDateTimePicker.vue'
+import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import AppFileField from '@/@core/components/app-form-elements/AppFileField.vue'
 import type { Graduate, GraduateFormValues } from '../types'
 import { graduateFormSchema } from '../validation/graduateFormSchema'
@@ -28,6 +28,7 @@ const emit = defineEmits<{
 const formRef = ref<FormContext<GraduateFormValues> | null>(null)
 
 const dialogTitle = computed(() => props.graduate ? 'Editar Graduado' : 'Nuevo Graduado')
+const isEditMode = computed(() => Boolean(props.graduate))
 
 const genderOptions = [
   { title: 'Masculino', value: 'M' },
@@ -151,6 +152,16 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
+            <VCol cols="12">
+              <VAlert
+                type="info"
+                variant="tonal"
+                density="compact"
+              >
+                La contrasena inicial de la cuenta sera el DNI registrado.
+              </VAlert>
+            </VCol>
+
             <VCol cols="12" md="6">
               <Field
                 name="celular"
@@ -191,14 +202,18 @@ const closeDialog = () => {
                 <AppDateTimePicker
                   :model-value="field.value"
                   label="Fecha de nacimiento"
-                  :config="{ dateFormat: 'Y-m-d' }"
+                  :config="{ dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true }"
                   :error-messages="errorMessage"
                   @update:model-value="field.onChange"
                 />
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              v-if="isEditMode"
+              cols="12"
+              md="6"
+            >
               <Field
                 name="fechaInicio"
                 v-slot="{ field, errorMessage }"
@@ -206,14 +221,18 @@ const closeDialog = () => {
                 <AppDateTimePicker
                   :model-value="field.value"
                   label="Fecha de inicio"
-                  :config="{ dateFormat: 'Y-m-d' }"
+                  :config="{ dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true }"
                   :error-messages="errorMessage"
                   @update:model-value="field.onChange"
                 />
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              v-if="isEditMode"
+              cols="12"
+              md="6"
+            >
               <Field
                 name="fechaFin"
                 v-slot="{ field, errorMessage }"
@@ -221,29 +240,17 @@ const closeDialog = () => {
                 <AppDateTimePicker
                   :model-value="field.value"
                   label="Fecha de fin"
-                  :config="{ dateFormat: 'Y-m-d' }"
+                  :config="{ dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true }"
                   :error-messages="errorMessage"
                   @update:model-value="field.onChange"
                 />
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
-              <Field
-                name="contrasena"
-                v-slot="{ field, errorMessage }"
-              >
-                <AppTextField
-                  :model-value="field.value"
-                  label="Contraseña"
-                  type="password"
-                  :error-messages="errorMessage"
-                  @update:model-value="field.onChange"
-                />
-              </Field>
-            </VCol>
-
-            <VCol cols="12">
+            <VCol
+              v-if="isEditMode"
+              cols="12"
+            >
               <Field
                 name="cvPath"
                 v-slot="{ field, errorMessage }"
@@ -254,7 +261,6 @@ const closeDialog = () => {
                   accept=".pdf,.doc,.docx"
                   placeholder="Adjunta el CV en formato PDF"
                   :error-messages="errorMessage"
-                  required
                   @update:model-value="field.onChange"
                 />
               </Field>

@@ -5,7 +5,7 @@ export {
   useEventForm,
   useEventList,
   useEventOptions,
-} from '../../../modules/events'
+} from '../../../modules/events/public-api'
 
 export type {
   Event,
@@ -14,4 +14,4 @@ export type {
   EventFormValues,
   EventPayload,
   EventStatus,
-} from '../../../modules/events'
+} from '../../../modules/events/public-api'

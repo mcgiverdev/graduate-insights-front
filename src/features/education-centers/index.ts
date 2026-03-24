@@ -5,7 +5,7 @@ export {
   useEducationCenterForm,
   useEducationCenterList,
   useEducationCenterService,
-} from '../../../modules/education-centers'
+} from '../../../modules/education-centers/public-api'
 
 export type {
   EducationCenter,
@@ -13,4 +13,4 @@ export type {
   EducationCenterFilters,
   EducationCenterFormValues,
   EducationCenterPayload,
-} from '../../../modules/education-centers'
+} from '../../../modules/education-centers/public-api'

@@ -1,13 +1,14 @@
 import { ref } from 'vue'
+import { useRouter } from '#imports'
 import { useSnackbar } from '@/composables/useSnackbar'
-import type { RequestResult } from '@/infrastructure/http/types'
 import { graduateService } from '../services/GraduateService'
 import type { Graduate, GraduateFormValues, GraduatePayload } from '../types'
 import { toPayload } from '../utils/mappers'
+import type { GraduateSaveResult } from './useGraduateForm'
 
 interface UseGraduateEditorOptions {
   fetchGraduates: () => Promise<void>
-  saveGraduate: (payload: GraduatePayload, graduateId?: number) => Promise<RequestResult>
+  saveGraduate: (payload: GraduatePayload, graduateId?: number) => Promise<GraduateSaveResult>
   clearServerErrors: () => void
 }
 
@@ -16,6 +17,7 @@ export const useGraduateEditor = ({
   saveGraduate,
   clearServerErrors,
 }: UseGraduateEditorOptions) => {
+  const router = useRouter()
   const isFormVisible = ref(false)
   const selectedGraduate = ref<Graduate | null>(null)
   const { showSnackbar } = useSnackbar()
@@ -54,9 +56,15 @@ export const useGraduateEditor = ({
     const result = await saveGraduate(payload, selectedGraduate.value?.graduateId)
 
     if (result.success) {
+      const createdGraduateId = result.createdGraduateId
+      const wasCreating = !selectedGraduate.value
+
       isFormVisible.value = false
       selectedGraduate.value = null
       await fetchGraduates()
+
+      if (wasCreating && createdGraduateId)
+        await router.push(`/graduates/${createdGraduateId}`)
     }
   }
 

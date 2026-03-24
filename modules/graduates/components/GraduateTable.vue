@@ -20,6 +20,7 @@ const emit = defineEmits<{
   (e: 'update:search', value: string): void
   (e: 'update:show-only-pending', value: boolean): void
   (e: 'create'): void
+  (e: 'view', graduateId: number): void
   (e: 'edit', graduateId: number): void
   (e: 'delete', graduateId: number): void
   (e: 'activate', graduateId: number): void
@@ -74,6 +75,12 @@ const handleEditClick = (tableItem: any) => {
   const graduateId = getRowGraduateId(tableItem)
   if (graduateId !== null)
     emit('edit', graduateId)
+}
+
+const handleViewClick = (tableItem: any) => {
+  const graduateId = getRowGraduateId(tableItem)
+  if (graduateId !== null)
+    emit('view', graduateId)
 }
 
 const handleDeleteClick = (tableItem: any) => {
@@ -200,6 +207,16 @@ const getStatusProps = (validated: boolean) => ({
             @click="handleActivateClick(item)"
           >
             Activar
+          </VBtn>
+          <VBtn
+            icon
+            variant="text"
+            size="small"
+            color="primary"
+            :disabled="getRowGraduateId(item) === null"
+            @click="handleViewClick(item)"
+          >
+            <VIcon icon="tabler-eye" />
           </VBtn>
           <VBtn
             icon

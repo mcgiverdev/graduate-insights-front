@@ -1,16 +1,9 @@
-export { default as DirectorFormDialog } from './components/DirectorFormDialog.vue'
-export { default as DirectorTable } from './components/DirectorTable.vue'
+import { defineNuxtModule } from '@nuxt/kit'
 
-export { useDirectorForm } from './composables/useDirectorForm'
-export { useDirectorList } from './composables/useDirectorList'
-export { useDirectorEditor } from './composables/useDirectorEditor'
-export { useDirectorService } from './composables/useDirectorService'
-
-export type {
-  Director,
-  DirectorApiResponse,
-  DirectorFilters,
-  DirectorFormValues,
-  DirectorPayload,
-  Gender,
-} from './types'
+// No-op local Nuxt module to avoid collisions with business modules under modules/.
+export default defineNuxtModule({
+  meta: {
+    name: 'graduate-insights-directors-local-module',
+  },
+  setup() {},
+})

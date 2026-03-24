@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from '#imports'
 import VConfirmDialog from '@/components/dialogs/VConfirmDialog.vue'
 import {
-  GraduateFormDialog,
   GraduateTable,
-  useGraduateEditor,
-  useGraduateForm,
   useGraduateList,
 } from '@/src/features/graduates'
 
@@ -26,29 +24,33 @@ const {
   setShowOnlyPending,
   deleteGraduate,
   activateGraduate,
-  fetchGraduates,
 } = useGraduateList()
-
-const { submitting, serverErrors, saveGraduate, clearServerErrors } = useGraduateForm()
 
 const isConfirmVisible = ref(false)
 const graduateIdToDelete = ref<number | null>(null)
-const {
-  isFormVisible,
-  selectedGraduate,
-  openCreateForm,
-  openEditForm,
-  handleFormSubmit,
-  handleDialogClosed,
-} = useGraduateEditor({
-  fetchGraduates,
-  saveGraduate,
-  clearServerErrors,
-})
+const router = useRouter()
 
 const requestDelete = (graduateId: number) => {
   graduateIdToDelete.value = graduateId
   isConfirmVisible.value = true
+}
+
+const openGraduateDetail = async (graduateId: number) => {
+  await router.push({
+    name: 'graduates-id',
+    params: { id: graduateId },
+  })
+}
+
+const openGraduateCreate = async () => {
+  await router.push({ name: 'graduates-new' })
+}
+
+const openGraduateEdit = async (graduateId: number) => {
+  await router.push({
+    name: 'graduates-id-edit',
+    params: { id: graduateId },
+  })
 }
 
 const confirmDelete = async () => {
@@ -75,19 +77,11 @@ const confirmDelete = async () => {
       @update:items-per-page="setItemsPerPage"
       @update:search="setSearch"
       @update:show-only-pending="setShowOnlyPending"
-      @create="openCreateForm"
-      @edit="openEditForm"
+      @create="openGraduateCreate"
+      @view="openGraduateDetail"
+      @edit="openGraduateEdit"
       @delete="requestDelete"
       @activate="activateGraduate"
-    />
-
-    <GraduateFormDialog
-      v-model="isFormVisible"
-      :graduate="selectedGraduate"
-      :submitting="submitting"
-      :server-errors="serverErrors"
-      @submit="handleFormSubmit"
-      @closed="handleDialogClosed"
     />
 
     <VConfirmDialog

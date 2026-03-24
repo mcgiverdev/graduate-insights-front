@@ -1,15 +1,9 @@
-export { default as MyJobOfferFormDialog } from './components/MyJobOfferFormDialog.vue'
-export { default as MyJobOfferTable } from './components/MyJobOfferTable.vue'
+import { defineNuxtModule } from '@nuxt/kit'
 
-export { useMyJobOfferEditor } from './composables/useMyJobOfferEditor'
-export { useMyJobOfferForm } from './composables/useMyJobOfferForm'
-export { useMyJobOfferList } from './composables/useMyJobOfferList'
-
-export type {
-  MyJobOffer,
-  MyJobOfferApiResponse,
-  MyJobOfferFilters,
-  MyJobOfferFormValues,
-  MyJobOfferPayload,
-  MyJobOfferStatus,
-} from './types'
+// No-op local Nuxt module to avoid collisions with business modules under modules/.
+export default defineNuxtModule({
+  meta: {
+    name: 'graduate-insights-my-job-offers-local-module',
+  },
+  setup() {},
+})

@@ -1,7 +1,17 @@
 import { useRoles } from '@/composables/useRoles'
+import { useUser } from '@/composables/useUser'
 
-export default defineNuxtRouteMiddleware(to => {
+export default defineNuxtRouteMiddleware(async to => {
   const { canAccessRoute, role } = useRoles()
+  const { fetchUser } = useUser()
+  const token = useCookie('accessToken', {
+    path: '/',
+    secure: true,
+    sameSite: 'strict',
+  })
+
+  if (!role.value && token.value)
+    await fetchUser()
 
   // Si el usuario no tiene rol asignado, redirigir al login
   if (!role.value)

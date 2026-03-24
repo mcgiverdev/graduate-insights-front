@@ -1,16 +1,9 @@
-export { default as EmployerFormDialog } from './components/EmployerFormDialog.vue'
-export { default as EmployerTable } from './components/EmployerTable.vue'
+import { defineNuxtModule } from '@nuxt/kit'
 
-export { useEmployerForm } from './composables/useEmployerForm'
-export { useEmployerList } from './composables/useEmployerList'
-export { useEmployerEditor } from './composables/useEmployerEditor'
-export { useEmployerService } from './composables/useEmployerService'
-
-export type {
-  Employer,
-  EmployerApiResponse,
-  EmployerFilters,
-  EmployerFormValues,
-  EmployerPayload,
-  Gender,
-} from './types'
+// No-op local Nuxt module to avoid collisions with business modules under modules/.
+export default defineNuxtModule({
+  meta: {
+    name: 'graduate-insights-employers-local-module',
+  },
+  setup() {},
+})

@@ -1,17 +1,9 @@
-export { default as JobFormDialog } from './components/JobFormDialog.vue'
-export { default as JobTable } from './components/JobTable.vue'
+import { defineNuxtModule } from '@nuxt/kit'
 
-export { useJobForm } from './composables/useJobForm'
-export { useJobList } from './composables/useJobList'
-export { useJobOptions } from './composables/useJobOptions'
-export { useJobEditor } from './composables/useJobEditor'
-
-export type {
-  Job,
-  JobApiResponse,
-  JobFilters,
-  JobFormValues,
-  JobMode,
-  JobPayload,
-  JobStatus,
-} from './types'
+// No-op local Nuxt module to avoid collisions with business modules under modules/.
+export default defineNuxtModule({
+  meta: {
+    name: 'graduate-insights-jobs-local-module',
+  },
+  setup() {},
+})
