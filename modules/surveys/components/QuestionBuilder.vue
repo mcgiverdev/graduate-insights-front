@@ -4,13 +4,18 @@ import { QuestionType, type SurveyOption, type SurveyQuestion } from '@/modules/
 
 interface Props {
   question?: SurveyQuestion | null
+  inline?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  question: null,
+  inline: false,
+})
 
 const emit = defineEmits<{
   save: [question: Omit<SurveyQuestion, 'id'>]
   cancel: []
+  'update:question': [question: Omit<SurveyQuestion, 'id'>]
 }>()
 
 // Estado del formulario
@@ -23,15 +28,15 @@ const questionForm = ref({
 
 // Opciones de tipos de pregunta
 const questionTypeOptions = [
-  { title: 'Sí/No', value: QuestionType.YES_NO, description: 'Pregunta de respuesta binaria' },
-  { title: 'Escala', value: QuestionType.SCALE, description: 'Escala de 1 a 5 (satisfacción/evaluación)' },
-  { title: 'Opción única', value: QuestionType.SINGLE_CHOICE, description: 'Seleccionar una opción' },
-  { title: 'Opción múltiple', value: QuestionType.MULTIPLE_CHOICE, description: 'Seleccionar múltiples opciones' },
+  { title: 'Si/No', value: QuestionType.YES_NO, description: 'Pregunta de respuesta binaria' },
+  { title: 'Escala', value: QuestionType.SCALE, description: 'Escala de 1 a 5 (satisfaccion/evaluacion)' },
+  { title: 'Opcion unica', value: QuestionType.SINGLE_CHOICE, description: 'Seleccionar una opcion' },
+  { title: 'Opcion multiple', value: QuestionType.MULTIPLE_CHOICE, description: 'Seleccionar multiples opciones' },
   { title: 'Texto', value: QuestionType.TEXT, description: 'Respuesta de texto libre' },
-  { title: 'Número', value: QuestionType.NUMBER, description: 'Respuesta numérica' },
+  { title: 'Numero', value: QuestionType.NUMBER, description: 'Respuesta numerica' },
   { title: 'Fecha', value: QuestionType.DATE, description: 'Seleccionar fecha' },
-  { title: 'Email', value: QuestionType.EMAIL, description: 'Dirección de correo electrónico' },
-  { title: 'Teléfono', value: QuestionType.PHONE, description: 'Número de teléfono' },
+  { title: 'Email', value: QuestionType.EMAIL, description: 'Direccion de correo electronico' },
+  { title: 'Telefono', value: QuestionType.PHONE, description: 'Numero de telefono' },
 ]
 
 // Validaciones
@@ -74,7 +79,7 @@ watch(() => questionForm.value.question_type, (newType, oldType) => {
   // Si cambia a YES_NO, crear opciones predeterminadas
   if (newType === QuestionType.YES_NO && oldType !== QuestionType.YES_NO) {
     questionForm.value.options = [
-      { option_text: 'Sí', order_number: 1 },
+      { option_text: 'Si', order_number: 1 },
       { option_text: 'No', order_number: 2 },
     ]
   }
@@ -91,7 +96,34 @@ watch(() => questionForm.value.question_type, (newType, oldType) => {
   }
 })
 
-// Métodos para manejar opciones
+// En modo inline, emitir cambios al padre cuando el formulario cambia
+watch(questionForm, (newVal) => {
+  if (props.inline) {
+    emit('update:question', {
+      question_text: newVal.question_text,
+      question_type: newVal.question_type,
+      required: newVal.required,
+      options: newVal.options,
+    })
+  }
+}, { deep: true })
+
+// Watch para actualizar cuando la prop question cambie (modo inline)
+watch(() => props.question, (newQuestion) => {
+  if (newQuestion) {
+    questionForm.value = {
+      question_text: newQuestion.question_text,
+      question_type: newQuestion.question_type,
+      required: newQuestion.required,
+      options: newQuestion.options.map(opt => ({
+        option_text: opt.option_text,
+        order_number: opt.order_number,
+      })),
+    }
+  }
+}, { deep: true })
+
+// Metodos para manejar opciones
 function addOption() {
   const newOrder = questionForm.value.options.length + 1
 
@@ -104,7 +136,7 @@ function addOption() {
 function removeOption(index: number) {
   questionForm.value.options.splice(index, 1)
 
-  // Reordenar números de orden
+  // Reordenar numeros de orden
   questionForm.value.options.forEach((option, i) => {
     option.order_number = i + 1
   })
@@ -116,7 +148,7 @@ function moveOption(from: number, to: number) {
 
   options.splice(to, 0, movedOption)
 
-  // Reordenar números de orden
+  // Reordenar numeros de orden
   options.forEach((option, i) => {
     option.order_number = i + 1
   })
@@ -124,7 +156,7 @@ function moveOption(from: number, to: number) {
   questionForm.value.options = options
 }
 
-// Métodos para guardar y cancelar
+// Metodos para guardar y cancelar
 function saveQuestion() {
   if (!isValidQuestion.value)
     return
@@ -141,19 +173,16 @@ function cancelQuestion() {
   emit('cancel')
 }
 
-// Resetear formulario
-function resetForm() {
-  questionForm.value = {
-    question_text: '',
-    question_type: QuestionType.TEXT,
-    required: false,
-    options: [],
-  }
-}
+// Exponer para uso externo
+defineExpose({
+  questionForm,
+  isValidQuestion,
+})
 </script>
 
 <template>
-  <VCard>
+  <!-- Modo dialog (comportamiento original) -->
+  <VCard v-if="!inline">
     <VCardItem class="pb-4">
       <VCardTitle>
         <VIcon
@@ -175,7 +204,7 @@ function resetForm() {
               label="Texto de la pregunta"
               required
               rows="3"
-              placeholder="Escribe tu pregunta aquí..."
+              placeholder="Escribe tu pregunta aqui..."
             />
           </VCol>
 
@@ -230,7 +259,7 @@ function resetForm() {
                 size="small"
                 @click="addOption"
               >
-                Agregar Opción
+                Agregar Opcion
               </VBtn>
             </div>
 
@@ -265,7 +294,7 @@ function resetForm() {
 
                     <VTextField
                       v-model="option.option_text"
-                      :placeholder="`Opción ${index + 1}`"
+                      :placeholder="`Opcion ${index + 1}`"
                       variant="outlined"
                       density="compact"
                       class="flex-grow-1"
@@ -309,7 +338,7 @@ function resetForm() {
                         @click="removeOption(index)"
                       >
                         <VTooltip activator="parent">
-                          Eliminar opción
+                          Eliminar opcion
                         </VTooltip>
                         <VIcon icon="tabler-trash" />
                       </VBtn>
@@ -344,6 +373,164 @@ function resetForm() {
       </VBtn>
     </VCardActions>
   </VCard>
+
+  <!-- Modo inline (para expansion panels) -->
+  <div v-else>
+    <VRow>
+      <!-- Texto de la pregunta -->
+      <VCol cols="12">
+        <VTextarea
+          v-model="questionForm.question_text"
+          label="Texto de la pregunta"
+          required
+          rows="2"
+          placeholder="Escribe tu pregunta aqui..."
+        />
+      </VCol>
+
+      <!-- Tipo de pregunta -->
+      <VCol
+        cols="12"
+        md="8"
+      >
+        <VSelect
+          v-model="questionForm.question_type"
+          :items="questionTypeOptions"
+          label="Tipo de pregunta"
+          item-title="title"
+          item-value="value"
+          required
+        >
+          <template #item="{ props: itemProps, item }">
+            <VListItem v-bind="itemProps">
+              <VListItemTitle>{{ item.raw.title }}</VListItemTitle>
+              <VListItemSubtitle>{{ item.raw.description }}</VListItemSubtitle>
+            </VListItem>
+          </template>
+        </VSelect>
+      </VCol>
+
+      <!-- Pregunta requerida -->
+      <VCol
+        cols="12"
+        md="4"
+      >
+        <VSwitch
+          v-model="questionForm.required"
+          label="Pregunta requerida"
+          color="primary"
+        />
+      </VCol>
+
+      <!-- Opciones de respuesta -->
+      <VCol
+        v-if="needsOptions"
+        cols="12"
+      >
+        <div class="d-flex justify-space-between align-center mb-4">
+          <h4 class="text-subtitle-1 font-weight-medium">
+            Opciones de respuesta
+          </h4>
+
+          <VBtn
+            v-if="questionForm.question_type !== QuestionType.YES_NO && questionForm.question_type !== QuestionType.SCALE"
+            prepend-icon="tabler-plus"
+            color="primary"
+            size="small"
+            variant="tonal"
+            @click="addOption"
+          >
+            Agregar Opcion
+          </VBtn>
+        </div>
+
+        <div
+          v-if="questionForm.options.length === 0"
+          class="text-center py-4"
+        >
+          <p class="text-body-2 text-medium-emphasis">
+            No hay opciones configuradas
+          </p>
+        </div>
+
+        <div
+          v-else
+          class="options-list"
+        >
+          <VCard
+            v-for="(option, index) in questionForm.options"
+            :key="index"
+            variant="outlined"
+            class="mb-2"
+          >
+            <VCardText class="py-2">
+              <div class="d-flex align-center gap-2">
+                <VChip
+                  size="small"
+                  variant="tonal"
+                  color="primary"
+                >
+                  {{ index + 1 }}
+                </VChip>
+
+                <VTextField
+                  v-model="option.option_text"
+                  :placeholder="`Opcion ${index + 1}`"
+                  variant="outlined"
+                  density="compact"
+                  class="flex-grow-1"
+                  :disabled="questionForm.question_type === QuestionType.YES_NO"
+                />
+
+                <div
+                  v-if="questionForm.question_type !== QuestionType.YES_NO"
+                  class="d-flex gap-1"
+                >
+                  <VBtn
+                    size="small"
+                    color="info"
+                    icon
+                    :disabled="index === 0"
+                    @click="moveOption(index, index - 1)"
+                  >
+                    <VTooltip activator="parent">
+                      Mover arriba
+                    </VTooltip>
+                    <VIcon icon="tabler-arrow-up" />
+                  </VBtn>
+
+                  <VBtn
+                    size="small"
+                    color="info"
+                    icon
+                    :disabled="index === questionForm.options.length - 1"
+                    @click="moveOption(index, index + 1)"
+                  >
+                    <VTooltip activator="parent">
+                      Mover abajo
+                    </VTooltip>
+                    <VIcon icon="tabler-arrow-down" />
+                  </VBtn>
+
+                  <VBtn
+                    size="small"
+                    color="error"
+                    icon
+                    @click="removeOption(index)"
+                  >
+                    <VTooltip activator="parent">
+                      Eliminar opcion
+                    </VTooltip>
+                    <VIcon icon="tabler-trash" />
+                  </VBtn>
+                </div>
+              </div>
+            </VCardText>
+          </VCard>
+        </div>
+      </VCol>
+    </VRow>
+  </div>
 </template>
 
 <style scoped>

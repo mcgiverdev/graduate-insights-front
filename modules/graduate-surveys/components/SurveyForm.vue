@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { useDebounceFn, useNow } from '@vueuse/core'
+import { useGraduateSurveyService } from '../composables/useGraduateSurveyService'
 import type {
-  QuestionType,
+  GraduateSurveyQuestion,
   SurveySubmissionRequest,
 } from '@/modules/graduate-surveys/types'
-import { useGraduateSurveyService } from '../composables/useGraduateSurveyService'
+import { useSnackbar } from '@/composables/useSnackbar'
 
 interface Props {
   surveyId: number
@@ -25,66 +26,187 @@ const {
   loadingSubmit,
   fetchSurveyDetail,
   submitSurveyResponses,
+  buildResponsesFromAnswers,
+  saveDraft,
 } = useGraduateSurveyService()
 
 const { showSnackbar } = useSnackbar()
 
-// Estado del formulario simple
-const answers = ref<{ [key: number]: any }>({})
-const currentQuestionIndex = ref(0)
+// State
+const answers = reactive<Record<number, any>>({})
+const reviewMode = ref(false)
+const lastSavedAt = ref<Date | null>(null)
+const submitting = ref(false)
 const showConfirmDialog = ref(false)
 
-// Estados computados
+// Reactive now for timeAgo computation
+const now = useNow({ interval: 10000 })
+
+// Computed
 const survey = computed(() => currentSurvey.value)
 const questions = computed(() => survey.value?.questions || [])
-const currentQuestion = computed(() => questions.value[currentQuestionIndex.value])
 const totalQuestions = computed(() => questions.value.length)
 
-const progress = computed(() => {
-  if (totalQuestions.value === 0)
-    return 0
+// Methods (defined before computed that use them)
+const isAnswered = (questionId: number) => {
+  const answer = answers[questionId]
+  if (answer === undefined || answer === null || answer === '')
+    return false
+  if (Array.isArray(answer))
+    return answer.length > 0
 
-  return Math.round(((currentQuestionIndex.value + 1) / totalQuestions.value) * 100)
+  return true
+}
+
+const answeredCount = computed(() =>
+  Object.keys(answers).filter(k => isAnswered(Number(k))).length,
+)
+
+const progressPercent = computed(() =>
+  totalQuestions.value > 0
+    ? (answeredCount.value / totalQuestions.value) * 100
+    : 0,
+)
+
+const missingRequired = computed(() =>
+  questions.value.filter(q => q.required && !isAnswered(q.question_id)),
+)
+
+const canSubmit = computed(() => answeredCount.value > 0)
+
+const timeAgo = computed(() => {
+  if (!lastSavedAt.value)
+    return ''
+
+  const seconds = Math.floor((now.value.getTime() - lastSavedAt.value.getTime()) / 1000)
+
+  if (seconds < 60)
+    return 'hace unos segundos'
+
+  const minutes = Math.floor(seconds / 60)
+
+  return `hace ${minutes} min`
 })
 
-const isFirstQuestion = computed(() => currentQuestionIndex.value === 0)
-const isLastQuestion = computed(() => currentQuestionIndex.value === totalQuestions.value - 1)
+const isRequiredUnanswered = (question: GraduateSurveyQuestion) =>
+  question.required && !isAnswered(question.question_id)
 
-const allRequiredQuestionsAnswered = computed(() => {
-  return questions.value.every(question => {
-    if (!question.required)
-      return true
+const getQuestionStatusIcon = (q: GraduateSurveyQuestion) => {
+  if (isAnswered(q.question_id))
+    return 'tabler-circle-check-filled'
+  if (q.required)
+    return 'tabler-circle-x'
 
-    const answer = answers.value[question.question_id]
-    if (!answer)
-      return false
+  return 'tabler-circle'
+}
 
-    switch (question.question_type) {
-      case 'TEXT':
-      case 'DATE':
-      case 'EMAIL':
-      case 'PHONE':
-        return typeof answer === 'string' && answer.trim() !== ''
-      case 'NUMBER':
-        return typeof answer === 'number' && !isNaN(answer)
-      case 'YES_NO':
-      case 'SCALE':
-      case 'SINGLE_CHOICE':
-        return answer !== null && answer !== undefined
-      case 'MULTIPLE_CHOICE':
-        return Array.isArray(answer) && answer.length > 0
-      default:
-        return false
-    }
+const getQuestionStatusColor = (q: GraduateSurveyQuestion) => {
+  if (isAnswered(q.question_id))
+    return 'success'
+  if (q.required)
+    return 'error'
+
+  return 'grey'
+}
+
+const scrollToQuestion = (questionId: number) => {
+  reviewMode.value = false
+  nextTick(() => {
+    document.getElementById(`question-${questionId}`)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+    })
   })
-})
+}
 
-// Métodos
+const truncate = (text: string, max: number) =>
+  text.length > max ? `${text.substring(0, max)}...` : text
+
+const enterReviewMode = () => {
+  reviewMode.value = true
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+const getAnswerDisplay = (question: GraduateSurveyQuestion) => {
+  const answer = answers[question.question_id]
+
+  if (answer === undefined || answer === null || answer === '')
+    return null
+
+  if (['YES_NO', 'SINGLE_CHOICE', 'SCALE'].includes(question.question_type)) {
+    const option = question.options.find(o => o.id === answer)
+
+    return option?.option_text ?? String(answer)
+  }
+
+  if (question.question_type === 'MULTIPLE_CHOICE') {
+    if (!Array.isArray(answer) || answer.length === 0)
+      return null
+
+    const selectedTexts = answer
+      .map((id: number) => question.options.find(o => o.id === id)?.option_text)
+      .filter(Boolean)
+
+    return selectedTexts.join(', ')
+  }
+
+  return String(answer)
+}
+
+const getInputLabel = (type: string) => {
+  const labels: Record<string, string> = {
+    TEXT: 'Escribe tu respuesta',
+    DATE: 'Ingresa la fecha',
+    EMAIL: 'Ingresa tu email',
+    PHONE: 'Ingresa tu telefono',
+    NUMBER: 'Ingresa un numero',
+  }
+
+  return labels[type] || 'Escribe tu respuesta'
+}
+
+const getInputType = (type: string) => {
+  const inputTypes: Record<string, string> = {
+    EMAIL: 'email',
+    PHONE: 'tel',
+    DATE: 'date',
+    NUMBER: 'number',
+    TEXT: 'text',
+  }
+
+  return inputTypes[type] || 'text'
+}
+
+const isCheckboxChecked = (questionId: number, optionId: number) => {
+  const current = answers[questionId]
+
+  if (!Array.isArray(current))
+    return false
+
+  return current.includes(optionId)
+}
+
+const toggleCheckbox = (questionId: number, optionId: number, checked: boolean) => {
+  if (!Array.isArray(answers[questionId]))
+    answers[questionId] = []
+
+  if (checked) {
+    if (!answers[questionId].includes(optionId))
+      answers[questionId].push(optionId)
+  }
+  else {
+    const idx = answers[questionId].indexOf(optionId)
+
+    if (idx > -1)
+      answers[questionId].splice(idx, 1)
+  }
+}
+
+// Initialize form from existing answers (draft or partial)
 const initializeForm = () => {
   if (!survey.value)
     return
 
-  // Inicializar respuestas existentes
   survey.value.questions.forEach(question => {
     if (question.answered) {
       switch (question.question_type) {
@@ -92,18 +214,18 @@ const initializeForm = () => {
         case 'DATE':
         case 'EMAIL':
         case 'PHONE':
-          answers.value[question.question_id] = question.text_response || ''
+          answers[question.question_id] = question.text_response || ''
           break
         case 'NUMBER':
-          answers.value[question.question_id] = question.number_response || null
+          answers[question.question_id] = question.number_response ?? null
           break
         case 'YES_NO':
         case 'SCALE':
         case 'SINGLE_CHOICE':
-          answers.value[question.question_id] = question.selected_option_ids?.[0] || null
+          answers[question.question_id] = question.selected_option_ids?.[0] ?? null
           break
         case 'MULTIPLE_CHOICE':
-          answers.value[question.question_id] = question.selected_option_ids || []
+          answers[question.question_id] = question.selected_option_ids || []
           break
       }
     }
@@ -121,103 +243,34 @@ const loadSurvey = async () => {
   }
 }
 
-const validateCurrentQuestion = () => {
-  if (!currentQuestion.value)
-    return false
-
-  if (!currentQuestion.value.required)
-    return true
-
-  const answer = answers.value[currentQuestion.value.question_id]
-
-  switch (currentQuestion.value.question_type) {
-    case 'TEXT':
-    case 'DATE':
-    case 'EMAIL':
-    case 'PHONE':
-      return typeof answer === 'string' && answer.trim() !== ''
-    case 'NUMBER':
-      return typeof answer === 'number' && !isNaN(answer)
-    case 'YES_NO':
-    case 'SCALE':
-    case 'SINGLE_CHOICE':
-      return answer !== null && answer !== undefined
-    case 'MULTIPLE_CHOICE':
-      return Array.isArray(answer) && answer.length > 0
-    default:
-      return false
-  }
-}
-
-const nextQuestion = () => {
-  if (!validateCurrentQuestion() && currentQuestion.value?.required) {
-    showSnackbar('Por favor responde la pregunta antes de continuar', 'warning')
-
+// Auto-save draft
+const draftSave = useDebounceFn(async () => {
+  if (!survey.value)
     return
-  }
-
-  if (!isLastQuestion.value) {
-    currentQuestionIndex.value++
-  }
-}
-
-const previousQuestion = () => {
-  if (!isFirstQuestion.value) {
-    currentQuestionIndex.value--
-  }
-}
-
-const handleSubmit = () => {
-  if (!allRequiredQuestionsAnswered.value) {
-    showSnackbar('Por favor responde todas las preguntas requeridas', 'warning')
-
+  if (Object.keys(answers).length === 0)
     return
+
+  try {
+    await saveDraft(survey.value.survey_id, answers, survey.value.questions)
+    lastSavedAt.value = new Date()
   }
+  catch (e) {
+    console.error('Auto-save failed:', e)
+  }
+}, 30000)
 
-  showConfirmDialog.value = true
-}
+watch(answers, () => {
+  draftSave()
+}, { deep: true })
 
-const confirmSubmit = async () => {
+// Submit flow
+const handleFinalSubmit = async () => {
   if (!survey.value)
     return
 
-  // Construir respuestas en el formato requerido
-  const responses = questions.value.map(question => {
-    const answer = answers.value[question.question_id]
+  submitting.value = true
 
-    if (!answer)
-      return null
-
-    switch (question.question_type) {
-      case 'TEXT':
-      case 'DATE':
-      case 'EMAIL':
-      case 'PHONE':
-        return {
-          question_id: question.question_id,
-          text_response: answer,
-        }
-      case 'NUMBER':
-        return {
-          question_id: question.question_id,
-          number_response: answer,
-        }
-      case 'YES_NO':
-      case 'SCALE':
-      case 'SINGLE_CHOICE':
-        return {
-          question_id: question.question_id,
-          selected_option_ids: [answer],
-        }
-      case 'MULTIPLE_CHOICE':
-        return {
-          question_id: question.question_id,
-          selected_option_ids: answer,
-        }
-      default:
-        return null
-    }
-  }).filter(response => response !== null)
+  const responses = buildResponsesFromAnswers(answers, survey.value.questions)
 
   const submissionData: SurveySubmissionRequest = {
     survey_id: survey.value.survey_id,
@@ -233,27 +286,12 @@ const confirmSubmit = async () => {
     showSnackbar(result.message, 'error')
   }
 
+  submitting.value = false
   showConfirmDialog.value = false
 }
 
 const handleCancel = () => {
   emit('cancel')
-}
-
-const formatQuestionType = (type: QuestionType) => {
-  const types = {
-    YES_NO: 'Sí/No',
-    SCALE: 'Escala',
-    TEXT: 'Texto',
-    NUMBER: 'Número',
-    DATE: 'Fecha',
-    EMAIL: 'Email',
-    PHONE: 'Teléfono',
-    SINGLE_CHOICE: 'Opción única',
-    MULTIPLE_CHOICE: 'Opción múltiple',
-  }
-
-  return types[type] || type
 }
 
 // Watchers
@@ -262,7 +300,7 @@ watch(() => props.surveyId, () => {
     loadSurvey()
 })
 
-// Cargar al montar
+// Load on mount
 onMounted(() => {
   if (props.surveyId)
     loadSurvey()
@@ -271,220 +309,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <!-- Encabezado de la encuesta -->
-    <VCard v-if="survey && !loadingDetail">
-      <VCardItem>
-        <VCardTitle class="text-h4">
-          {{ survey.survey_title }}
-        </VCardTitle>
-        <VCardSubtitle>
-          {{ survey.survey_description }}
-        </VCardSubtitle>
-      </VCardItem>
-
-      <!-- Progreso -->
-      <VCardText>
-        <div class="d-flex align-center mb-4">
-          <VProgressLinear
-            :model-value="progress"
-            height="8"
-            color="primary"
-            class="flex-grow-1 me-4"
-          />
-          <span class="text-caption">{{ currentQuestionIndex + 1 }}/{{ totalQuestions }}</span>
-        </div>
-      </VCardText>
-    </VCard>
-
-    <!-- Formulario de pregunta -->
-    <VCard
-      v-if="currentQuestion && !loadingDetail"
-      class="mt-4"
-    >
-      <VCardItem>
-        <VCardTitle class="text-h5">
-          {{ currentQuestion.question_text }}
-        </VCardTitle>
-        <VCardSubtitle>
-          <VChip
-            size="small"
-            :color="currentQuestion.required ? 'error' : 'success'"
-            variant="tonal"
-          >
-            {{ currentQuestion.required ? 'Requerida' : 'Opcional' }}
-          </VChip>
-          <VChip
-            size="small"
-            color="info"
-            variant="tonal"
-            class="ms-2"
-          >
-            {{ formatQuestionType(currentQuestion.question_type) }}
-          </VChip>
-        </VCardSubtitle>
-      </VCardItem>
-
-      <VCardText>
-        <!-- Respuesta de texto (TEXT, DATE, EMAIL, PHONE) -->
-        <div v-if="['TEXT', 'DATE', 'EMAIL', 'PHONE'].includes(currentQuestion.question_type)">
-          <VTextField
-            v-model="answers[currentQuestion.question_id]"
-            :label="currentQuestion.question_type === 'TEXT' ? 'Escribe tu respuesta'
-              : currentQuestion.question_type === 'DATE' ? 'Ingresa la fecha'
-                : currentQuestion.question_type === 'EMAIL' ? 'Ingresa tu email'
-                  : 'Ingresa tu teléfono'"
-            :type="currentQuestion.question_type === 'EMAIL' ? 'email'
-              : currentQuestion.question_type === 'PHONE' ? 'tel'
-                : currentQuestion.question_type === 'DATE' ? 'date'
-                  : 'text'"
-            :rules="currentQuestion.required ? [v => !!v || 'Este campo es requerido'] : []"
-            variant="outlined"
-          />
-        </div>
-
-        <!-- Respuesta numérica -->
-        <div v-else-if="currentQuestion.question_type === 'NUMBER'">
-          <VTextField
-            v-model.number="answers[currentQuestion.question_id]"
-            label="Ingresa un número"
-            type="number"
-            :rules="currentQuestion.required ? [v => v !== '' && v !== null || 'Este campo es requerido'] : []"
-            variant="outlined"
-          />
-        </div>
-
-        <!-- Respuesta Sí/No -->
-        <div v-else-if="currentQuestion.question_type === 'YES_NO'">
-          <VRadioGroup
-            :model-value="answers[currentQuestion.question_id] || null"
-            inline
-            @update:model-value="(value) => answers[currentQuestion.question_id] = value"
-          >
-            <VRadio
-              v-for="option in currentQuestion.options"
-              :key="`yes_no_${option.id}`"
-              :label="option.option_text"
-              :value="option.id"
-              color="primary"
-            />
-          </VRadioGroup>
-        </div>
-
-        <!-- Respuesta de Escala -->
-        <div v-else-if="currentQuestion.question_type === 'SCALE'">
-          <VRadioGroup
-            :model-value="answers[currentQuestion.question_id] || null"
-            inline
-            @update:model-value="(value) => answers[currentQuestion.question_id] = value"
-          >
-            <VRadio
-              v-for="option in currentQuestion.options"
-              :key="`scale_${option.id}`"
-              :label="option.option_text"
-              :value="option.id"
-              color="primary"
-            />
-          </VRadioGroup>
-        </div>
-
-        <!-- Respuesta de opción única -->
-        <div v-else-if="currentQuestion.question_type === 'SINGLE_CHOICE'">
-          <VRadioGroup
-            :model-value="answers[currentQuestion.question_id] || null"
-            @update:model-value="(value) => answers[currentQuestion.question_id] = value"
-          >
-            <VRadio
-              v-for="option in currentQuestion.options"
-              :key="`single_${option.id}`"
-              :label="option.option_text"
-              :value="option.id"
-              color="primary"
-            />
-          </VRadioGroup>
-        </div>
-
-        <!-- Respuesta de opción múltiple -->
-        <div v-else-if="currentQuestion.question_type === 'MULTIPLE_CHOICE'">
-          <div class="d-flex flex-column gap-2">
-            <VCheckbox
-              v-for="option in currentQuestion.options"
-              :key="option.id"
-              :label="option.option_text"
-              :value="option.id"
-              color="primary"
-              @update:model-value="(value) => {
-                if (!answers[currentQuestion.question_id]) {
-                  answers[currentQuestion.question_id] = []
-                }
-                if (value) {
-                  if (!answers[currentQuestion.question_id].includes(option.id)) {
-                    answers[currentQuestion.question_id].push(option.id)
-                  }
-                }
-                else {
-                  const idx = answers[currentQuestion.question_id].indexOf(option.id)
-                  if (idx > -1) {
-                    answers[currentQuestion.question_id].splice(idx, 1)
-                  }
-                }
-              }"
-            />
-          </div>
-        </div>
-      </VCardText>
-
-      <!-- Acciones -->
-      <VCardActions class="d-flex justify-space-between pa-4">
-        <VBtn
-          v-if="!isFirstQuestion"
-          variant="outlined"
-          @click="previousQuestion"
-        >
-          <VIcon
-            icon="tabler-arrow-left"
-            class="me-2"
-          />
-          Anterior
-        </VBtn>
-        <VSpacer v-else />
-
-        <div class="d-flex gap-2">
-          <VBtn
-            variant="outlined"
-            color="error"
-            @click="handleCancel"
-          >
-            Cancelar
-          </VBtn>
-
-          <VBtn
-            v-if="!isLastQuestion"
-            color="primary"
-            @click="nextQuestion"
-          >
-            Siguiente
-            <VIcon
-              icon="tabler-arrow-right"
-              class="ms-2"
-            />
-          </VBtn>
-
-          <VBtn
-            v-else
-            color="success"
-            @click="handleSubmit"
-          >
-            Finalizar Encuesta
-            <VIcon
-              icon="tabler-check"
-              class="ms-2"
-            />
-          </VBtn>
-        </div>
-      </VCardActions>
-    </VCard>
-
-    <!-- Cargando -->
+    <!-- Loading -->
     <VCard v-if="loadingDetail">
       <VCardText class="text-center py-8">
         <VProgressCircular
@@ -498,7 +323,321 @@ onMounted(() => {
       </VCardText>
     </VCard>
 
-    <!-- Diálogo de confirmación -->
+    <template v-if="survey && !loadingDetail">
+      <!-- Sticky header -->
+      <VCard class="mb-4">
+        <VCardText>
+          <div class="d-flex align-center justify-space-between flex-wrap gap-2">
+            <div>
+              <div class="text-h5">
+                {{ survey.survey_title }}
+              </div>
+              <div class="text-body-2 text-medium-emphasis">
+                {{ survey.survey_description }}
+              </div>
+            </div>
+            <div class="d-flex align-center gap-2">
+              <VChip
+                v-if="lastSavedAt"
+                color="success"
+                variant="tonal"
+                size="small"
+                prepend-icon="tabler-check"
+              >
+                Guardado {{ timeAgo }}
+              </VChip>
+              <VBtn
+                color="primary"
+                :disabled="!canSubmit"
+                @click="enterReviewMode"
+              >
+                Enviar respuestas
+              </VBtn>
+            </div>
+          </div>
+          <VProgressLinear
+            :model-value="progressPercent"
+            color="primary"
+            class="mt-3"
+            rounded
+          />
+          <div class="text-caption text-medium-emphasis mt-1">
+            {{ answeredCount }}/{{ totalQuestions }} preguntas respondidas
+          </div>
+        </VCardText>
+      </VCard>
+
+      <VRow>
+        <!-- Sidebar: question navigation -->
+        <VCol
+          cols="12"
+          md="3"
+        >
+          <VCard style="position: sticky; top: 80px;">
+            <VCardTitle class="text-subtitle-1">
+              Preguntas
+            </VCardTitle>
+            <VList
+              density="compact"
+              nav
+            >
+              <VListItem
+                v-for="(q, index) in survey.questions"
+                :key="q.question_id"
+                :value="index"
+                @click="scrollToQuestion(q.question_id)"
+              >
+                <template #prepend>
+                  <VIcon
+                    :icon="getQuestionStatusIcon(q)"
+                    :color="getQuestionStatusColor(q)"
+                    size="16"
+                  />
+                </template>
+                <VListItemTitle class="text-body-2">
+                  {{ index + 1 }}. {{ truncate(q.question_text, 40) }}
+                </VListItemTitle>
+                <template #append>
+                  <VChip
+                    v-if="q.required"
+                    size="x-small"
+                    color="error"
+                    variant="tonal"
+                  >
+                    *
+                  </VChip>
+                </template>
+              </VListItem>
+            </VList>
+          </VCard>
+        </VCol>
+
+        <!-- Main: all questions -->
+        <VCol
+          cols="12"
+          md="9"
+        >
+          <!-- Review mode banner -->
+          <VAlert
+            v-if="reviewMode"
+            type="info"
+            variant="tonal"
+            class="mb-4"
+            closable
+            @click:close="reviewMode = false"
+          >
+            Revisa tus respuestas antes de enviar. Haz clic en "Editar" para modificar una respuesta.
+          </VAlert>
+
+          <!-- Missing required warning in review mode -->
+          <VAlert
+            v-if="reviewMode && missingRequired.length > 0"
+            type="error"
+            variant="tonal"
+            class="mb-4"
+          >
+            <strong>Faltan {{ missingRequired.length }} respuestas obligatorias</strong>
+            <div class="mt-1 text-body-2">
+              {{ missingRequired.map(q => `"${truncate(q.question_text, 50)}"`).join(', ') }}
+            </div>
+          </VAlert>
+
+          <!-- Question cards -->
+          <VCard
+            v-for="(question, index) in survey.questions"
+            :id="`question-${question.question_id}`"
+            :key="question.question_id"
+            class="mb-4"
+            :variant="reviewMode ? 'tonal' : 'elevated'"
+            :color="reviewMode && isRequiredUnanswered(question) ? 'error' : undefined"
+          >
+            <VCardText>
+              <!-- Question header -->
+              <div class="d-flex align-center gap-2 mb-3">
+                <VAvatar
+                  size="32"
+                  color="primary"
+                  variant="tonal"
+                >
+                  <span class="text-body-2 font-weight-bold">{{ index + 1 }}</span>
+                </VAvatar>
+                <div class="text-subtitle-1 font-weight-medium flex-grow-1">
+                  {{ question.question_text }}
+                </div>
+                <VChip
+                  v-if="question.required"
+                  size="small"
+                  color="error"
+                  variant="tonal"
+                >
+                  Obligatoria
+                </VChip>
+                <VBtn
+                  v-if="reviewMode"
+                  variant="text"
+                  size="small"
+                  color="primary"
+                  @click="scrollToQuestion(question.question_id)"
+                >
+                  Editar
+                </VBtn>
+              </div>
+
+              <!-- Response input (edit mode) -->
+              <div v-if="!reviewMode">
+                <!-- TEXT, DATE, EMAIL, PHONE -->
+                <div v-if="['TEXT', 'DATE', 'EMAIL', 'PHONE'].includes(question.question_type)">
+                  <VTextField
+                    v-model="answers[question.question_id]"
+                    :label="getInputLabel(question.question_type)"
+                    :type="getInputType(question.question_type)"
+                    :rules="question.required ? [(v: any) => !!v || 'Este campo es requerido'] : []"
+                    variant="outlined"
+                  />
+                </div>
+
+                <!-- NUMBER -->
+                <div v-else-if="question.question_type === 'NUMBER'">
+                  <VTextField
+                    v-model.number="answers[question.question_id]"
+                    label="Ingresa un numero"
+                    type="number"
+                    :rules="question.required ? [(v: any) => (v !== '' && v !== null) || 'Este campo es requerido'] : []"
+                    variant="outlined"
+                  />
+                </div>
+
+                <!-- YES_NO -->
+                <div v-else-if="question.question_type === 'YES_NO'">
+                  <VRadioGroup
+                    :model-value="answers[question.question_id] || null"
+                    inline
+                    @update:model-value="(value: any) => answers[question.question_id] = value"
+                  >
+                    <VRadio
+                      v-for="option in question.options"
+                      :key="`yes_no_${option.id}`"
+                      :label="option.option_text"
+                      :value="option.id"
+                      color="primary"
+                    />
+                  </VRadioGroup>
+                </div>
+
+                <!-- SCALE -->
+                <div v-else-if="question.question_type === 'SCALE'">
+                  <VRadioGroup
+                    :model-value="answers[question.question_id] || null"
+                    inline
+                    @update:model-value="(value: any) => answers[question.question_id] = value"
+                  >
+                    <VRadio
+                      v-for="option in question.options"
+                      :key="`scale_${option.id}`"
+                      :label="option.option_text"
+                      :value="option.id"
+                      color="primary"
+                    />
+                  </VRadioGroup>
+                </div>
+
+                <!-- SINGLE_CHOICE -->
+                <div v-else-if="question.question_type === 'SINGLE_CHOICE'">
+                  <VRadioGroup
+                    :model-value="answers[question.question_id] || null"
+                    @update:model-value="(value: any) => answers[question.question_id] = value"
+                  >
+                    <VRadio
+                      v-for="option in question.options"
+                      :key="`single_${option.id}`"
+                      :label="option.option_text"
+                      :value="option.id"
+                      color="primary"
+                    />
+                  </VRadioGroup>
+                </div>
+
+                <!-- MULTIPLE_CHOICE -->
+                <div v-else-if="question.question_type === 'MULTIPLE_CHOICE'">
+                  <div class="d-flex flex-column gap-2">
+                    <VCheckbox
+                      v-for="option in question.options"
+                      :key="option.id"
+                      :label="option.option_text"
+                      :model-value="isCheckboxChecked(question.question_id, option.id)"
+                      color="primary"
+                      @update:model-value="(value: any) => toggleCheckbox(question.question_id, option.id, !!value)"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Review mode: show answer as text -->
+              <div v-else>
+                <div class="text-body-1 pa-3 bg-surface rounded">
+                  <VIcon
+                    icon="tabler-message"
+                    size="18"
+                    class="me-2"
+                  />
+                  {{ getAnswerDisplay(question) || 'Sin respuesta' }}
+                </div>
+              </div>
+            </VCardText>
+          </VCard>
+
+          <!-- Bottom actions (edit mode) -->
+          <VCard
+            v-if="!reviewMode"
+            class="mt-4"
+          >
+            <VCardActions>
+              <VBtn
+                variant="outlined"
+                color="error"
+                @click="handleCancel"
+              >
+                Cancelar
+              </VBtn>
+              <VSpacer />
+              <VBtn
+                color="primary"
+                :disabled="!canSubmit"
+                @click="enterReviewMode"
+              >
+                Revisar y enviar
+              </VBtn>
+            </VCardActions>
+          </VCard>
+
+          <!-- Review mode footer -->
+          <VCard
+            v-if="reviewMode"
+            class="mt-4"
+          >
+            <VCardActions>
+              <VBtn
+                variant="outlined"
+                @click="reviewMode = false"
+              >
+                Volver a editar
+              </VBtn>
+              <VSpacer />
+              <VBtn
+                color="success"
+                :loading="submitting || loadingSubmit"
+                :disabled="missingRequired.length > 0"
+                @click="showConfirmDialog = true"
+              >
+                Confirmar y enviar
+              </VBtn>
+            </VCardActions>
+          </VCard>
+        </VCol>
+      </VRow>
+    </template>
+
+    <!-- Confirm submission dialog -->
     <VDialog
       v-model="showConfirmDialog"
       max-width="400"
@@ -510,11 +649,11 @@ onMounted(() => {
             icon="tabler-help-circle"
             class="me-2"
           />
-          Confirmar envío
+          Confirmar envio
         </VCardTitle>
 
         <VCardText>
-          ¿Estás seguro de que deseas enviar tus respuestas? Una vez enviadas no podrás modificarlas.
+          Estas seguro de que deseas enviar tus respuestas? Una vez enviadas no podras modificarlas.
         </VCardText>
 
         <VCardActions>
@@ -527,8 +666,8 @@ onMounted(() => {
           </VBtn>
           <VBtn
             color="success"
-            :loading="loadingSubmit"
-            @click="confirmSubmit"
+            :loading="submitting || loadingSubmit"
+            @click="handleFinalSubmit"
           >
             Confirmar
           </VBtn>
@@ -539,10 +678,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.question-response {
-  min-block-size: 120px;
-}
-
 .v-radio-group {
   margin-block-start: 0;
 }

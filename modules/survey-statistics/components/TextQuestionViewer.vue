@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+import TextResponsesDialog from './TextResponsesDialog.vue'
+
+const showAllResponses = ref(false)
+
 interface TextQuestionData {
   question_id: number
   question_text: string
@@ -149,10 +154,25 @@ function getResponseLengthCategory(length: number): { label: string; color: stri
         </VRow>
       </div>
 
+      <div
+        v-if="question.sample_responses?.length"
+        class="d-flex justify-center mt-4"
+      >
+        <VBtn
+          variant="outlined"
+          color="primary"
+          prepend-icon="tabler-list"
+          @click="showAllResponses = true"
+        >
+          Ver todas las respuestas ({{ question.total_responses }})
+        </VBtn>
+      </div>
+
       <VAlert
         v-if="question.recommended_chart_type === 'word_cloud'"
         type="info"
         variant="outlined"
+        class="mt-4"
       >
         <template #prepend>
           <VIcon icon="tabler-cloud" />
@@ -163,5 +183,11 @@ function getResponseLengthCategory(length: number): { label: string; color: stri
         </div>
       </VAlert>
     </VCardText>
+
+    <TextResponsesDialog
+      v-model="showAllResponses"
+      :responses="question.sample_responses || []"
+      :question-text="question.question_text"
+    />
   </VCard>
 </template>

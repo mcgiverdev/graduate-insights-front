@@ -1,13 +1,15 @@
 import { readonly, ref } from 'vue'
-import { useApi } from '@/composables/useApi'
 import type {
   GraduateSurveyDetail,
   GraduateSurveyDetailResponse,
   GraduateSurveyListItem,
   GraduateSurveyListResponse,
+  GraduateSurveyQuestion,
+  SurveyQuestionResponse,
   SurveySubmissionRequest,
   SurveySubmissionResponse,
 } from '../types'
+import { useApi } from '@/composables/useApi'
 
 const surveys = ref<GraduateSurveyListItem[]>([])
 const currentSurvey = ref<GraduateSurveyDetail | null>(null)
@@ -141,6 +143,46 @@ export const useGraduateSurveyService = () => {
     return surveys.value.filter(survey => survey.survey_type === surveyType)
   }
 
+  const buildResponsesFromAnswers = (
+    answers: Record<number, any>,
+    questions: GraduateSurveyQuestion[],
+  ): SurveyQuestionResponse[] => {
+    return questions
+      .filter(q => {
+        const answer = answers[q.question_id]
+
+        return answer !== undefined && answer !== null && answer !== ''
+      })
+      .map(q => {
+        const answer = answers[q.question_id]
+        const response: SurveyQuestionResponse = { question_id: q.question_id }
+
+        if (['YES_NO', 'SINGLE_CHOICE', 'SCALE'].includes(q.question_type))
+          response.selected_option_ids = answer ? [answer] : []
+        else if (q.question_type === 'MULTIPLE_CHOICE')
+          response.selected_option_ids = Array.isArray(answer) ? answer : []
+        else if (q.question_type === 'NUMBER')
+          response.number_response = Number(answer)
+        else
+          response.text_response = String(answer)
+
+        return response
+      })
+  }
+
+  const saveDraft = async (
+    surveyId: number,
+    answers: Record<number, any>,
+    questions: GraduateSurveyQuestion[],
+  ) => {
+    const responses = buildResponsesFromAnswers(answers, questions)
+
+    await useApi('/graduate-insights/v1/api/survey-responses/draft', {
+      method: 'POST',
+      body: { survey_id: surveyId, responses },
+    })
+  }
+
   return {
     surveys: readonly(surveys),
     currentSurvey: readonly(currentSurvey),
@@ -156,5 +198,7 @@ export const useGraduateSurveyService = () => {
     getSurveyStats,
     isSurveyCompleted,
     getSurveysByType,
+    buildResponsesFromAnswers,
+    saveDraft,
   }
 }
