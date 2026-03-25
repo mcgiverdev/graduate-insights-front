@@ -26,12 +26,45 @@ const graduateId = computed(() => {
 
 const activeTab = ref('resumen-academico')
 
-const degreeTypes = ref<Array<{ id: number; nombre: string }>>([])
+const degreeTypes = ref<Array<{ id: number; nombre: string; codigo?: string }>>([])
 const titulationModes = ref<Array<{ id: number; nombre: string }>>([])
 const languages = ref<Array<{ id: number; nombre: string }>>([])
 const universities = ref<Array<{ id: number; nombre: string }>>([])
+const faculties = ref<Array<{ id: number; nombre: string }>>([])
+const professionalSchools = ref<Array<{ id: number; facultad_id?: number; facultadId?: number; nombre: string }>>([])
+
+const resolvedSchoolName = computed(() => {
+  if (!graduate.value?.escuelaProfesionalId) return '-'
+  return professionalSchools.value.find(s => s.id === graduate.value!.escuelaProfesionalId)?.nombre || '-'
+})
+
+const resolvedFacultyName = computed(() => {
+  if (!graduate.value?.escuelaProfesionalId) return '-'
+  const school = professionalSchools.value.find(s => s.id === graduate.value!.escuelaProfesionalId)
+  if (!school) return '-'
+  const fId = school.facultad_id ?? school.facultadId
+  if (!fId) return '-'
+  return faculties.value.find(f => f.id === fId)?.nombre || '-'
+})
 
 const { graduate, loading, notFound } = useGraduateDetail(graduateId)
+
+const formatDate = (value?: string | null) => {
+  if (!value) return '-'
+  const datePart = value.trim().split(/[T ]/)[0]
+  if (!datePart) return '-'
+  const [year, month, day] = datePart.split('-')
+  if (!year || !month || !day) return datePart
+  return `${day}/${month}/${year}`
+}
+
+const formatDateRange = (start?: string | null, end?: string | null) => {
+  const s = formatDate(start)
+  const e = formatDate(end)
+  if (s === '-' && e === '-') return '-'
+  if (e === '-') return s
+  return `${s} — ${e}`
+}
 
 const pageTitle = computed(() => {
   if (!graduate.value)
@@ -48,8 +81,8 @@ const summaryItems = computed(() => {
 
   return [
     { label: 'Codigo universitario', value: graduate.value.codigoUniversitario || '-' },
-    { label: 'Facultad', value: graduate.value.facultad || '-' },
-    { label: 'Escuela profesional', value: graduate.value.escuelaProfesional || '-' },
+    { label: 'Facultad', value: resolvedFacultyName.value },
+    { label: 'Escuela profesional', value: resolvedSchoolName.value },
     { label: 'Anio de ingreso', value: graduate.value.anioIngreso || '-' },
     { label: 'Anio de egreso', value: graduate.value.anioEgreso || '-' },
     { label: 'Nacionalidad', value: graduate.value.nacionalidad || '-' },
@@ -63,14 +96,33 @@ const degreeRows = computed(() => {
   if (!graduate.value)
     return []
 
-  return (graduate.value.grados || []).map((item, index) => ({
-    id: `${index}-${item.tipo_grado_id || 'na'}`,
-    tipo: degreeTypes.value.find(type => type.id === item.tipo_grado_id)?.nombre || '-',
-    universidad: universities.value.find(university => university.id === item.universidad_id)?.nombre || '-',
-    fecha: item.fecha_grado || '-',
-    modalidad: titulationModes.value.find(mode => mode.id === item.titulacion?.modalidad_titulacion_id)?.nombre || item.titulacion?.modalidad_otro || '-',
-    nombre: item.otro_grado_nombre || '-',
-  }))
+  return (graduate.value.grados || []).map((item, index) => {
+    const tipoObj = degreeTypes.value.find(t => t.id === item.tipo_grado_id)
+    const tipoNombre = tipoObj?.nombre || '-'
+    const isOtro = tipoObj?.codigo === 'OTRO' || tipoObj?.nombre === 'Otro'
+    const isTitulado = tipoObj?.codigo === 'TITULADO' || tipoObj?.nombre === 'Titulado'
+
+    // Resolver modalidad de titulación
+    const modalidadNombre = titulationModes.value.find(m => m.id === item.titulacion?.modalidad_titulacion_id)?.nombre
+      || item.titulacion?.modalidad_otro
+      || ''
+
+    // Construir nombre del tipo de grado
+    let tipo = tipoNombre
+    if (isOtro && item.otro_grado_nombre?.trim()) {
+      tipo = `${tipoNombre}: ${item.otro_grado_nombre.trim()}`
+    }
+    else if (isTitulado && modalidadNombre) {
+      tipo = `${tipoNombre} (${modalidadNombre})`
+    }
+
+    return {
+      id: `${index}-${item.tipo_grado_id || 'na'}`,
+      tipo,
+      universidad: universities.value.find(u => u.id === item.universidad_id)?.nombre || '-',
+      fecha: formatDate(item.fecha_grado),
+    }
+  })
 })
 
 const languageRows = computed(() => {
@@ -82,22 +134,52 @@ const languageRows = computed(() => {
     idioma: languages.value.find(language => language.id === item.idioma_id)?.nombre || '-',
     nivel: item.nivel || '-',
     aprendizaje: item.aprendizaje || '-',
-    vigencia: item.fecha_inicio && item.fecha_fin ? `${item.fecha_inicio} - ${item.fecha_fin}` : '-',
+    vigencia: formatDateRange(item.fecha_inicio, item.fecha_fin),
+  }))
+})
+
+const complementaryTrainingRows = computed(() => {
+  if (!graduate.value)
+    return []
+
+  return (graduate.value.formacionesComplementarias || []).map((item, index) => ({
+    id: `${index}-${item.nombre_curso || 'na'}`,
+    curso: item.nombre_curso || '-',
+    institucion: item.institucion || '-',
+    vigencia: formatDateRange(item.fecha_inicio, item.fecha_fin),
+  }))
+})
+
+const workTrajectoryRows = computed(() => {
+  if (!graduate.value)
+    return []
+
+  return (graduate.value.trayectoriasLaborales || []).map((item, index) => ({
+    id: `${index}-${item.empresa || 'na'}`,
+    empresa: item.empresa || '-',
+    cargo: item.cargo || '-',
+    modalidad: item.modalidad || '-',
+    vigencia: formatDateRange(item.fecha_inicio, item.fecha_fin),
+    estado: item.fecha_fin ? 'Finalizado' : 'En curso',
   }))
 })
 
 const loadCatalogs = async () => {
-  const [loadedDegreeTypes, loadedTitulationModes, loadedLanguages, loadedUniversities] = await Promise.all([
+  const [loadedDegreeTypes, loadedTitulationModes, loadedLanguages, loadedUniversities, loadedFaculties, loadedSchools] = await Promise.all([
     graduateService.fetchDegreeTypes(),
     graduateService.fetchTitulationModes(),
     graduateService.fetchLanguagesCatalog(),
     graduateService.fetchUniversities(),
+    graduateService.fetchFaculties(),
+    graduateService.fetchProfessionalSchools(),
   ])
 
   degreeTypes.value = loadedDegreeTypes
   titulationModes.value = loadedTitulationModes
   languages.value = loadedLanguages
   universities.value = loadedUniversities
+  faculties.value = loadedFaculties
+  professionalSchools.value = loadedSchools
 }
 
 const openEditWizard = async () => {
@@ -149,7 +231,7 @@ onMounted(async () => {
               <div><strong>DNI:</strong> {{ graduate?.dni || '-' }}</div>
               <div><strong>Celular:</strong> {{ graduate?.celular || '-' }}</div>
               <div><strong>Genero:</strong> {{ graduate?.genero || '-' }}</div>
-              <div><strong>Nacimiento:</strong> {{ graduate?.fechaNacimiento || '-' }}</div>
+              <div><strong>Nacimiento:</strong> {{ formatDate(graduate?.fechaNacimiento) }}</div>
               <div><strong>Direccion:</strong> {{ graduate?.direccionActual || '-' }}</div>
               <div><strong>Ciudad:</strong> {{ graduate?.ciudad || '-' }}</div>
               <div><strong>Departamento:</strong> {{ graduate?.departamento || '-' }}</div>
@@ -205,6 +287,12 @@ onMounted(async () => {
               <VTab value="idiomas">
                 Idiomas
               </VTab>
+              <VTab value="formacion-complementaria">
+                Formacion complementaria
+              </VTab>
+              <VTab value="trayectoria-laboral">
+                Trayectoria laboral
+              </VTab>
             </VTabs>
 
             <VWindow
@@ -248,11 +336,9 @@ onMounted(async () => {
                 <VTable v-else>
                   <thead>
                     <tr>
-                      <th scope="col">Tipo</th>
-                      <th scope="col">Nombre</th>
+                      <th scope="col">Tipo de grado</th>
                       <th scope="col">Universidad</th>
                       <th scope="col">Fecha</th>
-                      <th scope="col">Modalidad</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -261,10 +347,8 @@ onMounted(async () => {
                       :key="row.id"
                     >
                       <td>{{ row.tipo }}</td>
-                      <td>{{ row.nombre }}</td>
                       <td>{{ row.universidad }}</td>
                       <td>{{ row.fecha }}</td>
-                      <td>{{ row.modalidad }}</td>
                     </tr>
                   </tbody>
                 </VTable>
@@ -297,6 +381,70 @@ onMounted(async () => {
                       <td>{{ row.nivel }}</td>
                       <td>{{ row.aprendizaje }}</td>
                       <td>{{ row.vigencia }}</td>
+                    </tr>
+                  </tbody>
+                </VTable>
+              </VWindowItem>
+
+              <VWindowItem value="formacion-complementaria">
+                <VAlert
+                  v-if="complementaryTrainingRows.length === 0"
+                  type="info"
+                  variant="tonal"
+                >
+                  No hay formaciones complementarias registradas.
+                </VAlert>
+
+                <VTable v-else>
+                  <thead>
+                    <tr>
+                      <th scope="col">Curso</th>
+                      <th scope="col">Institucion</th>
+                      <th scope="col">Vigencia</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="row in complementaryTrainingRows"
+                      :key="row.id"
+                    >
+                      <td>{{ row.curso }}</td>
+                      <td>{{ row.institucion }}</td>
+                      <td>{{ row.vigencia }}</td>
+                    </tr>
+                  </tbody>
+                </VTable>
+              </VWindowItem>
+
+              <VWindowItem value="trayectoria-laboral">
+                <VAlert
+                  v-if="workTrajectoryRows.length === 0"
+                  type="info"
+                  variant="tonal"
+                >
+                  No hay trayectorias laborales registradas.
+                </VAlert>
+
+                <VTable v-else>
+                  <thead>
+                    <tr>
+                      <th scope="col">Empresa</th>
+                      <th scope="col">Cargo</th>
+                      <th scope="col">Modalidad</th>
+                      <th scope="col">Vigencia</th>
+                      <th scope="col">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="row in workTrajectoryRows"
+                      :key="row.id"
+                    >
+                      <td>{{ row.empresa }}</td>
+                      <td>{{ row.cargo }}</td>
+                      <td>{{ row.modalidad }}</td>
+                      <td>{{ row.vigencia }}</td>
+                      <td>{{ row.estado }}</td>
                     </tr>
                   </tbody>
                 </VTable>

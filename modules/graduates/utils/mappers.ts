@@ -33,35 +33,13 @@ export const toGraduate = (graduate: GraduateApiResponse): Graduate => ({
   paisResidencia: graduate.pais_residencia ?? '',
   linkedin: graduate.linkedin ?? '',
   portafolio: graduate.portafolio ?? '',
-  facultad: graduate.facultad ?? '',
-  escuelaProfesional: graduate.escuela_profesional ?? '',
   escuelaProfesionalId: graduate.escuela_profesional_id ?? undefined,
   anioIngreso: graduate.anio_ingreso ?? '',
   anioEgreso: graduate.anio_egreso ?? '',
-  gradoObtenido: graduate.grado_obtenido ?? '',
-  bachillerFecha: graduate.bachiller_fecha ?? '',
-  bachillerUniversidad: graduate.bachiller_universidad ?? '',
-  tituloProfesionalFecha: graduate.titulo_profesional_fecha ?? '',
-  tituloProfesionalUniversidad: graduate.titulo_profesional_universidad ?? '',
-  maestriaFecha: graduate.maestria_fecha ?? '',
-  maestriaUniversidad: graduate.maestria_universidad ?? '',
-  doctoradoFecha: graduate.doctorado_fecha ?? '',
-  doctoradoUniversidad: graduate.doctorado_universidad ?? '',
-  otroGradoNombre: graduate.otro_grado_nombre ?? '',
-  otroGradoFecha: graduate.otro_grado_fecha ?? '',
-  otroGradoUniversidad: graduate.otro_grado_universidad ?? '',
-  modalidadTitulacion: graduate.modalidad_titulacion ?? '',
-  modalidadTitulacionOtro: graduate.modalidad_titulacion_otro ?? '',
-  idiomaNombre: graduate.idioma_nombre ?? '',
-  idiomaNivel: graduate.idioma_nivel ?? '',
-  idiomaFechaInicio: graduate.idioma_fecha_inicio ?? '',
-  idiomaFechaFin: graduate.idioma_fecha_fin ?? '',
-  idiomaAprendizaje: graduate.idioma_aprendizaje ?? '',
   grados: graduate.grados ?? [],
   idiomas: graduate.idiomas ?? [],
-  fechaInicio: graduate.fecha_inicio ?? '',
-  fechaFin: graduate.fecha_fin ?? '',
-  cv: graduate.cv ?? undefined,
+  formacionesComplementarias: graduate.formaciones_complementarias ?? [],
+  trayectoriasLaborales: graduate.trayectorias_laborales ?? [],
   cvPath: graduate.cv_path ?? null,
   contrasena: graduate.contrasena ?? undefined,
   validated: Boolean(graduate.validated ?? true),
@@ -76,8 +54,6 @@ export const toFormValues = (graduate?: Graduate | null): GraduateFormValues => 
   dni: graduate?.dni ?? '',
   celular: graduate?.celular ?? '',
   contrasena: graduate?.contrasena ?? '',
-  fechaInicio: formatDate(graduate?.fechaInicio),
-  fechaFin: formatDate(graduate?.fechaFin),
   cvPath: graduate?.cvPath ?? '',
 })
 
@@ -94,12 +70,6 @@ export const toPayload = (values: GraduateFormValues): GraduatePayload => {
     celular: values.celular.trim(),
     contrasena: values.contrasena?.trim() || normalizedDni,
   }
-
-  if (values.fechaInicio)
-    payload.fecha_inicio = values.fechaInicio
-
-  if (values.fechaFin)
-    payload.fecha_fin = values.fechaFin
 
   if (values.cvPath)
     payload.cv_path = values.cvPath

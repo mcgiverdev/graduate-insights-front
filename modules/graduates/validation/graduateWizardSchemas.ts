@@ -69,6 +69,73 @@ const languageCollectionItemSchema = yup.object({
   },
 )
 
+const complementaryTrainingCollectionItemSchema = yup.object({
+  nombreCurso: optionalText(150),
+  institucion: optionalText(150),
+  fechaInicio: yup.string().optional(),
+  fechaFin: yup.string().optional().test(
+    'is-after-training-item-start',
+    'La fecha fin de la formacion debe ser mayor o igual a la fecha de inicio',
+    (value, context) => {
+      if (!value)
+        return true
+
+      const start = context.parent.fechaInicio
+      if (!start)
+        return true
+
+      return new Date(value) >= new Date(start)
+    },
+  ),
+}).test(
+  'training-item-name-required-when-filled',
+  'Ingrese el nombre del curso',
+  value => {
+    if (!value)
+      return true
+
+    const hasAny = Boolean(value.institucion || value.fechaInicio || value.fechaFin)
+    if (!hasAny)
+      return true
+
+    return Boolean(value.nombreCurso)
+  },
+)
+
+const workTrajectoryCollectionItemSchema = yup.object({
+  empresa: optionalText(150),
+  cargo: optionalText(150),
+  modalidad: optionalText(80),
+  fechaInicio: yup.string().optional(),
+  fechaFin: yup.string().optional().test(
+    'is-after-work-item-start',
+    'La fecha fin de la trayectoria debe ser mayor o igual a la fecha de inicio',
+    (value, context) => {
+      if (!value)
+        return true
+
+      const start = context.parent.fechaInicio
+      if (!start)
+        return true
+
+      return new Date(value) >= new Date(start)
+    },
+  ),
+}).test(
+  'work-item-required-fields-when-filled',
+  'Complete empresa, cargo y fecha de inicio de la trayectoria',
+  value => {
+    if (!value)
+      return true
+
+    const hasAny = Boolean(value.empresa || value.cargo || value.modalidad || value.fechaInicio || value.fechaFin)
+    if (!hasAny)
+      return true
+
+    return Boolean(value.empresa && value.cargo && value.fechaInicio)
+  },
+)
+
 export const graduateWizardStepOneSchema = yup.object({
   codigoUniversitario: yup
     .string()
@@ -152,3 +219,31 @@ export const graduateWizardStepThreeSchema = yup.object({
 })
 
 export const graduateWizardStepFourSchema = yup.object({})
+
+export const graduateWizardStepFiveSchema = yup.object({
+  formacionesComplementarias: yup.array().of(complementaryTrainingCollectionItemSchema).optional(),
+})
+
+export const graduateWizardStepSixSchema = yup.object({
+  trayectoriasLaborales: yup.array().of(workTrajectoryCollectionItemSchema).optional().test(
+    'single-active-work-trajectory',
+    'Solo se permite una trayectoria laboral activa',
+    value => {
+      if (!value)
+        return true
+
+      const activeItems = value.filter(item => {
+        if (!item)
+          return false
+
+        const hasAny = Boolean(item.empresa || item.cargo || item.modalidad || item.fechaInicio || item.fechaFin)
+        if (!hasAny)
+          return false
+
+        return !item.fechaFin
+      })
+
+      return activeItems.length <= 1
+    },
+  ),
+})

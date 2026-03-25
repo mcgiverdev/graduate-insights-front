@@ -12,15 +12,19 @@ import type {
   Gender,
   Graduate,
   GraduatePayload,
+  GraduateWizardComplementaryTrainingItem,
   GraduateWizardDegreeItem,
   GraduateWizardLanguageItem,
+  GraduateWizardWorkTrajectoryItem,
   GraduateWizardValues,
   LanguageLevel,
   ProfessionalSchoolCatalogItem,
 } from '../types'
 import {
   graduateWizardStepFourSchema,
+  graduateWizardStepFiveSchema,
   graduateWizardStepOneSchema,
+  graduateWizardStepSixSchema,
   graduateWizardStepThreeSchema,
   graduateWizardStepTwoSchema,
 } from '../validation/graduateWizardSchemas'
@@ -45,10 +49,16 @@ const saving = ref(false)
 const formMessage = ref('')
 const degreeDialogOpen = ref(false)
 const languageDialogOpen = ref(false)
+const complementaryTrainingDialogOpen = ref(false)
+const workTrajectoryDialogOpen = ref(false)
 const degreesTouched = ref(false)
 const languagesTouched = ref(false)
+const complementaryTrainingsTouched = ref(false)
+const workTrajectoriesTouched = ref(false)
 const editingDegreeIndex = ref<number | null>(null)
 const editingLanguageIndex = ref<number | null>(null)
+const editingComplementaryTrainingIndex = ref<number | null>(null)
+const editingWorkTrajectoryIndex = ref<number | null>(null)
 const facultyOptions = ref<FacultyCatalogItem[]>([])
 const professionalSchoolOptions = ref<ProfessionalSchoolCatalogItem[]>([])
 const degreeTypeOptions = ref<CatalogOptionItem[]>([])
@@ -62,6 +72,8 @@ const tabItems = [
   { value: 'resumen-academico', title: 'Resumen academico' },
   { value: 'grados', title: 'Grados' },
   { value: 'idiomas', title: 'Idiomas' },
+  { value: 'formacion-complementaria', title: 'Formacion complementaria' },
+  { value: 'trayectoria-laboral', title: 'Trayectoria laboral' },
 ]
 
 const civilStatusOptions: CivilStatus[] = ['Soltero(a)', 'Casado(a)', 'Divorciado(a)', 'Viudo(a)', 'Conviviente']
@@ -73,6 +85,26 @@ const sexOptions: Array<{ title: string; value: Gender }> = [
 ]
 
 const languageLevelOptions: LanguageLevel[] = ['Basico', 'Intermedio', 'Avanzado']
+
+const departamentoOptions = [
+  'Amazonas', 'Áncash', 'Apurímac', 'Arequipa', 'Ayacucho', 'Cajamarca',
+  'Callao', 'Cusco', 'Huancavelica', 'Huánuco', 'Ica', 'Junín',
+  'La Libertad', 'Lambayeque', 'Lima', 'Loreto', 'Madre de Dios', 'Moquegua',
+  'Pasco', 'Piura', 'Puno', 'San Martín', 'Tacna', 'Tumbes', 'Ucayali',
+]
+
+const workModalityOptions = [
+  { title: 'Presencial', value: 'Presencial' },
+  { title: 'Remoto', value: 'Remoto' },
+  { title: 'Híbrido', value: 'Híbrido' },
+]
+
+const learningMethodOptions = [
+  { title: 'Académico', value: 'Académico' },
+  { title: 'Autodidacta', value: 'Autodidacta' },
+  { title: 'Inmersión', value: 'Inmersión' },
+  { title: 'Nativo', value: 'Nativo' },
+]
 
 const createEmptyDegree = (): GraduateWizardDegreeItem => ({
   tipoGradoId: undefined,
@@ -91,13 +123,37 @@ const createEmptyLanguage = (): GraduateWizardLanguageItem => ({
   aprendizaje: '',
 })
 
+const createEmptyComplementaryTraining = (): GraduateWizardComplementaryTrainingItem => ({
+  nombreCurso: '',
+  institucion: '',
+  fechaInicio: '',
+  fechaFin: '',
+})
+
+const createEmptyWorkTrajectory = (): GraduateWizardWorkTrajectoryItem => ({
+  empresa: '',
+  cargo: '',
+  modalidad: '',
+  fechaInicio: '',
+  fechaFin: '',
+})
+
 const normalizeOptionalText = (value?: string) => value?.trim().toLowerCase() || ''
 
 const isTituladoDegreeType = (degreeTypeId?: number) => degreeTypeOptions.value
   .find(item => item.id === degreeTypeId)?.codigo === 'TITULADO'
 
+const isOtroType = (tipoGradoId?: number) =>
+  degreeTypeOptions.value.find(o => o.id === tipoGradoId)?.codigo === 'OTRO'
+
+const isOtroDegreeType = computed(() =>
+  degreeTypeOptions.value.find(item => item.id === degreeDraft.value.tipoGradoId)?.codigo === 'OTRO',
+)
+
 const degreeDraft = ref<GraduateWizardDegreeItem>(createEmptyDegree())
 const languageDraft = ref<GraduateWizardLanguageItem>(createEmptyLanguage())
+const complementaryTrainingDraft = ref<GraduateWizardComplementaryTrainingItem>(createEmptyComplementaryTraining())
+const workTrajectoryDraft = ref<GraduateWizardWorkTrajectoryItem>(createEmptyWorkTrajectory())
 
 const values = ref<GraduateWizardValues>({
   codigoUniversitario: '',
@@ -120,32 +176,14 @@ const values = ref<GraduateWizardValues>({
   linkedin: '',
   portafolio: '',
 
-  facultad: '',
-  escuelaProfesional: '',
   facultadId: undefined,
   escuelaProfesionalId: undefined,
   fechaIngreso: '',
   fechaEgreso: '',
-  bachillerFecha: '',
-  bachillerUniversidad: '',
-  tituloProfesionalFecha: '',
-  tituloProfesionalUniversidad: '',
-  maestriaFecha: '',
-  maestriaUniversidad: '',
-  doctoradoFecha: '',
-  doctoradoUniversidad: '',
-  otroGradoNombre: '',
-  otroGradoFecha: '',
-  otroGradoUniversidad: '',
-  modalidadTitulacion: '',
-  modalidadTitulacionOtro: '',
-  idiomaNombre: '',
-  idiomaNivel: '',
-  idiomaFechaInicio: '',
-  idiomaFechaFin: '',
-  idiomaAprendizaje: '',
   grados: [],
   idiomas: [],
+  formacionesComplementarias: [],
+  trayectoriasLaborales: [],
 })
 
 function isDegreeDuplicate(draft: GraduateWizardDegreeItem, skipIndex: number | null) {
@@ -171,32 +209,29 @@ function isLanguageDuplicate(draft: GraduateWizardLanguageItem, skipIndex: numbe
   })
 }
 
-const deriveLegacyAcademicFieldsFromCollections = () => {
-  const firstDegree = values.value.grados.find(item =>
-    Boolean(item.fechaGrado || item.universidadId || item.otroGradoNombre || item.modalidadTitulacionId || item.modalidadTitulacionOtro),
-  )
+function isComplementaryTrainingDuplicate(
+  draft: GraduateWizardComplementaryTrainingItem,
+  skipIndex: number | null,
+) {
+  return values.value.formacionesComplementarias.some((item, index) => {
+    if (skipIndex !== null && index === skipIndex)
+      return false
 
-  const firstUniversity = universityOptions.value.find(item => item.id === firstDegree?.universidadId)
-  const firstMode = titulationModeOptions.value.find(item => item.id === firstDegree?.modalidadTitulacionId)
+    return normalizeOptionalText(item.nombreCurso) === normalizeOptionalText(draft.nombreCurso)
+      && normalizeOptionalText(item.institucion) === normalizeOptionalText(draft.institucion)
+      && (item.fechaInicio || '') === (draft.fechaInicio || '')
+  })
+}
 
-  const firstLanguage = values.value.idiomas.find(item =>
-    Boolean(item.idiomaId || item.nivel || item.fechaInicio || item.fechaFin || item.aprendizaje),
-  )
+function isWorkTrajectoryDuplicate(draft: GraduateWizardWorkTrajectoryItem, skipIndex: number | null) {
+  return values.value.trayectoriasLaborales.some((item, index) => {
+    if (skipIndex !== null && index === skipIndex)
+      return false
 
-  const firstLanguageCatalog = languageCatalogOptions.value.find(item => item.id === firstLanguage?.idiomaId)
-
-  return {
-    otroGradoNombre: firstDegree?.otroGradoNombre || '',
-    otroGradoFecha: firstDegree?.fechaGrado || '',
-    otroGradoUniversidad: firstUniversity?.nombre || '',
-    modalidadTitulacion: (firstMode?.nombre as any) || '',
-    modalidadTitulacionOtro: firstDegree?.modalidadTitulacionOtro || '',
-    idiomaNombre: firstLanguageCatalog?.nombre || '',
-    idiomaNivel: firstLanguage?.nivel || '',
-    idiomaFechaInicio: firstLanguage?.fechaInicio || '',
-    idiomaFechaFin: firstLanguage?.fechaFin || '',
-    idiomaAprendizaje: firstLanguage?.aprendizaje || '',
-  }
+    return normalizeOptionalText(item.empresa) === normalizeOptionalText(draft.empresa)
+      && normalizeOptionalText(item.cargo) === normalizeOptionalText(draft.cargo)
+      && (item.fechaInicio || '') === (draft.fechaInicio || '')
+  })
 }
 
 const buildDegreesPayload = () => values.value.grados
@@ -205,7 +240,7 @@ const buildDegreesPayload = () => values.value.grados
     tipo_grado_id: item.tipoGradoId || undefined,
     universidad_id: item.universidadId || undefined,
     fecha_grado: item.fechaGrado || undefined,
-    otro_grado_nombre: item.otroGradoNombre?.trim() || undefined,
+    otro_grado_nombre: isOtroType(item.tipoGradoId) ? item.otroGradoNombre?.trim() || undefined : undefined,
     titulacion: isTituladoDegreeType(item.tipoGradoId) && (item.modalidadTitulacionId || item.modalidadTitulacionOtro?.trim())
       ? {
           modalidad_titulacion_id: item.modalidadTitulacionId || undefined,
@@ -222,6 +257,25 @@ const buildLanguagesPayload = () => values.value.idiomas
     fecha_inicio: item.fechaInicio || undefined,
     fecha_fin: item.fechaFin || undefined,
     aprendizaje: item.aprendizaje?.trim() || undefined,
+  }))
+
+const buildComplementaryTrainingsPayload = () => values.value.formacionesComplementarias
+  .filter(item => Boolean(item.nombreCurso || item.institucion || item.fechaInicio || item.fechaFin))
+  .map(item => ({
+    nombre_curso: item.nombreCurso?.trim() || undefined,
+    institucion: item.institucion?.trim() || undefined,
+    fecha_inicio: item.fechaInicio || undefined,
+    fecha_fin: item.fechaFin || undefined,
+  }))
+
+const buildWorkTrajectoriesPayload = () => values.value.trayectoriasLaborales
+  .filter(item => Boolean(item.empresa || item.cargo || item.modalidad || item.fechaInicio || item.fechaFin))
+  .map(item => ({
+    empresa: item.empresa?.trim() || undefined,
+    cargo: item.cargo?.trim() || undefined,
+    modalidad: item.modalidad?.trim() || undefined,
+    fecha_inicio: item.fechaInicio || undefined,
+    fecha_fin: item.fechaFin || undefined,
   }))
 
 const normalizeDateValue = (value?: string | null) => {
@@ -242,12 +296,10 @@ const getYearFromDate = (value?: string) => {
 }
 
 const wizardPayload = computed<GraduatePayload>(() => {
-  const legacyAcademic = deriveLegacyAcademicFieldsFromCollections()
   const degreesPayload = buildDegreesPayload()
   const languagesPayload = buildLanguagesPayload()
-  const firstDegree = values.value.grados.find(item => Boolean(item.tipoGradoId || item.otroGradoNombre))
-  const firstDegreeType = degreeTypeOptions.value.find(item => item.id === firstDegree?.tipoGradoId)
-  const gradoObtenido = firstDegreeType?.nombre || firstDegree?.otroGradoNombre?.trim() || undefined
+  const complementaryTrainingsPayload = buildComplementaryTrainingsPayload()
+  const workTrajectoriesPayload = buildWorkTrajectoriesPayload()
 
   const payload: GraduatePayload = {
     codigo_universitario: values.value.codigoUniversitario.trim(),
@@ -267,30 +319,9 @@ const wizardPayload = computed<GraduatePayload>(() => {
     pais_residencia: values.value.paisResidencia.trim() || undefined,
     linkedin: values.value.linkedin?.trim() || undefined,
     portafolio: values.value.portafolio?.trim() || undefined,
-    facultad: values.value.facultad.trim() || undefined,
-    escuela_profesional: values.value.escuelaProfesional.trim() || undefined,
     escuela_profesional_id: values.value.escuelaProfesionalId || undefined,
     anio_ingreso: getYearFromDate(values.value.fechaIngreso),
     anio_egreso: getYearFromDate(values.value.fechaEgreso),
-    grado_obtenido: gradoObtenido,
-    bachiller_fecha: values.value.bachillerFecha || undefined,
-    bachiller_universidad: values.value.bachillerUniversidad?.trim() || undefined,
-    titulo_profesional_fecha: values.value.tituloProfesionalFecha || undefined,
-    titulo_profesional_universidad: values.value.tituloProfesionalUniversidad?.trim() || undefined,
-    maestria_fecha: values.value.maestriaFecha || undefined,
-    maestria_universidad: values.value.maestriaUniversidad?.trim() || undefined,
-    doctorado_fecha: values.value.doctoradoFecha || undefined,
-    doctorado_universidad: values.value.doctoradoUniversidad?.trim() || undefined,
-    otro_grado_nombre: legacyAcademic.otroGradoNombre?.trim() || undefined,
-    otro_grado_fecha: legacyAcademic.otroGradoFecha || undefined,
-    otro_grado_universidad: legacyAcademic.otroGradoUniversidad?.trim() || undefined,
-    modalidad_titulacion: legacyAcademic.modalidadTitulacion || undefined,
-    modalidad_titulacion_otro: legacyAcademic.modalidadTitulacionOtro?.trim() || undefined,
-    idioma_nombre: legacyAcademic.idiomaNombre?.trim() || undefined,
-    idioma_nivel: (legacyAcademic.idiomaNivel as LanguageLevel) || undefined,
-    idioma_fecha_inicio: legacyAcademic.idiomaFechaInicio || undefined,
-    idioma_fecha_fin: legacyAcademic.idiomaFechaFin || undefined,
-    idioma_aprendizaje: legacyAcademic.idiomaAprendizaje?.trim() || undefined,
     contrasena: values.value.dni.trim(),
     cv_path: values.value.fotografia || undefined,
   }
@@ -300,6 +331,12 @@ const wizardPayload = computed<GraduatePayload>(() => {
 
   if (languagesTouched.value)
     payload.idiomas = languagesPayload
+
+  if (complementaryTrainingsTouched.value)
+    payload.formaciones_complementarias = complementaryTrainingsPayload
+
+  if (workTrajectoriesTouched.value)
+    payload.trayectorias_laborales = workTrajectoriesPayload
 
   return payload
 })
@@ -315,6 +352,8 @@ const getFieldError = (localField: string, backendField?: string): string | unde
 const hydrateFromGraduate = (graduate: Graduate) => {
   degreesTouched.value = false
   languagesTouched.value = false
+  complementaryTrainingsTouched.value = false
+  workTrajectoriesTouched.value = false
 
   values.value.codigoUniversitario = graduate.codigoUniversitario || ''
   values.value.nombres = graduate.nombres || ''
@@ -333,29 +372,9 @@ const hydrateFromGraduate = (graduate: Graduate) => {
   values.value.paisResidencia = graduate.paisResidencia || ''
   values.value.linkedin = graduate.linkedin || ''
   values.value.portafolio = graduate.portafolio || ''
-  values.value.facultad = graduate.facultad || ''
-  values.value.escuelaProfesional = graduate.escuelaProfesional || ''
   values.value.escuelaProfesionalId = graduate.escuelaProfesionalId || undefined
   values.value.fechaIngreso = normalizeDateValue(graduate.anioIngreso)
   values.value.fechaEgreso = normalizeDateValue(graduate.anioEgreso)
-  values.value.bachillerFecha = graduate.bachillerFecha ? graduate.bachillerFecha.split('T')[0] : ''
-  values.value.bachillerUniversidad = graduate.bachillerUniversidad || ''
-  values.value.tituloProfesionalFecha = graduate.tituloProfesionalFecha ? graduate.tituloProfesionalFecha.split('T')[0] : ''
-  values.value.tituloProfesionalUniversidad = graduate.tituloProfesionalUniversidad || ''
-  values.value.maestriaFecha = graduate.maestriaFecha ? graduate.maestriaFecha.split('T')[0] : ''
-  values.value.maestriaUniversidad = graduate.maestriaUniversidad || ''
-  values.value.doctoradoFecha = graduate.doctoradoFecha ? graduate.doctoradoFecha.split('T')[0] : ''
-  values.value.doctoradoUniversidad = graduate.doctoradoUniversidad || ''
-  values.value.otroGradoNombre = graduate.otroGradoNombre || ''
-  values.value.otroGradoFecha = graduate.otroGradoFecha ? graduate.otroGradoFecha.split('T')[0] : ''
-  values.value.otroGradoUniversidad = graduate.otroGradoUniversidad || ''
-  values.value.modalidadTitulacion = graduate.modalidadTitulacion || ''
-  values.value.modalidadTitulacionOtro = graduate.modalidadTitulacionOtro || ''
-  values.value.idiomaNombre = graduate.idiomaNombre || ''
-  values.value.idiomaNivel = graduate.idiomaNivel || ''
-  values.value.idiomaFechaInicio = graduate.idiomaFechaInicio ? graduate.idiomaFechaInicio.split('T')[0] : ''
-  values.value.idiomaFechaFin = graduate.idiomaFechaFin ? graduate.idiomaFechaFin.split('T')[0] : ''
-  values.value.idiomaAprendizaje = graduate.idiomaAprendizaje || ''
   values.value.fotografia = graduate.cvPath || ''
 
   values.value.grados = (graduate.grados || [])
@@ -368,18 +387,6 @@ const hydrateFromGraduate = (graduate: Graduate) => {
       modalidadTitulacionOtro: item.titulacion?.modalidad_otro || '',
     }))
 
-  if (!values.value.grados.length) {
-    const legacyDegree = createEmptyDegree()
-    legacyDegree.fechaGrado = values.value.otroGradoFecha || ''
-    legacyDegree.otroGradoNombre = values.value.otroGradoNombre || ''
-    legacyDegree.modalidadTitulacionOtro = values.value.modalidadTitulacionOtro || ''
-    legacyDegree.universidadId = universityOptions.value.find(item => item.nombre === values.value.otroGradoUniversidad)?.id
-    legacyDegree.modalidadTitulacionId = titulationModeOptions.value.find(item => item.nombre === values.value.modalidadTitulacion)?.id
-
-    if (legacyDegree.fechaGrado || legacyDegree.otroGradoNombre || legacyDegree.modalidadTitulacionOtro || legacyDegree.universidadId || legacyDegree.modalidadTitulacionId)
-      values.value.grados = [legacyDegree]
-  }
-
   values.value.idiomas = (graduate.idiomas || [])
     .map(item => ({
       idiomaId: item.idioma_id || undefined,
@@ -389,17 +396,22 @@ const hydrateFromGraduate = (graduate: Graduate) => {
       aprendizaje: item.aprendizaje || '',
     }))
 
-  if (!values.value.idiomas.length) {
-    const legacyLanguage = createEmptyLanguage()
-    legacyLanguage.idiomaId = languageCatalogOptions.value.find(item => item.nombre === values.value.idiomaNombre)?.id
-    legacyLanguage.nivel = values.value.idiomaNivel || ''
-    legacyLanguage.fechaInicio = values.value.idiomaFechaInicio || ''
-    legacyLanguage.fechaFin = values.value.idiomaFechaFin || ''
-    legacyLanguage.aprendizaje = values.value.idiomaAprendizaje || ''
+  values.value.formacionesComplementarias = (graduate.formacionesComplementarias || [])
+    .map(item => ({
+      nombreCurso: item.nombre_curso || '',
+      institucion: item.institucion || '',
+      fechaInicio: item.fecha_inicio ? item.fecha_inicio.split('T')[0] : '',
+      fechaFin: item.fecha_fin ? item.fecha_fin.split('T')[0] : '',
+    }))
 
-    if (legacyLanguage.idiomaId || legacyLanguage.nivel || legacyLanguage.fechaInicio || legacyLanguage.fechaFin || legacyLanguage.aprendizaje)
-      values.value.idiomas = [legacyLanguage]
-  }
+  values.value.trayectoriasLaborales = (graduate.trayectoriasLaborales || [])
+    .map(item => ({
+      empresa: item.empresa || '',
+      cargo: item.cargo || '',
+      modalidad: item.modalidad || '',
+      fechaInicio: item.fecha_inicio ? item.fecha_inicio.split('T')[0] : '',
+      fechaFin: item.fecha_fin ? item.fecha_fin.split('T')[0] : '',
+    }))
 }
 
 const openCreateDegreeDialog = () => {
@@ -420,6 +432,10 @@ const saveDegreeDialog = () => {
   if (!isTituladoDegreeType(nextValue.tipoGradoId)) {
     nextValue.modalidadTitulacionId = undefined
     nextValue.modalidadTitulacionOtro = ''
+  }
+
+  if (!isOtroDegreeType.value) {
+    nextValue.otroGradoNombre = ''
   }
 
   if (isDegreeDuplicate(nextValue, editingDegreeIndex.value)) {
@@ -477,19 +493,120 @@ const removeLanguage = (index: number) => {
   languagesTouched.value = true
 }
 
+const openCreateComplementaryTrainingDialog = () => {
+  editingComplementaryTrainingIndex.value = null
+  complementaryTrainingDraft.value = createEmptyComplementaryTraining()
+  complementaryTrainingDialogOpen.value = true
+}
+
+const openEditComplementaryTrainingDialog = (index: number) => {
+  editingComplementaryTrainingIndex.value = index
+  complementaryTrainingDraft.value = { ...values.value.formacionesComplementarias[index] }
+  complementaryTrainingDialogOpen.value = true
+}
+
+const saveComplementaryTrainingDialog = () => {
+  const nextValue = { ...complementaryTrainingDraft.value }
+
+  if (isComplementaryTrainingDuplicate(nextValue, editingComplementaryTrainingIndex.value)) {
+    formMessage.value = 'Esta formacion ya fue registrada con el mismo curso, institucion y fecha de inicio.'
+
+    return
+  }
+
+  if (editingComplementaryTrainingIndex.value === null)
+    values.value.formacionesComplementarias.push(nextValue)
+  else
+    values.value.formacionesComplementarias.splice(editingComplementaryTrainingIndex.value, 1, nextValue)
+
+  complementaryTrainingsTouched.value = true
+  complementaryTrainingDialogOpen.value = false
+}
+
+const removeComplementaryTraining = (index: number) => {
+  values.value.formacionesComplementarias.splice(index, 1)
+  complementaryTrainingsTouched.value = true
+}
+
+const openCreateWorkTrajectoryDialog = () => {
+  editingWorkTrajectoryIndex.value = null
+  workTrajectoryDraft.value = createEmptyWorkTrajectory()
+  workTrajectoryDialogOpen.value = true
+}
+
+const openEditWorkTrajectoryDialog = (index: number) => {
+  editingWorkTrajectoryIndex.value = index
+  workTrajectoryDraft.value = { ...values.value.trayectoriasLaborales[index] }
+  workTrajectoryDialogOpen.value = true
+}
+
+const saveWorkTrajectoryDialog = () => {
+  const nextValue = { ...workTrajectoryDraft.value }
+
+  if (isWorkTrajectoryDuplicate(nextValue, editingWorkTrajectoryIndex.value)) {
+    formMessage.value = 'Esta trayectoria ya fue registrada con la misma empresa, cargo y fecha de inicio.'
+
+    return
+  }
+
+  if (editingWorkTrajectoryIndex.value === null)
+    values.value.trayectoriasLaborales.push(nextValue)
+  else
+    values.value.trayectoriasLaborales.splice(editingWorkTrajectoryIndex.value, 1, nextValue)
+
+  workTrajectoriesTouched.value = true
+  workTrajectoryDialogOpen.value = false
+}
+
+const removeWorkTrajectory = (index: number) => {
+  values.value.trayectoriasLaborales.splice(index, 1)
+  workTrajectoriesTouched.value = true
+}
+
 const showDegreeTitulationFields = computed(() => isTituladoDegreeType(degreeDraft.value.tipoGradoId))
 
+const formatDate = (value?: string | null) => {
+  if (!value) return '-'
+  const datePart = value.trim().split(/[T ]/)[0]
+  if (!datePart) return '-'
+  const [year, month, day] = datePart.split('-')
+  if (!year || !month || !day) return datePart
+  return `${day}/${month}/${year}`
+}
+
+const formatDateRange = (start?: string | null, end?: string | null) => {
+  const s = formatDate(start)
+  const e = formatDate(end)
+  if (s === '-' && e === '-') return '-'
+  if (e === '-') return s
+  return `${s} — ${e}`
+}
+
 const degreeRows = computed(() => values.value.grados.map((item, index) => {
-  const tipo = degreeTypeOptions.value.find(option => option.id === item.tipoGradoId)?.nombre || '-'
-  const universidad = universityOptions.value.find(option => option.id === item.universidadId)?.nombre || '-'
-  const modalidad = titulationModeOptions.value.find(option => option.id === item.modalidadTitulacionId)?.nombre || '-'
+  const option = degreeTypeOptions.value.find(o => o.id === item.tipoGradoId)
+  const tipoNombre = option?.nombre || '-'
+  const isOtro = option?.codigo === 'OTRO'
+  const isTitulado = option?.codigo === 'TITULADO'
+
+  const modalidadNombre = titulationModeOptions.value.find(o => o.id === item.modalidadTitulacionId)?.nombre
+    || item.modalidadTitulacionOtro?.trim()
+    || ''
+
+  let tipo = tipoNombre
+  if (isOtro && item.otroGradoNombre?.trim()) {
+    tipo = `${tipoNombre}: ${item.otroGradoNombre.trim()}`
+  }
+  else if (isTitulado && modalidadNombre) {
+    tipo = `${tipoNombre} (${modalidadNombre})`
+  }
+
+  const universidad = universityOptions.value.find(o => o.id === item.universidadId)?.nombre || '-'
 
   return {
     index,
     tipo,
-    fechaGrado: item.fechaGrado || '-',
+    fechaGrado: formatDate(item.fechaGrado),
     universidad,
-    modalidad,
   }
 }))
 
@@ -501,9 +618,25 @@ const languageRows = computed(() => values.value.idiomas.map((item, index) => {
     idioma,
     nivel: item.nivel || '-',
     aprendizaje: item.aprendizaje || '-',
-    vigencia: item.fechaInicio && item.fechaFin ? `${item.fechaInicio} - ${item.fechaFin}` : '-',
+    vigencia: formatDateRange(item.fechaInicio, item.fechaFin),
   }
 }))
+
+const complementaryTrainingRows = computed(() => values.value.formacionesComplementarias.map((item, index) => ({
+  index,
+  nombreCurso: item.nombreCurso || '-',
+  institucion: item.institucion || '-',
+  vigencia: formatDateRange(item.fechaInicio, item.fechaFin),
+})))
+
+const workTrajectoryRows = computed(() => values.value.trayectoriasLaborales.map((item, index) => ({
+  index,
+  empresa: item.empresa || '-',
+  cargo: item.cargo || '-',
+  modalidad: item.modalidad || '-',
+  vigencia: formatDateRange(item.fechaInicio, item.fechaFin),
+  estado: item.fechaFin ? 'Finalizado' : 'En curso',
+})))
 
 const loadFaculties = async () => {
   facultyOptions.value = await graduateService.fetchFaculties()
@@ -535,12 +668,7 @@ const syncSelectedSchoolLabels = () => {
   if (!school)
     return
 
-  values.value.escuelaProfesional = school.nombre
   values.value.facultadId = resolveSchoolFacultyId(school)
-
-  const faculty = facultyOptions.value.find(item => item.id === resolveSchoolFacultyId(school))
-  if (faculty)
-    values.value.facultad = faculty.nombre
 }
 
 const schemaByTab = [
@@ -549,6 +677,8 @@ const schemaByTab = [
   graduateWizardStepThreeSchema,
   graduateWizardStepFourSchema,
   graduateWizardStepFourSchema,
+  graduateWizardStepFiveSchema,
+  graduateWizardStepSixSchema,
 ]
 
 const validateTab = async (tabIndex: number) => {
@@ -578,7 +708,7 @@ const validateTab = async (tabIndex: number) => {
 }
 
 const validateAllBeforeSave = async () => {
-  for (let tabIndex = 0; tabIndex <= 2; tabIndex += 1) {
+  for (let tabIndex = 0; tabIndex < tabItems.length; tabIndex += 1) {
     const isValid = await validateTab(tabIndex)
     if (!isValid) {
       activeTab.value = tabItems[tabIndex].value
@@ -644,39 +774,26 @@ watch(() => values.value.facultadId, async (facultyId) => {
   if (!facultyId) {
     await loadProfessionalSchools()
     values.value.escuelaProfesionalId = undefined
-    values.value.escuelaProfesional = ''
-    values.value.facultad = ''
 
     return
   }
 
-  const selectedFaculty = facultyOptions.value.find(item => item.id === facultyId)
-  values.value.facultad = selectedFaculty?.nombre || ''
-
   await loadProfessionalSchools(facultyId)
 
-  if (!professionalSchoolOptions.value.some(item => item.id === values.value.escuelaProfesionalId)) {
+  if (!professionalSchoolOptions.value.some(item => item.id === values.value.escuelaProfesionalId))
     values.value.escuelaProfesionalId = undefined
-    values.value.escuelaProfesional = ''
-  }
 })
 
 watch(() => values.value.escuelaProfesionalId, schoolId => {
   const selected = professionalSchoolOptions.value.find(item => item.id === schoolId)
 
   if (!selected) {
-    values.value.escuelaProfesional = ''
     values.value.facultadId = undefined
-    values.value.facultad = ''
 
     return
   }
 
-  values.value.escuelaProfesional = selected.nombre
   values.value.facultadId = resolveSchoolFacultyId(selected)
-
-  const selectedFaculty = facultyOptions.value.find(item => item.id === resolveSchoolFacultyId(selected))
-  values.value.facultad = selectedFaculty?.nombre || ''
 })
 
 watch(() => degreeDraft.value.tipoGradoId, (degreeTypeId) => {
@@ -766,7 +883,7 @@ watch(activeTab, () => {
               <VCol cols="12" md="6">
                 <AppTextField
                   v-model="values.codigoUniversitario"
-                  label="Codigo de egresado / universitario"
+                  label="Codigo de egresado / universitario *"
                   maxlength="20"
                   :error-messages="getFieldError('codigoUniversitario')"
                 />
@@ -775,7 +892,7 @@ watch(activeTab, () => {
               <VCol cols="12" md="6">
                 <AppTextField
                   v-model="values.dni"
-                  label="DNI o documento de identidad"
+                  label="DNI o documento de identidad *"
                   maxlength="8"
                   :error-messages="getFieldError('dni')"
                 />
@@ -784,7 +901,7 @@ watch(activeTab, () => {
               <VCol cols="12" md="6">
                 <AppTextField
                   v-model="values.nombres"
-                  label="Nombres"
+                  label="Nombres *"
                   maxlength="100"
                   :error-messages="getFieldError('nombres')"
                 />
@@ -793,7 +910,7 @@ watch(activeTab, () => {
               <VCol cols="12" md="6">
                 <AppTextField
                   v-model="values.apellidos"
-                  label="Apellidos"
+                  label="Apellidos *"
                   maxlength="100"
                   :error-messages="getFieldError('apellidos')"
                 />
@@ -802,7 +919,7 @@ watch(activeTab, () => {
               <VCol cols="12" md="6">
                 <AppDateTimePicker
                   v-model="values.fechaNacimiento"
-                  label="Fecha de nacimiento"
+                  label="Fecha de nacimiento *"
                   :config="{ dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true }"
                   :error-messages="getFieldError('fechaNacimiento', 'fechaNacimiento')"
                 />
@@ -811,7 +928,7 @@ watch(activeTab, () => {
               <VCol cols="12" md="6">
                 <AppSelect
                   v-model="values.sexo"
-                  label="Sexo"
+                  label="Sexo *"
                   :items="sexOptions"
                   item-title="title"
                   item-value="value"
@@ -822,7 +939,7 @@ watch(activeTab, () => {
               <VCol cols="12" md="6">
                 <AppSelect
                   v-model="values.estadoCivil"
-                  label="Estado civil"
+                  label="Estado civil *"
                   :items="civilStatusOptions"
                   :error-messages="getFieldError('estadoCivil')"
                 />
@@ -831,7 +948,7 @@ watch(activeTab, () => {
               <VCol cols="12" md="6">
                 <AppTextField
                   v-model="values.nacionalidad"
-                  label="Nacionalidad"
+                  label="Nacionalidad *"
                   maxlength="60"
                   :error-messages="getFieldError('nacionalidad')"
                 />
@@ -853,7 +970,7 @@ watch(activeTab, () => {
               <VCol cols="12" md="6">
                 <AppTextField
                   v-model="values.correoPersonal"
-                  label="Correo electronico personal"
+                  label="Correo electronico personal *"
                   type="email"
                   maxlength="100"
                   :error-messages="getFieldError('correoPersonal', 'correo')"
@@ -873,7 +990,7 @@ watch(activeTab, () => {
               <VCol cols="12" md="6">
                 <AppTextField
                   v-model="values.celular"
-                  label="Numero de celular"
+                  label="Numero de celular *"
                   maxlength="9"
                   :error-messages="getFieldError('celular')"
                 />
@@ -882,7 +999,7 @@ watch(activeTab, () => {
               <VCol cols="12" md="6">
                 <AppTextField
                   v-model="values.direccionActual"
-                  label="Direccion actual"
+                  label="Direccion actual *"
                   maxlength="150"
                   :error-messages="getFieldError('direccionActual')"
                 />
@@ -891,17 +1008,17 @@ watch(activeTab, () => {
               <VCol cols="12" md="4">
                 <AppTextField
                   v-model="values.ciudad"
-                  label="Ciudad"
+                  label="Ciudad *"
                   maxlength="80"
                   :error-messages="getFieldError('ciudad')"
                 />
               </VCol>
 
               <VCol cols="12" md="4">
-                <AppTextField
+                <AppSelect
                   v-model="values.departamento"
-                  label="Departamento"
-                  maxlength="80"
+                  label="Departamento *"
+                  :items="departamentoOptions"
                   :error-messages="getFieldError('departamento')"
                 />
               </VCol>
@@ -909,7 +1026,7 @@ watch(activeTab, () => {
               <VCol cols="12" md="4">
                 <AppTextField
                   v-model="values.paisResidencia"
-                  label="Pais de residencia"
+                  label="Pais de residencia *"
                   maxlength="80"
                   :error-messages="getFieldError('paisResidencia')"
                 />
@@ -1004,10 +1121,9 @@ watch(activeTab, () => {
             <VTable v-else>
               <thead>
                 <tr>
-                  <th scope="col">Tipo</th>
+                  <th scope="col">Tipo de grado</th>
                   <th scope="col">Fecha</th>
                   <th scope="col">Universidad</th>
-                  <th scope="col">Modalidad</th>
                   <th scope="col" class="text-right">Acciones</th>
                 </tr>
               </thead>
@@ -1019,7 +1135,6 @@ watch(activeTab, () => {
                   <td>{{ row.tipo }}</td>
                   <td>{{ row.fechaGrado }}</td>
                   <td>{{ row.universidad }}</td>
-                  <td>{{ row.modalidad }}</td>
                   <td class="text-right">
                     <VBtn
                       size="small"
@@ -1106,6 +1221,134 @@ watch(activeTab, () => {
               </tbody>
             </VTable>
           </VWindowItem>
+
+          <VWindowItem value="formacion-complementaria">
+            <div class="d-flex justify-space-between align-center mb-4">
+              <div class="text-subtitle-1 font-weight-medium">
+                Formacion complementaria
+              </div>
+              <VBtn
+                color="primary"
+                prepend-icon="tabler-plus"
+                @click="openCreateComplementaryTrainingDialog"
+              >
+                Agregar formacion
+              </VBtn>
+            </div>
+
+            <VAlert
+              v-if="complementaryTrainingRows.length === 0"
+              type="info"
+              variant="tonal"
+            >
+              Aun no registras formacion complementaria.
+            </VAlert>
+
+            <VTable v-else>
+              <thead>
+                <tr>
+                  <th scope="col">Curso</th>
+                  <th scope="col">Institucion</th>
+                  <th scope="col">Vigencia</th>
+                  <th scope="col" class="text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="row in complementaryTrainingRows"
+                  :key="`training-row-${row.index}`"
+                >
+                  <td>{{ row.nombreCurso }}</td>
+                  <td>{{ row.institucion }}</td>
+                  <td>{{ row.vigencia }}</td>
+                  <td class="text-right">
+                    <VBtn
+                      size="small"
+                      variant="text"
+                      color="primary"
+                      @click="openEditComplementaryTrainingDialog(row.index)"
+                    >
+                      Editar
+                    </VBtn>
+                    <VBtn
+                      size="small"
+                      variant="text"
+                      color="error"
+                      @click="removeComplementaryTraining(row.index)"
+                    >
+                      Eliminar
+                    </VBtn>
+                  </td>
+                </tr>
+              </tbody>
+            </VTable>
+          </VWindowItem>
+
+          <VWindowItem value="trayectoria-laboral">
+            <div class="d-flex justify-space-between align-center mb-4">
+              <div class="text-subtitle-1 font-weight-medium">
+                Trayectoria laboral
+              </div>
+              <VBtn
+                color="primary"
+                prepend-icon="tabler-plus"
+                @click="openCreateWorkTrajectoryDialog"
+              >
+                Agregar trayectoria
+              </VBtn>
+            </div>
+
+            <VAlert
+              v-if="workTrajectoryRows.length === 0"
+              type="info"
+              variant="tonal"
+            >
+              Aun no registras trayectoria laboral.
+            </VAlert>
+
+            <VTable v-else>
+              <thead>
+                <tr>
+                  <th scope="col">Empresa</th>
+                  <th scope="col">Cargo</th>
+                  <th scope="col">Modalidad</th>
+                  <th scope="col">Vigencia</th>
+                  <th scope="col">Estado</th>
+                  <th scope="col" class="text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="row in workTrajectoryRows"
+                  :key="`work-row-${row.index}`"
+                >
+                  <td>{{ row.empresa }}</td>
+                  <td>{{ row.cargo }}</td>
+                  <td>{{ row.modalidad }}</td>
+                  <td>{{ row.vigencia }}</td>
+                  <td>{{ row.estado }}</td>
+                  <td class="text-right">
+                    <VBtn
+                      size="small"
+                      variant="text"
+                      color="primary"
+                      @click="openEditWorkTrajectoryDialog(row.index)"
+                    >
+                      Editar
+                    </VBtn>
+                    <VBtn
+                      size="small"
+                      variant="text"
+                      color="error"
+                      @click="removeWorkTrajectory(row.index)"
+                    >
+                      Eliminar
+                    </VBtn>
+                  </td>
+                </tr>
+              </tbody>
+            </VTable>
+          </VWindowItem>
         </VWindow>
 
         <VDialog
@@ -1121,7 +1364,7 @@ watch(activeTab, () => {
                 <VCol cols="12" md="4">
                   <AppSelect
                     v-model="degreeDraft.tipoGradoId"
-                    label="Tipo de grado"
+                    label="Tipo de grado *"
                     :items="degreeTypeOptions"
                     item-title="nombre"
                     item-value="id"
@@ -1143,10 +1386,10 @@ watch(activeTab, () => {
                     item-value="id"
                   />
                 </VCol>
-                <VCol cols="12" md="6">
+                <VCol v-if="isOtroDegreeType" cols="12" md="6">
                   <AppTextField
                     v-model="degreeDraft.otroGradoNombre"
-                    label="Nombre del grado"
+                    label="Nombre del grado *"
                     maxlength="100"
                   />
                 </VCol>
@@ -1193,6 +1436,7 @@ watch(activeTab, () => {
         <VDialog
           v-model="languageDialogOpen"
           max-width="900"
+          :retain-focus="false"
         >
           <VCard>
             <VCardTitle>
@@ -1212,15 +1456,17 @@ watch(activeTab, () => {
                 <VCol cols="12" md="4">
                   <AppSelect
                     v-model="languageDraft.nivel"
-                    label="Nivel"
+                    label="Nivel *"
                     :items="languageLevelOptions"
                   />
                 </VCol>
                 <VCol cols="12" md="4">
-                  <AppTextField
+                  <AppSelect
                     v-model="languageDraft.aprendizaje"
                     label="Forma de aprendizaje"
-                    maxlength="100"
+                    :items="learningMethodOptions"
+                    item-title="title"
+                    item-value="value"
                   />
                 </VCol>
                 <VCol cols="12" md="6">
@@ -1250,6 +1496,133 @@ watch(activeTab, () => {
               <VBtn
                 color="primary"
                 @click="saveLanguageDialog"
+              >
+                Guardar
+              </VBtn>
+            </VCardActions>
+          </VCard>
+        </VDialog>
+
+        <VDialog
+          v-model="complementaryTrainingDialogOpen"
+          max-width="900"
+          :retain-focus="false"
+        >
+          <VCard>
+            <VCardTitle>
+              {{ editingComplementaryTrainingIndex === null ? 'Agregar formacion complementaria' : 'Editar formacion complementaria' }}
+            </VCardTitle>
+            <VCardText>
+              <VRow>
+                <VCol cols="12" md="6">
+                  <AppTextField
+                    v-model="complementaryTrainingDraft.nombreCurso"
+                    label="Nombre del curso"
+                    maxlength="150"
+                  />
+                </VCol>
+                <VCol cols="12" md="6">
+                  <AppTextField
+                    v-model="complementaryTrainingDraft.institucion"
+                    label="Institucion"
+                    maxlength="150"
+                  />
+                </VCol>
+                <VCol cols="12" md="6">
+                  <AppDateTimePicker
+                    v-model="complementaryTrainingDraft.fechaInicio"
+                    label="Fecha de inicio"
+                    :config="{ dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true }"
+                  />
+                </VCol>
+                <VCol cols="12" md="6">
+                  <AppDateTimePicker
+                    v-model="complementaryTrainingDraft.fechaFin"
+                    label="Fecha de fin"
+                    :config="{ dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true, minDate: complementaryTrainingDraft.fechaInicio || undefined }"
+                  />
+                </VCol>
+              </VRow>
+            </VCardText>
+            <VCardActions class="justify-end">
+              <VBtn
+                variant="tonal"
+                color="secondary"
+                @click="complementaryTrainingDialogOpen = false"
+              >
+                Cancelar
+              </VBtn>
+              <VBtn
+                color="primary"
+                @click="saveComplementaryTrainingDialog"
+              >
+                Guardar
+              </VBtn>
+            </VCardActions>
+          </VCard>
+        </VDialog>
+
+        <VDialog
+          v-model="workTrajectoryDialogOpen"
+          max-width="900"
+          :retain-focus="false"
+        >
+          <VCard>
+            <VCardTitle>
+              {{ editingWorkTrajectoryIndex === null ? 'Agregar trayectoria laboral' : 'Editar trayectoria laboral' }}
+            </VCardTitle>
+            <VCardText>
+              <VRow>
+                <VCol cols="12" md="4">
+                  <AppTextField
+                    v-model="workTrajectoryDraft.empresa"
+                    label="Empresa *"
+                    maxlength="150"
+                  />
+                </VCol>
+                <VCol cols="12" md="4">
+                  <AppTextField
+                    v-model="workTrajectoryDraft.cargo"
+                    label="Cargo *"
+                    maxlength="150"
+                  />
+                </VCol>
+                <VCol cols="12" md="4">
+                  <AppSelect
+                    v-model="workTrajectoryDraft.modalidad"
+                    label="Modalidad"
+                    :items="workModalityOptions"
+                    item-title="title"
+                    item-value="value"
+                  />
+                </VCol>
+                <VCol cols="12" md="6">
+                  <AppDateTimePicker
+                    v-model="workTrajectoryDraft.fechaInicio"
+                    label="Fecha de inicio *"
+                    :config="{ dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true }"
+                  />
+                </VCol>
+                <VCol cols="12" md="6">
+                  <AppDateTimePicker
+                    v-model="workTrajectoryDraft.fechaFin"
+                    label="Fecha de fin"
+                    :config="{ dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true, minDate: workTrajectoryDraft.fechaInicio || undefined }"
+                  />
+                </VCol>
+              </VRow>
+            </VCardText>
+            <VCardActions class="justify-end">
+              <VBtn
+                variant="tonal"
+                color="secondary"
+                @click="workTrajectoryDialogOpen = false"
+              >
+                Cancelar
+              </VBtn>
+              <VBtn
+                color="primary"
+                @click="saveWorkTrajectoryDialog"
               >
                 Guardar
               </VBtn>

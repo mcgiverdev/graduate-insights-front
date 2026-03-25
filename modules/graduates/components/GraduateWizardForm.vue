@@ -43,6 +43,13 @@ const sexOptions: Array<{ title: string; value: Gender }> = [
   { title: 'Otro', value: 'Otro' },
 ]
 
+const departamentoOptions = [
+  'Amazonas', 'Áncash', 'Apurímac', 'Arequipa', 'Ayacucho', 'Cajamarca',
+  'Callao', 'Cusco', 'Huancavelica', 'Huánuco', 'Ica', 'Junín',
+  'La Libertad', 'Lambayeque', 'Lima', 'Loreto', 'Madre de Dios', 'Moquegua',
+  'Pasco', 'Piura', 'Puno', 'San Martín', 'Tacna', 'Tumbes', 'Ucayali',
+]
+
 const stepItems = [
   { title: 'Datos basicos', icon: 'tabler-user-square-rounded' },
   { title: 'Datos de contacto', icon: 'tabler-address-book' },
@@ -69,32 +76,14 @@ const values = ref<GraduateWizardValues>({
   linkedin: '',
   portafolio: '',
 
-  facultad: '',
-  escuelaProfesional: '',
   facultadId: undefined,
   escuelaProfesionalId: undefined,
   fechaIngreso: '',
   fechaEgreso: '',
-  bachillerFecha: '',
-  bachillerUniversidad: '',
-  tituloProfesionalFecha: '',
-  tituloProfesionalUniversidad: '',
-  maestriaFecha: '',
-  maestriaUniversidad: '',
-  doctoradoFecha: '',
-  doctoradoUniversidad: '',
-  otroGradoNombre: '',
-  otroGradoFecha: '',
-  otroGradoUniversidad: '',
-  modalidadTitulacion: '',
-  modalidadTitulacionOtro: '',
-  idiomaNombre: '',
-  idiomaNivel: '',
-  idiomaFechaInicio: '',
-  idiomaFechaFin: '',
-  idiomaAprendizaje: '',
   grados: [],
   idiomas: [],
+  formacionesComplementarias: [],
+  trayectoriasLaborales: [],
 })
 
 const getYearFromDate = (value?: string) => {
@@ -123,30 +112,9 @@ const wizardPayload = computed<GraduatePayload>(() => {
     pais_residencia: values.value.paisResidencia.trim() || undefined,
     linkedin: values.value.linkedin?.trim() || undefined,
     portafolio: values.value.portafolio?.trim() || undefined,
-    facultad: values.value.facultad.trim() || undefined,
-    escuela_profesional: values.value.escuelaProfesional.trim() || undefined,
     escuela_profesional_id: values.value.escuelaProfesionalId || undefined,
     anio_ingreso: getYearFromDate(values.value.fechaIngreso),
     anio_egreso: getYearFromDate(values.value.fechaEgreso),
-    grado_obtenido: undefined,
-    bachiller_fecha: values.value.bachillerFecha || undefined,
-    bachiller_universidad: values.value.bachillerUniversidad?.trim() || undefined,
-    titulo_profesional_fecha: values.value.tituloProfesionalFecha || undefined,
-    titulo_profesional_universidad: values.value.tituloProfesionalUniversidad?.trim() || undefined,
-    maestria_fecha: values.value.maestriaFecha || undefined,
-    maestria_universidad: values.value.maestriaUniversidad?.trim() || undefined,
-    doctorado_fecha: values.value.doctoradoFecha || undefined,
-    doctorado_universidad: values.value.doctoradoUniversidad?.trim() || undefined,
-    otro_grado_nombre: undefined,
-    otro_grado_fecha: undefined,
-    otro_grado_universidad: undefined,
-    modalidad_titulacion: undefined,
-    modalidad_titulacion_otro: undefined,
-    idioma_nombre: undefined,
-    idioma_nivel: undefined,
-    idioma_fecha_inicio: undefined,
-    idioma_fecha_fin: undefined,
-    idioma_aprendizaje: undefined,
     contrasena: values.value.dni.trim(),
     cv_path: values.value.fotografia || undefined,
   }
@@ -316,7 +284,7 @@ watch(currentStep, () => {
               <VCol cols="12" md="6">
                 <AppTextField
                   v-model="values.codigoUniversitario"
-                  label="Codigo de egresado / universitario"
+                  label="Codigo de egresado / universitario *"
                   maxlength="20"
                   :error-messages="getFieldError('codigoUniversitario')"
                 />
@@ -325,7 +293,7 @@ watch(currentStep, () => {
               <VCol cols="12" md="6">
                 <AppTextField
                   v-model="values.dni"
-                  label="DNI o documento de identidad"
+                  label="DNI o documento de identidad *"
                   maxlength="8"
                   :error-messages="getFieldError('dni')"
                 />
@@ -334,7 +302,7 @@ watch(currentStep, () => {
               <VCol cols="12" md="6">
                 <AppTextField
                   v-model="values.nombres"
-                  label="Nombres"
+                  label="Nombres *"
                   maxlength="100"
                   :error-messages="getFieldError('nombres')"
                 />
@@ -343,7 +311,7 @@ watch(currentStep, () => {
               <VCol cols="12" md="6">
                 <AppTextField
                   v-model="values.apellidos"
-                  label="Apellidos"
+                  label="Apellidos *"
                   maxlength="100"
                   :error-messages="getFieldError('apellidos')"
                 />
@@ -352,7 +320,7 @@ watch(currentStep, () => {
               <VCol cols="12" md="6">
                 <AppDateTimePicker
                   v-model="values.fechaNacimiento"
-                  label="Fecha de nacimiento"
+                  label="Fecha de nacimiento *"
                   :config="{ dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true }"
                   :error-messages="getFieldError('fechaNacimiento', 'fechaNacimiento')"
                 />
@@ -361,7 +329,7 @@ watch(currentStep, () => {
               <VCol cols="12" md="6">
                 <AppSelect
                   v-model="values.sexo"
-                  label="Sexo"
+                  label="Sexo *"
                   :items="sexOptions"
                   item-title="title"
                   item-value="value"
@@ -372,7 +340,7 @@ watch(currentStep, () => {
               <VCol cols="12" md="6">
                 <AppSelect
                   v-model="values.estadoCivil"
-                  label="Estado civil"
+                  label="Estado civil *"
                   :items="civilStatusOptions"
                   :error-messages="getFieldError('estadoCivil')"
                 />
@@ -381,7 +349,7 @@ watch(currentStep, () => {
               <VCol cols="12" md="6">
                 <AppTextField
                   v-model="values.nacionalidad"
-                  label="Nacionalidad"
+                  label="Nacionalidad *"
                   maxlength="60"
                   :error-messages="getFieldError('nacionalidad')"
                 />
@@ -403,7 +371,7 @@ watch(currentStep, () => {
               <VCol cols="12" md="6">
                 <AppTextField
                   v-model="values.correoPersonal"
-                  label="Correo electronico personal"
+                  label="Correo electronico personal *"
                   type="email"
                   maxlength="100"
                   :error-messages="getFieldError('correoPersonal', 'correo')"
@@ -423,7 +391,7 @@ watch(currentStep, () => {
               <VCol cols="12" md="6">
                 <AppTextField
                   v-model="values.celular"
-                  label="Numero de celular"
+                  label="Numero de celular *"
                   maxlength="9"
                   :error-messages="getFieldError('celular')"
                 />
@@ -432,7 +400,7 @@ watch(currentStep, () => {
               <VCol cols="12" md="6">
                 <AppTextField
                   v-model="values.direccionActual"
-                  label="Direccion actual"
+                  label="Direccion actual *"
                   maxlength="150"
                   :error-messages="getFieldError('direccionActual')"
                 />
@@ -441,17 +409,17 @@ watch(currentStep, () => {
               <VCol cols="12" md="4">
                 <AppTextField
                   v-model="values.ciudad"
-                  label="Ciudad"
+                  label="Ciudad *"
                   maxlength="80"
                   :error-messages="getFieldError('ciudad')"
                 />
               </VCol>
 
               <VCol cols="12" md="4">
-                <AppTextField
+                <AppSelect
                   v-model="values.departamento"
-                  label="Departamento"
-                  maxlength="80"
+                  label="Departamento *"
+                  :items="departamentoOptions"
                   :error-messages="getFieldError('departamento')"
                 />
               </VCol>
@@ -459,7 +427,7 @@ watch(currentStep, () => {
               <VCol cols="12" md="4">
                 <AppTextField
                   v-model="values.paisResidencia"
-                  label="Pais de residencia"
+                  label="Pais de residencia *"
                   maxlength="80"
                   :error-messages="getFieldError('paisResidencia')"
                 />

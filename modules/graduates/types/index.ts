@@ -41,6 +41,21 @@ export interface GraduateLanguagePayload {
   aprendizaje?: string
 }
 
+export interface GraduateComplementaryTrainingPayload {
+  nombre_curso?: string
+  institucion?: string
+  fecha_inicio?: string
+  fecha_fin?: string
+}
+
+export interface GraduateWorkTrajectoryPayload {
+  empresa?: string
+  cargo?: string
+  modalidad?: string
+  fecha_inicio?: string
+  fecha_fin?: string
+}
+
 export interface Graduate {
   graduateId: number
   userId: number
@@ -62,35 +77,13 @@ export interface Graduate {
   paisResidencia: string
   linkedin: string
   portafolio: string
-  facultad: string
-  escuelaProfesional: string
   escuelaProfesionalId?: number
   anioIngreso: string
   anioEgreso: string
-  gradoObtenido: string
-  bachillerFecha: string
-  bachillerUniversidad: string
-  tituloProfesionalFecha: string
-  tituloProfesionalUniversidad: string
-  maestriaFecha: string
-  maestriaUniversidad: string
-  doctoradoFecha: string
-  doctoradoUniversidad: string
-  otroGradoNombre: string
-  otroGradoFecha: string
-  otroGradoUniversidad: string
-  modalidadTitulacion: DegreeMode | ''
-  modalidadTitulacionOtro: string
-  idiomaNombre: string
-  idiomaNivel: LanguageLevel | ''
-  idiomaFechaInicio: string
-  idiomaFechaFin: string
-  idiomaAprendizaje: string
   grados?: GraduateAcademicDegreePayload[]
   idiomas?: GraduateLanguagePayload[]
-  fechaInicio: string
-  fechaFin: string
-  cv?: string
+  formacionesComplementarias?: GraduateComplementaryTrainingPayload[]
+  trayectoriasLaborales?: GraduateWorkTrajectoryPayload[]
   cvPath?: string | null
   contrasena?: string
   validated: boolean
@@ -117,35 +110,13 @@ export interface GraduateApiResponse {
   pais_residencia?: string | null
   linkedin?: string | null
   portafolio?: string | null
-  facultad?: string | null
-  escuela_profesional?: string | null
   escuela_profesional_id?: number | null
   anio_ingreso?: string | null
   anio_egreso?: string | null
-  grado_obtenido?: string | null
-  bachiller_fecha?: string | null
-  bachiller_universidad?: string | null
-  titulo_profesional_fecha?: string | null
-  titulo_profesional_universidad?: string | null
-  maestria_fecha?: string | null
-  maestria_universidad?: string | null
-  doctorado_fecha?: string | null
-  doctorado_universidad?: string | null
-  otro_grado_nombre?: string | null
-  otro_grado_fecha?: string | null
-  otro_grado_universidad?: string | null
-  modalidad_titulacion?: DegreeMode | null
-  modalidad_titulacion_otro?: string | null
-  idioma_nombre?: string | null
-  idioma_nivel?: LanguageLevel | null
-  idioma_fecha_inicio?: string | null
-  idioma_fecha_fin?: string | null
-  idioma_aprendizaje?: string | null
   grados?: GraduateAcademicDegreePayload[] | null
   idiomas?: GraduateLanguagePayload[] | null
-  fecha_inicio: string | null
-  fecha_fin: string | null
-  cv?: string | null
+  formaciones_complementarias?: GraduateComplementaryTrainingPayload[] | null
+  trayectorias_laborales?: GraduateWorkTrajectoryPayload[] | null
   cv_path?: string | null
   contrasena?: string | null
   validated?: boolean | null
@@ -172,8 +143,6 @@ export interface GraduateFormValues {
   dni: string
   celular: string
   contrasena?: string
-  fechaInicio?: string
-  fechaFin?: string
   cvPath?: string
 }
 
@@ -195,35 +164,14 @@ export interface GraduatePayload {
   pais_residencia?: string
   linkedin?: string
   portafolio?: string
-  facultad?: string
-  escuela_profesional?: string
   escuela_profesional_id?: number
   anio_ingreso?: string
   anio_egreso?: string
-  grado_obtenido?: string
-  bachiller_fecha?: string
-  bachiller_universidad?: string
-  titulo_profesional_fecha?: string
-  titulo_profesional_universidad?: string
-  maestria_fecha?: string
-  maestria_universidad?: string
-  doctorado_fecha?: string
-  doctorado_universidad?: string
-  otro_grado_nombre?: string
-  otro_grado_fecha?: string
-  otro_grado_universidad?: string
-  modalidad_titulacion?: DegreeMode
-  modalidad_titulacion_otro?: string
-  idioma_nombre?: string
-  idioma_nivel?: LanguageLevel
-  idioma_fecha_inicio?: string
-  idioma_fecha_fin?: string
-  idioma_aprendizaje?: string
   grados?: GraduateAcademicDegreePayload[]
   idiomas?: GraduateLanguagePayload[]
+  formaciones_complementarias?: GraduateComplementaryTrainingPayload[]
+  trayectorias_laborales?: GraduateWorkTrajectoryPayload[]
   contrasena: string
-  fecha_inicio?: string
-  fecha_fin?: string
   cv_path?: string
 }
 
@@ -248,32 +196,14 @@ export interface GraduateWizardValues {
   linkedin?: string
   portafolio?: string
 
-  facultad: string
-  escuelaProfesional: string
   facultadId?: number
   escuelaProfesionalId?: number
   fechaIngreso?: string
   fechaEgreso?: string
-  bachillerFecha?: string
-  bachillerUniversidad?: string
-  tituloProfesionalFecha?: string
-  tituloProfesionalUniversidad?: string
-  maestriaFecha?: string
-  maestriaUniversidad?: string
-  doctoradoFecha?: string
-  doctoradoUniversidad?: string
-  otroGradoNombre?: string
-  otroGradoFecha?: string
-  otroGradoUniversidad?: string
-  modalidadTitulacion: DegreeMode | ''
-  modalidadTitulacionOtro?: string
-  idiomaNombre?: string
-  idiomaNivel: LanguageLevel | ''
-  idiomaFechaInicio?: string
-  idiomaFechaFin?: string
-  idiomaAprendizaje?: string
   grados: GraduateWizardDegreeItem[]
   idiomas: GraduateWizardLanguageItem[]
+  formacionesComplementarias: GraduateWizardComplementaryTrainingItem[]
+  trayectoriasLaborales: GraduateWizardWorkTrajectoryItem[]
 }
 
 export interface GraduateWizardDegreeItem {
@@ -291,4 +221,19 @@ export interface GraduateWizardLanguageItem {
   fechaInicio?: string
   fechaFin?: string
   aprendizaje?: string
+}
+
+export interface GraduateWizardComplementaryTrainingItem {
+  nombreCurso?: string
+  institucion?: string
+  fechaInicio?: string
+  fechaFin?: string
+}
+
+export interface GraduateWizardWorkTrajectoryItem {
+  empresa?: string
+  cargo?: string
+  modalidad?: string
+  fechaInicio?: string
+  fechaFin?: string
 }

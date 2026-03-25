@@ -27,14 +27,13 @@ const emit = defineEmits<{
 }>()
 
 const headers = [
-  { title: 'ID', key: 'graduateId' },
   { title: 'DNI', key: 'dni' },
-  { title: 'Nombres', key: 'nombres' },
-  { title: 'Apellidos', key: 'apellidos' },
+  { title: 'Nombre completo', key: 'nombreCompleto' },
   { title: 'Correo', key: 'correo' },
   { title: 'Celular', key: 'celular' },
-  { title: 'Inicio', key: 'fechaInicio' },
-  { title: 'Fin', key: 'fechaFin' },
+  { title: 'Ingreso', key: 'anioIngreso' },
+  { title: 'Egreso', key: 'anioEgreso' },
+  { title: 'Fec. nacimiento', key: 'fechaNacimiento' },
   { title: 'Estado', key: 'validated' },
   { title: 'Acciones', key: 'actions', sortable: false },
 ]
@@ -54,7 +53,14 @@ const formatDate = (value?: string | null) => {
     return '-'
 
   const [datePart] = normalized.split(/[T ]/)
-  return datePart || normalized
+  if (!datePart)
+    return normalized
+
+  const [year, month, day] = datePart.split('-')
+  if (!year || !month || !day)
+    return datePart
+
+  return `${day}/${month}/${year}`
 }
 
 const getRowGraduateId = (tableItem: { raw?: Graduate | null } | Graduate | null): number | null => {
@@ -171,17 +177,21 @@ const getStatusProps = (validated: boolean) => ({
       @update:page="page => emit('update:page', page)"
       @update:items-per-page="value => emit('update:items-per-page', Number(value))"
     >
-      <template #item.graduateId="{ value }">
+      <template #item.nombreCompleto="{ item }">
         <span class="text-body-2 font-weight-medium">
-          {{ value ?? '-' }}
+          {{ item.nombres }} {{ item.apellidos }}
         </span>
       </template>
 
-      <template #item.fechaInicio="{ value }">
-        {{ formatDate(value as string) }}
+      <template #item.anioIngreso="{ value }">
+        {{ value || '-' }}
       </template>
 
-      <template #item.fechaFin="{ value }">
+      <template #item.anioEgreso="{ value }">
+        {{ value || '-' }}
+      </template>
+
+      <template #item.fechaNacimiento="{ value }">
         {{ formatDate(value as string) }}
       </template>
 
