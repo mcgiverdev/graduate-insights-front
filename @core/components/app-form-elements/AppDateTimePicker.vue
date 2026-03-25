@@ -59,6 +59,7 @@ const attrs = useAttrs()
 const [rootAttrs, compAttrs] = filterInputAttrs(attrs)
 const inputProps = ref(VInput.filterProps(props))
 const fieldProps = ref(filterFieldProps(props))
+const appPickerRoot = ref<HTMLElement | null>(null)
 
 const refFlatPicker = ref()
 
@@ -76,6 +77,8 @@ compAttrs.config = {
   ...compAttrs.config,
   prevArrow: '<i class="tabler-chevron-left v-icon" style="font-size: 20px; height: 20px; width: 20px;"></i>',
   nextArrow: '<i class="tabler-chevron-right v-icon" style="font-size: 20px; height: 20px; width: 20px;"></i>',
+  allowInput: true,
+  disableMobile: true,
 }
 
 // v-field clear prop
@@ -107,13 +110,45 @@ const updateThemeClassInCalendar = () => {
 
 watch(() => configStore.theme, updateThemeClassInCalendar)
 
+const ensureCalendarInsideOverlay = () => {
+  if (isInlinePicker.value)
+    return
+
+  const overlayContent = appPickerRoot.value?.closest('.v-overlay__content')
+  if (!overlayContent)
+    return
+
+  compAttrs.config = {
+    ...compAttrs.config,
+    appendTo: overlayContent,
+    static: false,
+  }
+}
+
 onMounted(() => {
+  ensureCalendarInsideOverlay()
   updateThemeClassInCalendar()
 })
 
 const emitModelValue = (val: string) => {
   emit('update:modelValue', val)
 }
+
+const onFieldControlClick = (event: MouseEvent, disabled: boolean, readonly: boolean) => {
+  emit('click:control', event)
+
+  if (disabled || readonly || isInlinePicker.value)
+    return
+
+  const flatpickrInstance = refFlatPicker.value?.fp
+  if (!flatpickrInstance)
+    return
+
+  flatpickrInstance.open()
+  flatpickrInstance._input?.focus()
+}
+
+const uniqueId = useUniqueId()
 
 watch(() => props, () => {
   fieldProps.value = filterFieldProps(props)
@@ -124,17 +159,18 @@ watch(() => props, () => {
   immediate: true,
 })
 
-const elementId = computed (() => {
-  const _elementIdToken = fieldProps.id || fieldProps.label || inputProps.value.id
+const elementId = computed(() => {
+  const explicitId = fieldProps.id || inputProps.value.id
 
-  const _id = useUniqueId()
-
-  return _elementIdToken ? `app-picker-field-${_elementIdToken}` : _id
+  return explicitId || uniqueId
 })
 </script>
 
 <template>
-  <div class="app-picker-field">
+  <div
+    ref="appPickerRoot"
+    class="app-picker-field"
+  >
     <!-- v-input -->
     <VLabel
       v-if="fieldProps.label"
@@ -159,7 +195,7 @@ const elementId = computed (() => {
         <!-- v-field -->
         <VField
           v-bind="{ ...fieldProps, label: undefined }"
-          :id="id.value"
+          :id="elementId"
           role="textbox"
           :active="focused || isDirty.value || isCalendarOpen"
           :focused="focused || isCalendarOpen"
@@ -169,12 +205,16 @@ const elementId = computed (() => {
           @click:clear="onClear"
         >
           <template #default="{ props: vFieldProps }">
-            <div v-bind="vFieldProps">
+            <div
+              v-bind="vFieldProps"
+              @click="onFieldControlClick($event, isDisabled.value, isReadonly.value)"
+            >
               <!-- flat-picker  -->
               <FlatPickr
                 v-if="!isInlinePicker"
                 v-bind="compAttrs"
                 ref="refFlatPicker"
+                :id="elementId"
                 :model-value="modelValue"
                 :placeholder="props.placeholder"
                 :readonly="isReadonly.value"
@@ -188,6 +228,7 @@ const elementId = computed (() => {
               <!-- simple input for inline prop -->
               <input
                 v-if="isInlinePicker"
+                :id="elementId"
                 :value="modelValue"
                 :placeholder="props.placeholder"
                 :readonly="isReadonly.value"
@@ -463,6 +504,10 @@ input[altinputclass="inlinePicker"] {
 .flatpickr-current-month {
   .flatpickr-monthDropdown-months {
     appearance: none;
+
+    span {
+      display: none;
+    }
   }
 
   .flatpickr-monthDropdown-months,
@@ -474,10 +519,6 @@ input[altinputclass="inlinePicker"] {
     font-weight: 400;
     line-height: 1.375rem;
     transition: all 0.15s ease-out;
-
-    span {
-      display: none;
-    }
 
     .flatpickr-monthDropdown-month {
       background-color: rgb(var(--v-theme-surface));
