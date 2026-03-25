@@ -2,11 +2,9 @@
 import { Field, Form } from 'vee-validate'
 import type { FormContext } from 'vee-validate'
 import { computed, ref, watch } from 'vue'
-import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
-import AppDateTimePicker from '@/@core/components/app-form-elements/AppDateTimePicker.vue'
 import type { Employer, EmployerFormValues } from '../types'
-import { employerFormSchema } from '../validation/employerFormSchema'
+import { createEmployerFormSchema } from '../validation/employerFormSchema'
 import { toFormValues } from '../utils/mappers'
 
 interface Props {
@@ -25,19 +23,19 @@ const emit = defineEmits<{
 }>()
 
 const formRef = ref<FormContext<EmployerFormValues> | null>(null)
+const showPasswordField = ref(false)
 
-const dialogTitle = computed(() => props.employer ? 'Editar Empleador' : 'Nuevo Empleador')
-
-const genderOptions = [
-  { title: 'Masculino', value: 'M' },
-  { title: 'Femenino', value: 'F' },
-]
+const isEdit = computed(() => !!props.employer)
+const dialogTitle = computed(() => isEdit.value ? 'Editar Empleador' : 'Nuevo Empleador')
+const validationSchema = computed(() => createEmployerFormSchema(isEdit.value))
 
 const computedInitialValues = computed(() => toFormValues(props.employer))
 
 watch(() => props.modelValue, isOpen => {
-  if (isOpen)
+  if (isOpen) {
+    showPasswordField.value = false
     formRef.value?.resetForm({ values: computedInitialValues.value })
+  }
 })
 
 watch(() => props.employer, () => {
@@ -55,6 +53,9 @@ watch(() => props.serverErrors, errors => {
 })
 
 const handleSubmit = (values: EmployerFormValues) => {
+  if (isEdit.value && !showPasswordField.value)
+    values.contrasena = ''
+
   emit('submit', values)
 }
 
@@ -86,116 +87,16 @@ const closeDialog = () => {
       <VCardText>
         <Form
           ref="formRef"
-          :validation-schema="employerFormSchema"
+          :validation-schema="validationSchema"
           :initial-values="computedInitialValues"
           @submit="handleSubmit"
         >
+          <!-- Datos de la empresa -->
+          <div class="text-subtitle-1 font-weight-medium mb-3">
+            Datos de la empresa
+          </div>
+
           <VRow>
-            <VCol cols="12" md="6">
-              <Field
-                name="nombres"
-                v-slot="{ field, errorMessage }"
-              >
-                <AppTextField
-                  :model-value="field.value"
-                  label="Nombres"
-                  :error-messages="errorMessage"
-                  @update:model-value="field.onChange"
-                />
-              </Field>
-            </VCol>
-
-            <VCol cols="12" md="6">
-              <Field
-                name="apellidos"
-                v-slot="{ field, errorMessage }"
-              >
-                <AppTextField
-                  :model-value="field.value"
-                  label="Apellidos"
-                  :error-messages="errorMessage"
-                  @update:model-value="field.onChange"
-                />
-              </Field>
-            </VCol>
-
-            <VCol cols="12" md="6">
-              <Field
-                name="correo"
-                v-slot="{ field, errorMessage }"
-              >
-                <AppTextField
-                  :model-value="field.value"
-                  label="Correo electrónico"
-                  type="email"
-                  :error-messages="errorMessage"
-                  @update:model-value="field.onChange"
-                />
-              </Field>
-            </VCol>
-
-            <VCol cols="12" md="6">
-              <Field
-                name="dni"
-                v-slot="{ field, errorMessage }"
-              >
-                <AppTextField
-                  :model-value="field.value"
-                  label="DNI"
-                  maxlength="8"
-                  :error-messages="errorMessage"
-                  @update:model-value="field.onChange"
-                />
-              </Field>
-            </VCol>
-
-            <VCol cols="12" md="6">
-              <Field
-                name="celular"
-                v-slot="{ field, errorMessage }"
-              >
-                <AppTextField
-                  :model-value="field.value"
-                  label="Celular"
-                  maxlength="9"
-                  :error-messages="errorMessage"
-                  @update:model-value="field.onChange"
-                />
-              </Field>
-            </VCol>
-
-            <VCol cols="12" md="6">
-              <Field
-                name="genero"
-                v-slot="{ field, errorMessage }"
-              >
-                <AppSelect
-                  :model-value="field.value"
-                  :items="genderOptions"
-                  label="Género"
-                  item-title="title"
-                  item-value="value"
-                  :error-messages="errorMessage"
-                  @update:model-value="field.onChange"
-                />
-              </Field>
-            </VCol>
-
-            <VCol cols="12" md="6">
-              <Field
-                name="fechaNacimiento"
-                v-slot="{ field, errorMessage }"
-              >
-                <AppDateTimePicker
-                  :model-value="field.value"
-                  label="Fecha de nacimiento"
-                  :config="{ dateFormat: 'Y-m-d' }"
-                  :error-messages="errorMessage"
-                  @update:model-value="field.onChange"
-                />
-              </Field>
-            </VCol>
-
             <VCol cols="12" md="6">
               <Field
                 name="ruc"
@@ -203,7 +104,7 @@ const closeDialog = () => {
               >
                 <AppTextField
                   :model-value="field.value"
-                  label="RUC"
+                  label="RUC *"
                   maxlength="11"
                   :error-messages="errorMessage"
                   @update:model-value="field.onChange"
@@ -218,7 +119,7 @@ const closeDialog = () => {
               >
                 <AppTextField
                   :model-value="field.value"
-                  label="Razón social"
+                  label="Razón social *"
                   :error-messages="errorMessage"
                   @update:model-value="field.onChange"
                 />
@@ -227,17 +128,124 @@ const closeDialog = () => {
 
             <VCol cols="12" md="6">
               <Field
+                name="direccion"
+                v-slot="{ field, errorMessage }"
+              >
+                <AppTextField
+                  :model-value="field.value"
+                  label="Dirección"
+                  :error-messages="errorMessage"
+                  @update:model-value="field.onChange"
+                />
+              </Field>
+            </VCol>
+
+            <VCol cols="12">
+              <Field
+                name="resumenEmpresa"
+                v-slot="{ field, errorMessage }"
+              >
+                <VTextarea
+                  :model-value="field.value"
+                  label="Resumen de la empresa"
+                  rows="3"
+                  maxlength="1000"
+                  variant="outlined"
+                  :error-messages="errorMessage"
+                  @update:model-value="field.onChange"
+                />
+              </Field>
+            </VCol>
+          </VRow>
+
+          <!-- Datos del contacto -->
+          <div class="text-subtitle-1 font-weight-medium mb-3 mt-4">
+            Datos del contacto
+          </div>
+
+          <VRow>
+            <VCol cols="12" md="6">
+              <Field
+                name="nombres"
+                v-slot="{ field, errorMessage }"
+              >
+                <AppTextField
+                  :model-value="field.value"
+                  label="Nombres *"
+                  :error-messages="errorMessage"
+                  @update:model-value="field.onChange"
+                />
+              </Field>
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <Field
+                name="apellidos"
+                v-slot="{ field, errorMessage }"
+              >
+                <AppTextField
+                  :model-value="field.value"
+                  label="Apellidos *"
+                  :error-messages="errorMessage"
+                  @update:model-value="field.onChange"
+                />
+              </Field>
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <Field
+                name="correo"
+                v-slot="{ field, errorMessage }"
+              >
+                <AppTextField
+                  :model-value="field.value"
+                  label="Correo electrónico *"
+                  type="email"
+                  :error-messages="errorMessage"
+                  @update:model-value="field.onChange"
+                />
+              </Field>
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <Field
+                name="celular"
+                v-slot="{ field, errorMessage }"
+              >
+                <AppTextField
+                  :model-value="field.value"
+                  label="Celular *"
+                  maxlength="9"
+                  :error-messages="errorMessage"
+                  @update:model-value="field.onChange"
+                />
+              </Field>
+            </VCol>
+
+            <VCol v-if="!isEdit || showPasswordField" cols="12" md="6">
+              <Field
                 name="contrasena"
                 v-slot="{ field, errorMessage }"
               >
                 <AppTextField
                   :model-value="field.value"
-                  label="Contraseña"
+                  :label="isEdit ? 'Nueva contraseña' : 'Contraseña *'"
                   type="password"
                   :error-messages="errorMessage"
                   @update:model-value="field.onChange"
                 />
               </Field>
+            </VCol>
+
+            <VCol v-if="isEdit && !showPasswordField" cols="12" md="6">
+              <VBtn
+                variant="tonal"
+                color="secondary"
+                prepend-icon="tabler-lock"
+                @click="showPasswordField = true"
+              >
+                Cambiar contraseña
+              </VBtn>
             </VCol>
           </VRow>
 

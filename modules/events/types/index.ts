@@ -9,6 +9,8 @@ export interface Event {
   directorNombre: string
   eventTypeId: number
   eventTypeNombre: string
+  fechaEvento: string
+  enlaceInscripcion: string
 }
 
 export interface EventFilters {
@@ -22,6 +24,8 @@ export interface EventFormValues {
   contenido: string
   directorId: number | null
   eventTypeId: number | null
+  fechaEvento: string
+  enlaceInscripcion: string
 }
 
 export interface EventPayload {
@@ -29,6 +33,8 @@ export interface EventPayload {
   contenido: string
   director_id: number
   event_type_id: number
+  fecha_evento: string
+  enlace_inscripcion: string
 }
 
 export interface EventApiResponse {
@@ -40,4 +46,6 @@ export interface EventApiResponse {
   director_nombre: string
   event_type_id: number
   event_type_nombre: string
+  fecha_evento: string
+  enlace_inscripcion: string
 }

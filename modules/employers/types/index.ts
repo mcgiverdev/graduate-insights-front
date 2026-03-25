@@ -1,18 +1,15 @@
-export type Gender = 'M' | 'F'
-
 export interface Employer {
   employerId: number
   userId: number
   nombres: string
   apellidos: string
-  fechaNacimiento: string
-  genero: Gender
   correo: string
   estado: string
-  dni: string
   celular: string
   ruc: string
   razonSocial: string
+  direccion: string
+  resumenEmpresa: string
   contrasena?: string
 }
 
@@ -25,26 +22,24 @@ export interface EmployerFilters {
 export interface EmployerFormValues {
   nombres: string
   apellidos: string
-  fechaNacimiento: string
-  genero: Gender
   correo: string
-  dni: string
   celular: string
   ruc: string
   razonSocial: string
+  direccion: string
+  resumenEmpresa: string
   contrasena: string
 }
 
 export interface EmployerPayload {
   nombres: string
   apellidos: string
-  fecha_nacimiento: string
-  genero: Gender
   correo: string
-  dni: string
   celular: string
   ruc: string
   razon_social: string
+  direccion: string
+  resumen_empresa: string
   contrasena: string
 }
 
@@ -53,13 +48,12 @@ export interface EmployerApiResponse {
   user_id: number
   nombres: string
   apellidos: string
-  fecha_nacimiento: string
-  genero: Gender
   correo: string
   estado: string
-  dni: string
   celular: string
   ruc: string
   razon_social: string
+  direccion: string
+  resumen_empresa: string
   contrasena?: string
 }

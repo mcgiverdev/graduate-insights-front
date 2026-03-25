@@ -11,6 +11,7 @@ export interface Director {
   estado: string
   dni: string
   celular: string
+  cargo: string
   contrasena?: string
 }
 
@@ -28,6 +29,7 @@ export interface DirectorFormValues {
   correo: string
   dni: string
   celular: string
+  cargo: string
   contrasena: string
 }
 
@@ -39,6 +41,7 @@ export interface DirectorPayload {
   correo: string
   dni: string
   celular: string
+  cargo: string
   contrasena: string
 }
 
@@ -53,5 +56,6 @@ export interface DirectorApiResponse {
   estado: string
   dni: string
   celular: string
+  cargo: string
   contrasena?: string
 }

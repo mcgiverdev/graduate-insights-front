@@ -4,6 +4,7 @@ import type { FormContext } from 'vee-validate'
 import { computed, ref, watch } from 'vue'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
+import AppDateTimePicker from '@/@core/components/app-form-elements/AppDateTimePicker.vue'
 import type { KeyValueOption } from '@/modules/shared/types/keyValue'
 import type { Event, EventFormValues } from '../types'
 import { eventFormSchema } from '../validation/eventFormSchema'
@@ -116,6 +117,35 @@ const closeDialog = () => {
                   auto-grow
                   rows="4"
                   variant="outlined"
+                  :error-messages="errorMessage"
+                  @update:model-value="field.onChange"
+                />
+              </Field>
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <Field
+                name="fechaEvento"
+                v-slot="{ field, errorMessage }"
+              >
+                <AppDateTimePicker
+                  :model-value="field.value"
+                  label="Fecha del evento *"
+                  :config="{ dateFormat: 'Y-m-d' }"
+                  :error-messages="errorMessage"
+                  @update:model-value="field.onChange"
+                />
+              </Field>
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <Field
+                name="enlaceInscripcion"
+                v-slot="{ field, errorMessage }"
+              >
+                <AppTextField
+                  :model-value="field.value"
+                  label="Enlace de inscripción"
                   :error-messages="errorMessage"
                   @update:model-value="field.onChange"
                 />

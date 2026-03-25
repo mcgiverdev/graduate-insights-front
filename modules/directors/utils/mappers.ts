@@ -23,6 +23,7 @@ export const toDirector = (director: DirectorApiResponse): Director => ({
   estado: director.estado,
   dni: director.dni,
   celular: director.celular,
+  cargo: director.cargo ?? '',
   contrasena: director.contrasena,
 })
 
@@ -34,7 +35,8 @@ export const toFormValues = (director?: Director | null): DirectorFormValues => 
   correo: director?.correo ?? '',
   dni: director?.dni ?? '',
   celular: director?.celular ?? '',
-  contrasena: director?.contrasena ?? '',
+  cargo: director?.cargo ?? '',
+  contrasena: '',
 })
 
 export const toPayload = (values: DirectorFormValues): DirectorPayload => ({
@@ -45,5 +47,6 @@ export const toPayload = (values: DirectorFormValues): DirectorPayload => ({
   correo: values.correo.trim(),
   dni: values.dni.trim(),
   celular: values.celular.trim(),
+  cargo: values.cargo,
   contrasena: values.contrasena,
 })

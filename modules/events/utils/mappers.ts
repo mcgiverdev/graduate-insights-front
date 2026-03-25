@@ -5,6 +5,13 @@ import type {
   EventPayload,
 } from '../types'
 
+const normalizeDate = (value?: string | null) => {
+  if (!value)
+    return ''
+
+  return value.split('T')[0]
+}
+
 export const toEvent = (event: EventApiResponse): Event => ({
   eventId: event.event_id,
   nombre: event.nombre,
@@ -14,6 +21,8 @@ export const toEvent = (event: EventApiResponse): Event => ({
   directorNombre: event.director_nombre,
   eventTypeId: event.event_type_id,
   eventTypeNombre: event.event_type_nombre,
+  fechaEvento: normalizeDate(event.fecha_evento),
+  enlaceInscripcion: event.enlace_inscripcion ?? '',
 })
 
 export const toFormValues = (event?: Event | null): EventFormValues => ({
@@ -22,6 +31,8 @@ export const toFormValues = (event?: Event | null): EventFormValues => ({
   estado: event?.estado ?? '1',
   directorId: event?.directorId ?? null,
   eventTypeId: event?.eventTypeId ?? null,
+  fechaEvento: event?.fechaEvento ?? '',
+  enlaceInscripcion: event?.enlaceInscripcion ?? '',
 })
 
 export const toPayload = (values: EventFormValues): EventPayload => ({
@@ -30,4 +41,6 @@ export const toPayload = (values: EventFormValues): EventPayload => ({
   estado: values.estado,
   director_id: Number(values.directorId),
   event_type_id: Number(values.eventTypeId),
+  fecha_evento: values.fechaEvento,
+  enlace_inscripcion: values.enlaceInscripcion?.trim() ?? '',
 })

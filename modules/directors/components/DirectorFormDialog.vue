@@ -6,7 +6,7 @@ import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import AppDateTimePicker from '@/@core/components/app-form-elements/AppDateTimePicker.vue'
 import type { Director, DirectorFormValues } from '../types'
-import { directorFormSchema } from '../validation/directorFormSchema'
+import { createDirectorFormSchema } from '../validation/directorFormSchema'
 import { toFormValues } from '../utils/mappers'
 
 interface Props {
@@ -25,19 +25,30 @@ const emit = defineEmits<{
 }>()
 
 const formRef = ref<FormContext<DirectorFormValues> | null>(null)
+const showPasswordField = ref(false)
 
-const dialogTitle = computed(() => props.director ? 'Editar Director' : 'Nuevo Director')
+const isEdit = computed(() => !!props.director)
+const dialogTitle = computed(() => isEdit.value ? 'Editar Director' : 'Nuevo Director')
+const validationSchema = computed(() => createDirectorFormSchema(isEdit.value))
 
 const genderOptions = [
   { title: 'Masculino', value: 'M' },
   { title: 'Femenino', value: 'F' },
 ]
 
+const cargoOptions = [
+  'Director de escuela',
+  'Presidente de comisión',
+  'Decano',
+]
+
 const computedInitialValues = computed(() => toFormValues(props.director))
 
 watch(() => props.modelValue, isOpen => {
-  if (isOpen)
+  if (isOpen) {
+    showPasswordField.value = false
     formRef.value?.resetForm({ values: computedInitialValues.value })
+  }
 })
 
 watch(() => props.director, () => {
@@ -55,6 +66,9 @@ watch(() => props.serverErrors, errors => {
 })
 
 const handleSubmit = (values: DirectorFormValues) => {
+  if (isEdit.value && !showPasswordField.value)
+    values.contrasena = ''
+
   emit('submit', values)
 }
 
@@ -86,7 +100,7 @@ const closeDialog = () => {
       <VCardText>
         <Form
           ref="formRef"
-          :validation-schema="directorFormSchema"
+          :validation-schema="validationSchema"
           :initial-values="computedInitialValues"
           @submit="handleSubmit"
         >
@@ -198,17 +212,43 @@ const closeDialog = () => {
 
             <VCol cols="12" md="6">
               <Field
+                name="cargo"
+                v-slot="{ field, errorMessage }"
+              >
+                <AppSelect
+                  :model-value="field.value"
+                  :items="cargoOptions"
+                  label="Cargo *"
+                  :error-messages="errorMessage"
+                  @update:model-value="field.onChange"
+                />
+              </Field>
+            </VCol>
+
+            <VCol v-if="!isEdit || showPasswordField" cols="12" md="6">
+              <Field
                 name="contrasena"
                 v-slot="{ field, errorMessage }"
               >
                 <AppTextField
                   :model-value="field.value"
-                  label="Contraseña"
+                  :label="isEdit ? 'Nueva contraseña' : 'Contraseña *'"
                   type="password"
                   :error-messages="errorMessage"
                   @update:model-value="field.onChange"
                 />
               </Field>
+            </VCol>
+
+            <VCol v-if="isEdit && !showPasswordField" cols="12" md="6">
+              <VBtn
+                variant="tonal"
+                color="secondary"
+                prepend-icon="tabler-lock"
+                @click="showPasswordField = true"
+              >
+                Cambiar contraseña
+              </VBtn>
             </VCol>
           </VRow>
 

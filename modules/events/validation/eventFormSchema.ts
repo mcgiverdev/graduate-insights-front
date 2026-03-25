@@ -12,4 +12,6 @@ export const eventFormSchema = yup.object({
     .number()
     .typeError('Seleccione un tipo de evento')
     .required('El tipo de evento es obligatorio'),
+  fechaEvento: yup.string().required('La fecha del evento es obligatoria'),
+  enlaceInscripcion: yup.string().url('Debe ser una URL válida').optional().nullable(),
 })

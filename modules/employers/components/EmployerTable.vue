@@ -24,13 +24,12 @@ const emit = defineEmits<{
 
 const headers = [
   { title: 'ID', key: 'employerId' },
-  { title: 'DNI', key: 'dni' },
+  { title: 'RUC', key: 'ruc' },
+  { title: 'Razón Social', key: 'razonSocial' },
   { title: 'Nombres', key: 'nombres' },
   { title: 'Apellidos', key: 'apellidos' },
   { title: 'Correo', key: 'correo' },
   { title: 'Celular', key: 'celular' },
-  { title: 'RUC', key: 'ruc' },
-  { title: 'Razón Social', key: 'razonSocial' },
   { title: 'Estado', key: 'estado' },
   { title: 'Acciones', key: 'actions', sortable: false },
 ]
