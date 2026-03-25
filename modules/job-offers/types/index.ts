@@ -8,6 +8,9 @@ export interface JobOffer {
   estado: JobOfferStatus
   employerId: number
   employerName: string
+  employerRuc: string
+  employerDireccion: string
+  employerCorreo: string
 }
 
 export interface JobOfferFilters {
@@ -38,4 +41,7 @@ export interface JobOfferApiResponse {
   estado: JobOfferStatus
   employer_id: number
   employer_name: string
+  employer_ruc: string
+  employer_direccion: string
+  employer_correo: string
 }

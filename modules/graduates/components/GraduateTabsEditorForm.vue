@@ -35,9 +35,20 @@ import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 
 interface Props {
   graduateId: number
+  fetchFn?: (id: number) => Promise<Graduate | null>
+  saveFn?: (payload: GraduatePayload, id: number) => Promise<{ success: boolean; message?: string }>
+  backRoute?: string
+  pageTitle?: string
+  pageSubtitle?: string
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  fetchFn: undefined,
+  saveFn: undefined,
+  backRoute: undefined,
+  pageTitle: 'Editar Graduado',
+  pageSubtitle: 'Gestiona informacion personal, contacto y trayectoria academica desde un solo panel.',
+})
 
 const router = useRouter()
 const { saveGraduate, submitting, serverErrors, clearServerErrors } = useGraduateForm()
@@ -731,12 +742,14 @@ const submit = async () => {
   saving.value = true
 
   try {
-    const result = await saveGraduate(wizardPayload.value, props.graduateId)
-    if (!result.success)
+    const result = props.saveFn
+      ? await props.saveFn(wizardPayload.value, props.graduateId)
+      : await saveGraduate(wizardPayload.value, props.graduateId)
 
+    if (!result.success)
       return
 
-    await router.push(`/graduates/${props.graduateId}`)
+    await router.push(props.backRoute ?? `/graduates/${props.graduateId}`)
   }
   finally {
     saving.value = false
@@ -747,10 +760,11 @@ const loadGraduateForEdit = async () => {
   loadingData.value = true
 
   try {
-    const graduate = await graduateService.getById(props.graduateId)
+    const fetchFn = props.fetchFn ?? graduateService.getById.bind(graduateService)
+    const graduate = await fetchFn(props.graduateId)
 
     if (!graduate) {
-      await router.push('/graduates')
+      await router.push(props.backRoute ?? '/graduates')
 
       return
     }
@@ -827,10 +841,10 @@ watch(activeTab, () => {
       <VCardTitle class="d-flex justify-space-between align-center flex-wrap gap-3">
         <div>
           <div class="text-h5">
-            Editar Graduado
+            {{ pageTitle }}
           </div>
           <div class="text-body-2 text-medium-emphasis">
-            Gestiona informacion personal, contacto y trayectoria academica desde un solo panel.
+            {{ pageSubtitle }}
           </div>
         </div>
 
@@ -838,9 +852,9 @@ watch(activeTab, () => {
           <VBtn
             variant="tonal"
             color="secondary"
-            :to="`/graduates/${graduateId}`"
+            :to="backRoute ?? `/graduates/${graduateId}`"
           >
-            Volver al detalle
+            {{ backRoute ? 'Volver al inicio' : 'Volver al detalle' }}
           </VBtn>
           <VBtn
             color="primary"

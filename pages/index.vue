@@ -70,6 +70,7 @@ const {
   jobOffers,
   activeJobsCount,
   totalJobsCount,
+  profileComplete,
 } = useGraduateDashboard()
 
 const graduateDashboardLoaded = ref(false)
@@ -822,6 +823,28 @@ watch(isGraduate, async newIsGraduate => {
 
     <!-- DASHBOARD PARA GRADUADOS -->
     <div v-else-if="isGraduate">
+      <VAlert
+        v-if="!profileComplete"
+        type="warning"
+        variant="tonal"
+        class="mb-4"
+        prominent
+      >
+        <template #title>
+          Completa tu perfil academico
+        </template>
+        Tu perfil no tiene informacion academica completa. Completa tus datos para mejorar tu visibilidad ante empleadores.
+        <template #append>
+          <VBtn
+            color="warning"
+            variant="elevated"
+            to="/my-profile"
+          >
+            Completar datos
+          </VBtn>
+        </template>
+      </VAlert>
+
       <VRow>
         <VCol cols="12">
           <VCard
@@ -844,11 +867,10 @@ watch(isGraduate, async newIsGraduate => {
                     <VBtn
                       color="white"
                       class="text-primary"
-                      prepend-icon="tabler-refresh"
-                      :loading="graduateDashboardLoading"
-                      @click="loadGraduateDashboard"
+                      prepend-icon="tabler-edit"
+                      to="/my-profile"
                     >
-                      Actualizar datos
+                      Completar mi perfil
                     </VBtn>
                     <VBtn
                       color="primary"

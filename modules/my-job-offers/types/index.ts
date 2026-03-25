@@ -6,6 +6,10 @@ export interface MyJobOffer {
   link: string
   descripcion: string
   estado: MyJobOfferStatus
+  employerName: string
+  employerRuc: string
+  employerDireccion: string
+  employerCorreo: string
 }
 
 export interface MyJobOfferFilters {
@@ -32,4 +36,8 @@ export interface MyJobOfferApiResponse {
   link: string
   descripcion: string
   estado: MyJobOfferStatus
+  employer_name: string
+  employer_ruc: string
+  employer_direccion: string
+  employer_correo: string
 }

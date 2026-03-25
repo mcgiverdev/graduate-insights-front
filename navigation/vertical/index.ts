@@ -67,6 +67,12 @@ export default [
     requiredRoles: [ROLES.DIRECTOR, ROLES.ADMINISTRADOR],
   },
   {
+    title: 'Mi Perfil Academico',
+    icon: { icon: 'tabler-school' },
+    to: 'my-profile',
+    requiredRoles: [ROLES.GRADUADO],
+  },
+  {
     title: 'Mis Encuestas',
     icon: { icon: 'tabler-clipboard-text' },
     to: 'my-surveys',

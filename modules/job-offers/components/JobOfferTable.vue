@@ -25,7 +25,7 @@ const emit = defineEmits<{
 const headers = [
   { title: 'ID', key: 'jobOfferId' },
   { title: 'Título', key: 'titulo' },
-  { title: 'Empleador', key: 'employerName' },
+  { title: 'Empresa', key: 'employerName' },
   { title: 'Estado', key: 'estado' },
   { title: 'Acciones', key: 'actions', sortable: false },
 ]
@@ -91,6 +91,43 @@ const getStatusColor = (estado?: string) => estado === '1' ? 'success' : 'error'
     >
       <template #item.jobOfferId="{ item }">
         <span class="text-body-2 font-weight-medium">{{ item?.jobOfferId ?? '-' }}</span>
+      </template>
+
+      <template #item.employerName="{ item }">
+        <div class="d-flex align-center gap-2">
+          <div>
+            <span class="text-body-2 font-weight-medium">{{ item?.employerName ?? '-' }}</span>
+            <div
+              v-if="item?.employerRuc"
+              class="text-caption text-medium-emphasis"
+            >
+              RUC: {{ item.employerRuc }}
+            </div>
+          </div>
+          <VTooltip location="end">
+            <template #activator="{ props: tooltipProps }">
+              <VIcon
+                v-if="item?.employerCorreo || item?.employerDireccion"
+                v-bind="tooltipProps"
+                icon="tabler-info-circle"
+                size="18"
+                color="primary"
+                class="cursor-pointer"
+              />
+            </template>
+            <div>
+              <div v-if="item?.employerCorreo">
+                <strong>Correo:</strong> {{ item.employerCorreo }}
+              </div>
+              <div v-if="item?.employerDireccion">
+                <strong>Direcci&oacute;n:</strong> {{ item.employerDireccion }}
+              </div>
+              <div v-if="item?.employerRuc">
+                <strong>RUC:</strong> {{ item.employerRuc }}
+              </div>
+            </div>
+          </VTooltip>
+        </div>
       </template>
 
       <template #item.estado="{ item }">

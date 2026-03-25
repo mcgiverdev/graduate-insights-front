@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import type { MyJobOffer } from '../types'
 
@@ -38,9 +39,42 @@ const onSearchInput = (value: string) => {
 
 const getStatusLabel = (estado?: string) => estado === '1' ? 'Activo' : 'Inactivo'
 const getStatusColor = (estado?: string) => estado === '1' ? 'success' : 'error'
+
+const employerInfo = computed(() => {
+  const first = props.items[0]
+  if (!first?.employerName) return null
+
+  return {
+    name: first.employerName,
+    ruc: first.employerRuc,
+    direccion: first.employerDireccion,
+    correo: first.employerCorreo,
+  }
+})
 </script>
 
 <template>
+  <VAlert
+    v-if="employerInfo"
+    type="info"
+    variant="tonal"
+    class="mb-4"
+    icon="tabler-building"
+  >
+    <div class="d-flex flex-wrap gap-x-6 gap-y-1 align-center">
+      <span class="font-weight-semibold">{{ employerInfo.name }}</span>
+      <span v-if="employerInfo.ruc" class="text-body-2">
+        <strong>RUC:</strong> {{ employerInfo.ruc }}
+      </span>
+      <span v-if="employerInfo.correo" class="text-body-2">
+        <strong>Correo:</strong> {{ employerInfo.correo }}
+      </span>
+      <span v-if="employerInfo.direccion" class="text-body-2">
+        <strong>Direcci&oacute;n:</strong> {{ employerInfo.direccion }}
+      </span>
+    </div>
+  </VAlert>
+
   <VCard>
     <VCardItem>
       <template #title>

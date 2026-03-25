@@ -11,6 +11,10 @@ export const toMyJobOffer = (offer: MyJobOfferApiResponse): MyJobOffer => ({
   link: offer.link,
   descripcion: offer.descripcion,
   estado: offer.estado,
+  employerName: offer.employer_name ?? '',
+  employerRuc: offer.employer_ruc ?? '',
+  employerDireccion: offer.employer_direccion ?? '',
+  employerCorreo: offer.employer_correo ?? '',
 })
 
 export const toFormValues = (offer?: MyJobOffer | null): MyJobOfferFormValues => ({

@@ -16,6 +16,7 @@ interface GraduateDashboardApiResponse {
     total_jobs: number
     active_jobs: number
   }
+  profile_complete?: boolean
   pending_surveys: GraduateSurveyListItem[]
   completed_surveys: GraduateSurveyListItem[]
   jobs: MyJobApiResponse[]
@@ -38,6 +39,7 @@ const jobStatsState = ref({
   totalJobs: 0,
   activeJobs: 0,
 })
+const profileCompleteState = ref(false)
 
 const toMyJob = (job: MyJobApiResponse): MyJob => ({
   jobId: job.job_id,
@@ -81,6 +83,8 @@ export const useGraduateDashboard = () => {
           completionRate: payload.survey_stats?.completion_rate ?? 0,
         }
 
+        profileCompleteState.value = payload.profile_complete ?? false
+
         pendingSurveysState.value = payload.pending_surveys ?? []
         completedSurveysState.value = payload.completed_surveys ?? []
 
@@ -115,6 +119,7 @@ export const useGraduateDashboard = () => {
 
   const activeJobsCount = computed(() => jobStatsState.value.activeJobs)
   const totalJobsCount = computed(() => jobStatsState.value.totalJobs)
+  const profileComplete = readonly(profileCompleteState)
 
   return {
     loadGraduateDashboard,
@@ -127,5 +132,6 @@ export const useGraduateDashboard = () => {
     jobOffers: readonly(jobOffers),
     activeJobsCount,
     totalJobsCount,
+    profileComplete,
   }
 }

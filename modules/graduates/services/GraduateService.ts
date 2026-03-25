@@ -100,6 +100,16 @@ class GraduateService extends BaseApiService {
   async activate(id: number) {
     return this.patch<ApiEnvelope<void>>(`${BASE_ENDPOINT}/${id}/activate`)
   }
+
+  async fetchMyProfile(): Promise<Graduate> {
+    const response = await this.get<ApiEnvelope<GraduateApiResponse>>(`${BASE_ENDPOINT}/me`)
+
+    return toGraduate(response.data)
+  }
+
+  async updateMyProfile(payload: GraduatePayload): Promise<void> {
+    await this.put(`${BASE_ENDPOINT}/me`, { body: payload })
+  }
 }
 
 export const graduateService = new GraduateService()
