@@ -85,6 +85,12 @@ export default [
     requiredRoles: [ROLES.GRADUADO],
   },
   {
+    title: 'Configuracion Email',
+    icon: { icon: 'tabler-mail-cog' },
+    to: 'email-config',
+    requiredRoles: [ROLES.DIRECTOR],
+  },
+  {
     title: 'Feed',
     to: { name: 'feed' },
     icon: { icon: 'tabler-news' },
