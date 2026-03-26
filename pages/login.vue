@@ -1,12 +1,7 @@
 <script setup lang="ts">
 import { LoginForm } from '@/src/features/auth'
-import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
-import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
-import authV2LoginIllustrationBorderedLight from '@images/pages/auth-v2-login-illustration-bordered-light.png'
-import authV2LoginIllustrationDark from '@images/pages/auth-v2-login-illustration-dark.png'
-import authV2LoginIllustrationLight from '@images/pages/auth-v2-login-illustration-light.png'
-import authV2MaskDark from '@images/pages/misc-mask-dark.png'
-import authV2MaskLight from '@images/pages/misc-mask-light.png'
+import authV1BottomShape from '@images/svg/auth-v1-bottom-shape.svg?raw'
+import authV1TopShape from '@images/svg/auth-v1-top-shape.svg?raw'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 
@@ -15,83 +10,76 @@ definePageMeta({
   public: true,
   middleware: ['guest'],
 })
-
-const authThemeImg = useGenerateImageVariant(
-  authV2LoginIllustrationLight,
-  authV2LoginIllustrationDark,
-  authV2LoginIllustrationBorderedLight,
-  authV2LoginIllustrationBorderedDark,
-  true)
-
-const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 </script>
 
 <template>
-  <a href="javascript:void(0)">
-    <div class="auth-logo d-flex align-center gap-x-3">
-      <VNodeRenderer :nodes="themeConfig.app.logo" />
-      <h1 class="auth-title">
-        SYSGRAD
-      </h1>
-    </div>
-  </a>
+  <VThemeProvider theme="light">
+    <div class="auth-wrapper d-flex align-center justify-center pa-4">
+      <div class="position-relative my-sm-16">
+        <!-- Top shape -->
+        <VNodeRenderer
+          :nodes="h('div', { innerHTML: authV1TopShape })"
+          class="text-primary auth-v1-top-shape d-none d-sm-block"
+        />
 
-  <VRow
-    no-gutters
-    class="auth-wrapper bg-surface"
-  >
-    <VCol
-      md="8"
-      class="d-none d-md-flex"
-    >
-      <div class="position-relative bg-background w-100 me-0">
-        <div
-          class="d-flex align-center justify-center w-100 h-100"
-          style="padding-inline: 6.25rem;"
-        >
-          <VImg
-            max-width="613"
-            :src="authThemeImg"
-            class="auth-illustration mt-16 mb-2"
-          />
-        </div>
+        <!-- Bottom shape -->
+        <VNodeRenderer
+          :nodes="h('div', { innerHTML: authV1BottomShape })"
+          class="text-primary auth-v1-bottom-shape d-none d-sm-block"
+        />
 
-        <img
-          class="auth-footer-mask flip-in-rtl"
-          :src="authThemeMask"
-          alt="auth-footer-mask"
-          height="280"
-          width="100"
+        <!-- Auth Card -->
+        <VCard
+          class="auth-card"
+          max-width="460"
+          :class="$vuetify.display.smAndUp ? 'pa-6' : 'pa-0'"
         >
+          <VCardItem class="justify-center pb-2">
+            <VCardTitle>
+              <NuxtLink to="/" class="d-flex flex-column align-center text-decoration-none">
+                <div class="auth-logo-img mb-3">
+                  <VNodeRenderer :nodes="themeConfig.app.logo" />
+                </div>
+                <span class="auth-brand-title text-primary">
+                  Egresys
+                </span>
+              </NuxtLink>
+            </VCardTitle>
+          </VCardItem>
+
+          <VDivider class="mx-6 mb-2" />
+
+          <VCardText class="pt-4">
+            <h4 class="text-h5 font-weight-bold mb-1 text-center">
+              Bienvenido de nuevo
+            </h4>
+            <p class="mb-0 text-center text-medium-emphasis">
+              Inicia sesión para acceder al sistema
+            </p>
+          </VCardText>
+
+          <VCardText>
+            <LoginForm @success="() => navigateTo('/', { replace: true })" />
+          </VCardText>
+        </VCard>
       </div>
-    </VCol>
-
-    <VCol
-      cols="12"
-      md="4"
-      class="auth-card-v2 d-flex align-center justify-center"
-    >
-      <VCard
-        flat
-        :max-width="500"
-        class="mt-12 mt-sm-0 pa-6"
-      >
-        <VCardText>
-          <h4 class="text-h4 mb-1">
-            Bienvenido a <span class="text-capitalize">Sistema de Egresados</span>! 👋🏻
-          </h4>
-          <p class="mb-0">
-            Inicia sesión en tu cuenta para acceder al sistema
-          </p>
-        </VCardText>
-        <VCardText>
-          <LoginForm @success="() => navigateTo('/', { replace: true })" />
-        </VCardText>
-      </VCard>
-    </VCol>
-  </VRow>
+    </div>
+  </VThemeProvider>
 </template>
 
 <style lang="scss">
 @use "@core/scss/template/pages/page-auth";
+
+.auth-brand-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.auth-logo-img img {
+  height: 72px !important;
+  width: auto !important;
+  display: block !important;
+  margin: 0 auto !important;
+}
 </style>

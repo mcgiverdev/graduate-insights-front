@@ -9,25 +9,34 @@ import Footer from '@/layouts/components/Footer.vue'
 import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue'
 import UserProfile from '@/layouts/components/UserProfile.vue'
 import NavBarI18n from '@core/components/I18n.vue'
+import TheCustomizer from '@core/components/TheCustomizer.vue'
 
 // @layouts plugin
 import { VerticalNavLayout } from '@layouts'
 
-// Filtrar elementos de navegación basándose en roles
 const { hasAnyRole, role } = useRoles()
+
+function filterItems(items: any[]): any[] {
+  return items.reduce((acc: any[], item: any) => {
+    if (item.requiredRoles && !hasAnyRole(item.requiredRoles))
+      return acc
+
+    if (item.children) {
+      const filteredChildren = filterItems(item.children)
+      if (filteredChildren.length > 0)
+        acc.push({ ...item, children: filteredChildren })
+      return acc
+    }
+
+    acc.push(item)
+    return acc
+  }, [])
+}
 
 const filteredNavItems = computed(() => {
   if (!role.value)
     return []
-
-  return navItems.filter(item => {
-    // Si el elemento no tiene requiredRoles, está disponible para todos
-    if (!item.requiredRoles)
-      return true
-
-    // Verificar si el usuario tiene alguno de los roles requeridos
-    return hasAnyRole(item.requiredRoles)
-  })
+  return filterItems(navItems)
 })
 </script>
 
@@ -68,6 +77,6 @@ const filteredNavItems = computed(() => {
     </template>
 
     <!-- 👉 Customizer -->
-    <!-- <TheCustomizer /> -->
+    <TheCustomizer />
   </VerticalNavLayout>
 </template>
