@@ -4,7 +4,7 @@ import { navigateTo } from '#imports'
 import { useAuthService } from '@/composables/useAuthService'
 import { useUser } from '@/composables/useUser'
 
-const { user, fetchUser, initials } = useUser()
+const { user, fetchUser, initials, avatarUrl } = useUser()
 const { logout } = useAuthService()
 
 const goToProfile = () => {
@@ -30,14 +30,14 @@ onMounted(() => {
       color="primary"
       variant="tonal"
     >
-      <span
-        v-if="!user?.avatar && initials"
-        style=" font-size: 1.2rem;font-weight: bold;"
-      >{{ initials }}</span>
       <VImg
-        v-else
-        :src="user?.avatar"
+        v-if="avatarUrl"
+        :src="avatarUrl"
       />
+      <span
+        v-else
+        style="font-size: 1.2rem; font-weight: bold;"
+      >{{ initials }}</span>
 
       <!-- SECTION Menu -->
       <VMenu
@@ -62,14 +62,14 @@ onMounted(() => {
                     color="primary"
                     variant="tonal"
                   >
-                    <span
-                      v-if="!user?.avatar && initials"
-                      style=" font-size: 1.2rem;font-weight: bold;"
-                    >{{ initials }}</span>
                     <VImg
-                      v-else
-                      :src="user?.avatar"
+                      v-if="avatarUrl"
+                      :src="avatarUrl"
                     />
+                    <span
+                      v-else
+                      style="font-size: 1.2rem; font-weight: bold;"
+                    >{{ initials }}</span>
                   </VAvatar>
                 </VBadge>
               </VListItemAction>

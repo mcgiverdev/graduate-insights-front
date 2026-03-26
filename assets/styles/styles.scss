@@ -1,1 +1,7 @@
 // Write your overrides
+
+// Ocultar el botón pin/unpin del nav lateral
+.nav-header .header-action .nav-pin,
+.nav-header .header-action .nav-unpin {
+  display: none !important;
+}

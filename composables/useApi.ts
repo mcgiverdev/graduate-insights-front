@@ -68,7 +68,8 @@ export const useApi = async <T = any>(url: string, options: any = {}): Promise<A
       throw apiError
     }
 
-    // Si no es un error de la API, propagar el error original
+    // Sin respuesta del servidor (red caída, CORS, timeout, etc.)
+    showSnackbar({ text: 'Ocurrió un problema. Vuelva a intentarlo en unos minutos.', color: 'error' })
     throw error
   }
 }

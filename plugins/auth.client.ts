@@ -1,6 +1,9 @@
+import { useUser } from '@/composables/useUser'
+
 export default defineNuxtPlugin(async () => {
   const router = useRouter()
   const route = useRoute()
+  const { user, fetchUser } = useUser()
 
   // Rutas públicas que no requieren autenticación
   const publicRoutes = ['/login', '/validate-code']
@@ -22,7 +25,6 @@ export default defineNuxtPlugin(async () => {
 
     // Si no hay token y la ruta no es pública, redirigir al login
     if (!token.value) {
-      // Guardar la ruta actual para redirigir después del login
       const returnTo = useCookie('returnTo', {
         path: '/',
         secure: isSecure,
@@ -34,28 +36,38 @@ export default defineNuxtPlugin(async () => {
       return '/login'
     }
 
-    // Si hay token y la ruta no es pública ni es la de validación, verificar si el usuario está validado
-    if (token.value && !publicRoutes.includes(to.path) && to.name !== 'validate-code') {
+    // Si hay token y la ruta no es pública ni es la de validación, verificar el usuario
+    if (!publicRoutes.includes(to.path) && to.name !== 'validate-code') {
       try {
-        const { data } = await useApi('/graduate-insights/v1/api/auth/me')
+        // Solo llamar al API si aún no tenemos el usuario cargado en memoria
+        if (!user.value) {
+          await fetchUser()
+        }
 
-        // Si el usuario no está verificado y no estamos en la página de validación,
-        // redirigir a la página de validación
-        if (!data.data.verified) {
+        if (!user.value) {
+          // fetchUser falló (token inválido o expirado)
+          token.value = null
+          const returnTo = useCookie('returnTo', {
+            path: '/',
+            secure: isSecure,
+            sameSite: isSecure ? 'strict' : 'lax',
+          })
+          returnTo.value = to.fullPath
+          return '/login'
+        }
+
+        // Si el usuario no está verificado, redirigir a validación
+        if (!user.value.verified) {
           return {
             path: '/validate-code',
-            query: {
-              email: data.data.email,
-            },
+            query: { email: user.value.email },
           }
         }
       }
       catch (error: any) {
-        // Si hay error al obtener la información del usuario, redirigir al login
         console.error('Error verificando usuario:', error)
         token.value = null
 
-        // Guardar la ruta actual para redirigir después del login
         const returnTo = useCookie('returnTo', {
           path: '/',
           secure: isSecure,

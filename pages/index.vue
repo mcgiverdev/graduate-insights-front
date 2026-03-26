@@ -120,25 +120,25 @@ function summarize(text: string, limit = 140) {
 // Dashboard title según el rol
 const dashboardTitle = computed(() => {
   if (isDirector.value)
-    return 'Dashboard Administrativo'
+    return 'Panel de Control'
   if (isEmployer.value)
-    return 'Dashboard de Empleador'
+    return 'Mi Panel'
   if (isGraduate.value)
-    return 'Dashboard de Graduado'
+    return 'Mi Panel'
 
-  return 'Dashboard'
+  return 'Inicio'
 })
 
 // Dashboard subtitle según el rol
 const dashboardSubtitle = computed(() => {
   if (isDirector.value)
-    return 'Vista general de todas las encuestas y estadísticas del sistema'
+    return 'Resumen de encuestas y estadísticas del sistema'
   if (isEmployer.value)
     return 'Gestiona tus ofertas laborales y consulta perfiles de graduados'
   if (isGraduate.value)
-    return 'Accede a encuestas y gestiona tu perfil profesional'
+    return 'Accede a tus encuestas pendientes y gestiona tu perfil profesional'
 
-  return 'Bienvenido al sistema Graduate Insights'
+  return 'Bienvenido al sistema Egresys'
 })
 
 async function loadDashboard(useFilters = false) {
@@ -169,69 +169,46 @@ watch(isGraduate, async newIsGraduate => {
     <!-- Header dinámico según el rol -->
     <div class="d-flex justify-space-between align-center mb-6">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-2">
-          <VIcon
-            icon="tabler-dashboard"
-            class="me-3"
-            size="32"
-          />
+        <h1 class="text-h5 font-weight-bold mb-1">
           {{ dashboardTitle }}
         </h1>
-        <p class="text-body-1 text-medium-emphasis mb-0">
+        <p class="text-body-2 text-medium-emphasis mb-0">
           {{ dashboardSubtitle }}
         </p>
       </div>
-      <VBtn
+      <div
         v-if="isDirector"
-        :loading="loadingDashboard"
-        color="primary"
-        prepend-icon="tabler-refresh"
-        @click="loadDashboard"
+        class="d-flex align-center gap-3"
       >
-        Actualizar
-      </VBtn>
+        <AppSelect
+          v-model="filters.graduation_year"
+          :items="graduationYears"
+          label="Año de graduación"
+          density="compact"
+          hide-details
+          clearable
+          style="min-width: 180px"
+          @update:model-value="() => loadDashboard(true)"
+          @click:clear="clearFilters"
+        />
+        <VBtn
+          :loading="loadingDashboard"
+          color="primary"
+          icon
+          variant="tonal"
+          size="small"
+          @click="loadDashboard"
+        >
+          <VIcon
+            icon="tabler-refresh"
+            size="18"
+          />
+        </VBtn>
+      </div>
     </div>
 
     <!-- DASHBOARD PARA DIRECTORES -->
     <div v-if="isDirector">
-      <!-- Filtros simplificados -->
-      <VCard class="mb-6">
-        <VCardTitle class="d-flex align-center">
-          <VIcon
-            icon="tabler-filter"
-            class="me-2"
-          />
-          Filtros
-        </VCardTitle>
-        <VCardText>
-          <VRow>
-            <VCol
-              cols="12"
-              md="4"
-            >
-              <AppSelect
-                v-model="filters.graduation_year"
-                :items="graduationYears"
-                label="Año de Graduación"
-                placeholder="Seleccione un año"
-                @update:model-value="() => loadDashboard(true)"
-              />
-            </VCol>
-            <VCol
-              cols="auto"
-              class="d-flex align-center"
-            >
-              <VBtn
-                variant="outlined"
-                prepend-icon="tabler-x"
-                @click="clearFilters"
-              >
-                Limpiar Filtros
-              </VBtn>
-            </VCol>
-          </VRow>
-        </VCardText>
-      </VCard>
 
       <!-- Estados de Carga y Error -->
       <div
@@ -261,197 +238,247 @@ watch(isGraduate, async newIsGraduate => {
           >
             <VCard
               class="h-100"
-              elevation="2"
+              elevation="0"
+              :style="{ borderTop: `4px solid ${kpi.color}` }"
             >
-              <VCardText class="d-flex align-center pa-6">
-                <div class="flex-grow-1">
-                  <div class="text-body-2 text-medium-emphasis mb-2">
-                    {{ kpi.name }}
-                  </div>
-                  <div
-                    class="text-h4 font-weight-bold mb-1"
-                    :style="{ color: kpi.color }"
+              <VCardText class="pa-5">
+                <div class="d-flex align-start justify-space-between mb-4">
+                  <VAvatar
+                    :color="getTrendColor(kpi.trend)"
+                    rounded="lg"
+                    size="54"
                   >
-                    {{ kpi.value }}
-                  </div>
-                  <div class="text-caption text-medium-emphasis">
-                    {{ kpi.description }}
-                  </div>
+                    <VIcon
+                      :icon="getTrendIcon(kpi.trend)"
+                      size="26"
+                      color="white"
+                    />
+                  </VAvatar>
+                  <VChip
+                    :color="getTrendColor(kpi.trend)"
+                    size="small"
+                    variant="tonal"
+                    class="font-weight-medium"
+                  >
+                    {{ kpi.trend === 'up' ? '↑ Subiendo' : kpi.trend === 'down' ? '↓ Bajando' : '→ Estable' }}
+                  </VChip>
                 </div>
-                <VAvatar
-                  :color="getTrendColor(kpi.trend)"
-                  variant="tonal"
-                  size="48"
+                <div
+                  class="text-h3 font-weight-bold mb-1"
+                  :style="{ color: kpi.color }"
                 >
-                  <VIcon
-                    :icon="getTrendIcon(kpi.trend)"
-                    size="24"
-                  />
-                </VAvatar>
+                  {{ kpi.value }}
+                </div>
+                <div class="text-body-1 font-weight-semibold mb-1">
+                  {{ kpi.name }}
+                </div>
+                <div class="text-caption text-medium-emphasis">
+                  {{ kpi.description }}
+                </div>
               </VCardText>
             </VCard>
           </VCol>
         </VRow>
 
         <!-- Estadísticas Generales -->
-        <VCard class="mb-6">
-          <VCardTitle class="d-flex align-center">
-            <VIcon
-              icon="tabler-chart-pie"
-              class="me-2"
-            />
-            Estadísticas Generales
-          </VCardTitle>
-          <VCardText>
-            <VRow>
-              <VCol
-                cols="6"
-                md="3"
-              >
-                <div class="text-center">
-                  <VAvatar
-                    color="primary"
-                    variant="tonal"
-                    size="56"
-                    class="mb-3"
-                  >
-                    <VIcon
-                      icon="tabler-file-text"
-                      size="28"
-                    />
-                  </VAvatar>
-                  <div class="text-h4 font-weight-bold text-primary mb-1">
+        <VRow class="mb-6">
+          <VCol
+            cols="6"
+            md="3"
+          >
+            <VCard
+              elevation="0"
+              class="h-100 stat-card stat-card--primary"
+            >
+              <VCardText class="d-flex align-center pa-5">
+                <VAvatar
+                  color="primary"
+                  rounded="lg"
+                  size="54"
+                  class="me-4 flex-shrink-0"
+                >
+                  <VIcon
+                    icon="tabler-file-text"
+                    size="26"
+                    color="white"
+                  />
+                </VAvatar>
+                <div>
+                  <div class="text-h4 font-weight-bold text-primary">
                     {{ dashboardData.general_statistics.total_surveys }}
                   </div>
                   <div class="text-body-2 text-medium-emphasis">
                     Total de Encuestas
                   </div>
                 </div>
-              </VCol>
-              <VCol
-                cols="6"
-                md="3"
-              >
-                <div class="text-center">
-                  <VAvatar
-                    color="success"
-                    variant="tonal"
-                    size="56"
-                    class="mb-3"
-                  >
-                    <VIcon
-                      icon="tabler-users"
-                      size="28"
-                    />
-                  </VAvatar>
-                  <div class="text-h4 font-weight-bold text-success mb-1">
+              </VCardText>
+            </VCard>
+          </VCol>
+          <VCol
+            cols="6"
+            md="3"
+          >
+            <VCard
+              elevation="0"
+              class="h-100 stat-card stat-card--success"
+            >
+              <VCardText class="d-flex align-center pa-5">
+                <VAvatar
+                  color="success"
+                  rounded="lg"
+                  size="54"
+                  class="me-4 flex-shrink-0"
+                >
+                  <VIcon
+                    icon="tabler-user-check"
+                    size="26"
+                    color="white"
+                  />
+                </VAvatar>
+                <div>
+                  <div class="text-h4 font-weight-bold text-success">
                     {{ dashboardData.general_statistics.total_graduates }}
                   </div>
                   <div class="text-body-2 text-medium-emphasis">
                     Total de Graduados
                   </div>
                 </div>
-              </VCol>
-              <VCol
-                cols="6"
-                md="3"
-              >
-                <div class="text-center">
-                  <VAvatar
-                    color="info"
-                    variant="tonal"
-                    size="56"
-                    class="mb-3"
-                  >
-                    <VIcon
-                      icon="tabler-message-circle"
-                      size="28"
-                    />
-                  </VAvatar>
-                  <div class="text-h4 font-weight-bold text-info mb-1">
+              </VCardText>
+            </VCard>
+          </VCol>
+          <VCol
+            cols="6"
+            md="3"
+          >
+            <VCard
+              elevation="0"
+              class="h-100 stat-card stat-card--info"
+            >
+              <VCardText class="d-flex align-center pa-5">
+                <VAvatar
+                  color="info"
+                  rounded="lg"
+                  size="54"
+                  class="me-4 flex-shrink-0"
+                >
+                  <VIcon
+                    icon="tabler-message-dots"
+                    size="26"
+                    color="white"
+                  />
+                </VAvatar>
+                <div>
+                  <div class="text-h4 font-weight-bold text-info">
                     {{ dashboardData.general_statistics.total_responses }}
                   </div>
                   <div class="text-body-2 text-medium-emphasis">
                     Total de Respuestas
                   </div>
                 </div>
-              </VCol>
-              <VCol
-                cols="6"
-                md="3"
-              >
-                <div class="text-center">
-                  <VAvatar
-                    color="warning"
-                    variant="tonal"
-                    size="56"
-                    class="mb-3"
-                  >
-                    <VIcon
-                      icon="tabler-percentage"
-                      size="28"
-                    />
-                  </VAvatar>
-                  <div class="text-h4 font-weight-bold text-warning mb-1">
+              </VCardText>
+            </VCard>
+          </VCol>
+          <VCol
+            cols="6"
+            md="3"
+          >
+            <VCard
+              elevation="0"
+              class="h-100 stat-card stat-card--warning"
+            >
+              <VCardText class="d-flex align-center pa-5">
+                <VAvatar
+                  color="warning"
+                  rounded="lg"
+                  size="54"
+                  class="me-4 flex-shrink-0"
+                >
+                  <VIcon
+                    icon="tabler-chart-bar"
+                    size="26"
+                    color="white"
+                  />
+                </VAvatar>
+                <div>
+                  <div class="text-h4 font-weight-bold text-warning">
                     {{ dashboardData.general_statistics.overall_response_rate.toFixed(1) }}%
                   </div>
                   <div class="text-body-2 text-medium-emphasis">
                     Tasa de Respuesta
                   </div>
                 </div>
-              </VCol>
-            </VRow>
+              </VCardText>
+            </VCard>
+          </VCol>
+        </VRow>
 
-            <!-- Estado de Encuestas -->
-            <VDivider class="my-6" />
-            <VRow>
-              <VCol
-                cols="6"
-                md="6"
-              >
-                <div class="text-center">
-                  <VChip
-                    color="success"
-                    variant="tonal"
-                    size="large"
-                    class="mb-2"
-                  >
-                    <VIcon
-                      icon="tabler-play"
-                      start
-                    />
+        <!-- Estado de Encuestas -->
+        <VRow class="mb-6">
+          <VCol
+            cols="12"
+            sm="6"
+          >
+            <VCard
+              elevation="0"
+              class="stat-card stat-card--success-light"
+            >
+              <VCardText class="d-flex align-center pa-4">
+                <VAvatar
+                  color="success"
+                  rounded="lg"
+                  size="46"
+                  class="me-4 flex-shrink-0"
+                >
+                  <VIcon
+                    icon="tabler-player-play"
+                    size="22"
+                    color="white"
+                  />
+                </VAvatar>
+                <div>
+                  <div class="text-h5 font-weight-bold text-success">
                     {{ dashboardData.general_statistics.active_surveys }}
-                  </VChip>
+                  </div>
                   <div class="text-body-2 text-medium-emphasis">
                     Encuestas Activas
                   </div>
                 </div>
-              </VCol>
-              <VCol
-                cols="6"
-                md="6"
-              >
-                <div class="text-center">
-                  <VChip
-                    color="info"
-                    variant="tonal"
-                    size="large"
-                    class="mb-2"
-                  >
-                    <VIcon
-                      icon="tabler-check"
-                      start
-                    />
+              </VCardText>
+            </VCard>
+          </VCol>
+          <VCol
+            cols="12"
+            sm="6"
+          >
+            <VCard
+              elevation="0"
+              class="stat-card stat-card--info-light"
+            >
+              <VCardText class="d-flex align-center pa-4">
+                <VAvatar
+                  color="info"
+                  rounded="lg"
+                  size="46"
+                  class="me-4 flex-shrink-0"
+                >
+                  <VIcon
+                    icon="tabler-circle-check"
+                    size="22"
+                    color="white"
+                  />
+                </VAvatar>
+                <div>
+                  <div class="text-h5 font-weight-bold text-info">
                     {{ dashboardData.general_statistics.completed_surveys }}
-                  </VChip>
+                  </div>
                   <div class="text-body-2 text-medium-emphasis">
                     Encuestas Completadas
                   </div>
                 </div>
-              </VCol>
-            </VRow>
-          </VCardText>
-        </VCard>
+              </VCardText>
+            </VCard>
+          </VCol>
+        </VRow>
 
         <!-- Gráficos del Dashboard -->
         <VRow class="mb-6">
@@ -1276,6 +1303,47 @@ watch(isGraduate, async newIsGraduate => {
 <style scoped>
 .chart-container {
   position: relative;
+}
+
+/* Stat cards con color tonal */
+.stat-card {
+  border-radius: 12px !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.stat-card--primary {
+  border-inline-start: 4px solid rgb(var(--v-theme-primary));
+  background: rgba(var(--v-theme-primary), 0.06) !important;
+}
+
+.stat-card--success {
+  border-inline-start: 4px solid rgb(var(--v-theme-success));
+  background: rgba(var(--v-theme-success), 0.06) !important;
+}
+
+.stat-card--info {
+  border-inline-start: 4px solid rgb(var(--v-theme-info));
+  background: rgba(var(--v-theme-info), 0.06) !important;
+}
+
+.stat-card--warning {
+  border-inline-start: 4px solid rgb(var(--v-theme-warning));
+  background: rgba(var(--v-theme-warning), 0.06) !important;
+}
+
+.stat-card--success-light {
+  border-inline-start: 4px solid rgb(var(--v-theme-success));
+  background: rgba(var(--v-theme-success), 0.04) !important;
+}
+
+.stat-card--info-light {
+  border-inline-start: 4px solid rgb(var(--v-theme-info));
+  background: rgba(var(--v-theme-info), 0.04) !important;
 }
 
 .text-truncate-2 {

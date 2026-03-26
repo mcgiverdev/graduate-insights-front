@@ -10,7 +10,7 @@ const { snackbar } = useSnackbar()
       v-model="snackbar.show"
       :color="snackbar.color"
       :timeout="snackbar.timeout"
-      location="top center"
+      location="top right"
       elevation="1"
     >
       {{ snackbar.text }}

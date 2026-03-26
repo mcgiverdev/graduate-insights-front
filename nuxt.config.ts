@@ -31,8 +31,8 @@ export default defineNuxtConfig({
 
       link: [{
         rel: 'icon',
-        type: 'image/x-icon',
-        href: `${process.env.NUXT_APP_BASE_URL}/favicon.ico`,
+        type: 'image/png',
+        href: `${process.env.NUXT_APP_BASE_URL || ''}/logo.png`,
       }],
     },
 
@@ -42,7 +42,7 @@ export default defineNuxtConfig({
   },
 
   devtools: {
-    enabled: true,
+    enabled: false,
   },
 
   css: [

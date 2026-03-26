@@ -1,11 +1,27 @@
 import { computed, ref } from 'vue'
 import { useApi } from '@/composables/useApi'
 
+const MALE_AVATARS = [1, 3, 5, 7, 9, 11, 13, 15]
+const FEMALE_AVATARS = [2, 4, 6, 8, 10, 12, 14]
+
+function getDefaultAvatar(id: number, genero?: string): string {
+  if (genero === 'M') {
+    const idx = id % MALE_AVATARS.length
+    return `/avatars/avatar-${MALE_AVATARS[idx]}.png`
+  }
+  if (genero === 'F') {
+    const idx = id % FEMALE_AVATARS.length
+    return `/avatars/avatar-${FEMALE_AVATARS[idx]}.png`
+  }
+  return `/avatars/avatar-${(id % 15) + 1}.png`
+}
+
 export interface UserData {
   id: number
   name: string
   email: string
   role: string
+  genero?: string
   avatar?: string
   verified: boolean
 }
@@ -42,6 +58,14 @@ export const useUser = () => {
       .toUpperCase()
   })
 
+  const avatarUrl = computed(() => {
+    if (user.value?.avatar)
+      return user.value.avatar
+    if (user.value?.id)
+      return getDefaultAvatar(user.value.id, user.value.genero)
+    return null
+  })
+
   const role = computed(() => user.value?.role || null)
 
   const isRole = (roleToCheck: string) => {
@@ -61,6 +85,7 @@ export const useUser = () => {
     loading,
     fetchUser,
     initials,
+    avatarUrl,
     role,
     isRole,
     hasAnyRole,
