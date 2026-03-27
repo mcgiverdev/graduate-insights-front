@@ -106,11 +106,11 @@ export const useRoles = () => {
       return false
 
     const routePermissions: Record<string, keyof typeof ROLE_PERMISSIONS[Role]> = {
-      'graduates': 'canViewGraduates',
-      'employers': 'canViewEmployers',
-      'directors': 'canViewDirectors',
-      'education-centers': 'canViewEducationCenters',
-      'surveys': 'canViewSurveys',
+      'egresados': 'canViewGraduates',
+      'empleadores': 'canViewEmployers',
+      'directores': 'canViewDirectors',
+      'centros-educativos': 'canViewEducationCenters',
+      'encuestas': 'canViewSurveys',
     }
 
     const requiredPermission = routePermissions[routeName]

@@ -148,7 +148,7 @@ class AuthModuleService {
           success: true,
           message: loginData.message || 'Completa la verificación de tu cuenta.',
           redirectTo: {
-            path: '/validate-code',
+            path: '/validar-codigo',
             query: { email },
           },
         }

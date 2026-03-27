@@ -1,6 +1,7 @@
 import { deepMerge } from '@antfu/utils'
 import { createVuetify } from 'vuetify'
 import { VBtn } from 'vuetify/components/VBtn'
+import { es } from 'vuetify/locale'
 import defaults from './defaults'
 import { icons } from './icons'
 import { staticPrimaryColor, staticPrimaryDarkenColor, themes } from './theme'
@@ -40,6 +41,10 @@ export default defineNuxtPlugin(nuxtApp => {
     defaults,
     icons,
     theme: optionTheme,
+    locale: {
+      locale: 'es',
+      messages: { es },
+    },
     date: {
       adapter: 'vuetify',
     },

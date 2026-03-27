@@ -41,6 +41,7 @@ export const toGraduate = (graduate: GraduateApiResponse): Graduate => ({
   formacionesComplementarias: graduate.formaciones_complementarias ?? [],
   trayectoriasLaborales: graduate.trayectorias_laborales ?? [],
   cvPath: graduate.cv_path ?? null,
+  fotoPath: graduate.foto_path ?? null,
   contrasena: graduate.contrasena ?? undefined,
   validated: Boolean(graduate.validated ?? true),
 })

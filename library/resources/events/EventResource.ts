@@ -16,7 +16,7 @@ export interface Event {
 export class EventResource extends Resource {
   constructor() {
     super({
-      name: 'events',
+      name: 'eventos',
       resourcePath: '/graduate-insights/v1/api/event',
       idField: 'event_id',
       perPage: 10,

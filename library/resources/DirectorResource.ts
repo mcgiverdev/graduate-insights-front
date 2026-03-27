@@ -19,7 +19,7 @@ export interface Director {
 export class DirectorResource extends Resource {
   constructor() {
     super({
-      name: 'directors',
+      name: 'directores',
       resourcePath: '/graduate-insights/v1/api/director',
       idField: 'director_id',
       perPage: 10,

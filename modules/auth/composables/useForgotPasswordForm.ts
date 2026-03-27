@@ -35,7 +35,7 @@ export const useForgotPasswordForm = () => {
       showSnackbar({ text: success.value, color: 'success' })
 
       await navigateTo({
-        path: '/reset-password',
+        path: '/restablecer-contrasena',
         query: { email: normalizedEmail },
       })
     }

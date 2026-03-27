@@ -781,7 +781,7 @@ watch(isGraduate, async newIsGraduate => {
               <VBtn
                 color="primary"
                 variant="outlined"
-                to="/graduates"
+                to="/egresados"
               >
                 Ver Graduados
               </VBtn>
@@ -816,7 +816,7 @@ watch(isGraduate, async newIsGraduate => {
               <VBtn
                 color="success"
                 variant="outlined"
-                to="/surveys"
+                to="/encuestas"
               >
                 Ver Encuestas
               </VBtn>
@@ -851,7 +851,7 @@ watch(isGraduate, async newIsGraduate => {
               <VBtn
                 color="info"
                 variant="outlined"
-                to="/employers"
+                to="/empleadores"
               >
                 Ver Empresas
               </VBtn>
@@ -913,7 +913,7 @@ watch(isGraduate, async newIsGraduate => {
           <VBtn
             color="warning"
             variant="elevated"
-            to="/my-profile"
+            to="/mi-perfil"
           >
             Completar datos
           </VBtn>
@@ -943,7 +943,7 @@ watch(isGraduate, async newIsGraduate => {
                       color="white"
                       class="text-primary"
                       prepend-icon="tabler-edit"
-                      to="/my-profile"
+                      to="/mi-perfil"
                     >
                       Completar mi perfil
                     </VBtn>
@@ -951,7 +951,7 @@ watch(isGraduate, async newIsGraduate => {
                       color="primary"
                       variant="tonal"
                       prepend-icon="tabler-edit"
-                      to="/my-surveys"
+                      to="/mis-encuestas"
                     >
                       Gestionar encuestas
                     </VBtn>
@@ -1140,7 +1140,7 @@ watch(isGraduate, async newIsGraduate => {
                           color="primary"
                           variant="text"
                           size="small"
-                          to="/my-surveys"
+                          to="/mis-encuestas"
                         >
                           {{ survey.completed ? 'Ver resultados' : 'Responder' }}
                         </VBtn>
@@ -1169,7 +1169,7 @@ watch(isGraduate, async newIsGraduate => {
                 <VBtn
                   variant="text"
                   color="primary"
-                  to="/my-surveys"
+                  to="/mis-encuestas"
                   append-icon="tabler-arrow-right"
                 >
                   Ver todas las encuestas
@@ -1239,7 +1239,7 @@ watch(isGraduate, async newIsGraduate => {
                 <VBtn
                   variant="text"
                   color="primary"
-                  to="/my-jobs"
+                  to="/mis-empleos"
                   append-icon="tabler-arrow-right"
                 >
                   Administrar mis trabajos

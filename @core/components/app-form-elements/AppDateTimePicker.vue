@@ -14,6 +14,9 @@ import { filterInputAttrs } from 'vuetify/lib/util/helpers'
 
 import { useConfigStore } from '@core/stores/config'
 
+// @ts-expect-error no declaration file for locale
+import { Spanish } from 'flatpickr/dist/l10n/es'
+
 // inherit Attribute make false
 defineOptions({
   inheritAttrs: false,
@@ -73,12 +76,119 @@ if (compAttrs.config && compAttrs.config.inline) {
   Object.assign(compAttrs, { altInputClass: 'inlinePicker' })
 }
 
+const setMonthNavVisible = (calendar: HTMLElement, visible: boolean) => {
+  const prevBtn = calendar.querySelector<HTMLElement>('.flatpickr-prev-month')
+  const nextBtn = calendar.querySelector<HTMLElement>('.flatpickr-next-month')
+  const display = visible ? '' : 'none'
+  if (prevBtn) prevBtn.style.display = display
+  if (nextBtn) nextBtn.style.display = display
+}
+
+const showYearGrid = (calendar: HTMLElement, currentYear: number) => {
+  const grid = calendar.querySelector('.fp-year-grid') as HTMLElement | null
+  if (!grid) return
+
+  grid.querySelectorAll<HTMLElement>('.fp-year-item').forEach(item => {
+    const y = parseInt(item.getAttribute('data-year') ?? '')
+    item.classList.toggle('fp-year-item--selected', y === currentYear)
+  })
+
+  grid.style.display = 'grid'
+  setMonthNavVisible(calendar, false)
+
+  const selected = grid.querySelector<HTMLElement>('.fp-year-item--selected')
+  if (selected) selected.scrollIntoView({ block: 'center', behavior: 'instant' })
+}
+
+const hideYearGrid = (calendar: HTMLElement) => {
+  const grid = calendar.querySelector<HTMLElement>('.fp-year-grid')
+  if (grid) grid.style.display = 'none'
+  setMonthNavVisible(calendar, true)
+}
+
+const setupYearGrid = (fp: any) => {
+  if (!fp?.calendarContainer || fp.calendarContainer.querySelector('.fp-year-grid')) return
+
+  const calendar = fp.calendarContainer as HTMLElement
+  const currentYear = new Date().getFullYear()
+
+  // Build year grid panel
+  const grid = document.createElement('div')
+  grid.className = 'fp-year-grid'
+  grid.style.display = 'none'
+
+  for (let year = currentYear + 2; year >= 1920; year--) {
+    const item = document.createElement('span')
+    item.className = 'fp-year-item'
+    item.setAttribute('data-year', String(year))
+    item.textContent = String(year)
+    grid.appendChild(item)
+  }
+
+  grid.addEventListener('click', (e: Event) => {
+    const target = e.target as HTMLElement
+    if (!target.classList.contains('fp-year-item')) return
+    const year = parseInt(target.getAttribute('data-year') ?? '')
+    if (!isNaN(year)) {
+      fp.changeYear(year)
+      hideYearGrid(calendar)
+    }
+  })
+
+  calendar.appendChild(grid)
+
+  // Make the year element a clickable toggle
+  const yearEl = fp.currentYearElement as HTMLElement | null
+  if (yearEl) {
+    const wrapper = yearEl.parentNode as HTMLElement
+    wrapper.classList.add('fp-year-wrapper')
+    wrapper.addEventListener('click', (e: Event) => {
+      e.stopPropagation()
+      const visible = (calendar.querySelector<HTMLElement>('.fp-year-grid')?.style.display ?? 'none') !== 'none'
+      if (visible)
+        hideYearGrid(calendar)
+      else
+        showYearGrid(calendar, fp.currentYear)
+    })
+  }
+}
+
+const syncYearGrid = (fp: any) => {
+  const grid = fp?.calendarContainer?.querySelector<HTMLElement>('.fp-year-grid')
+  if (!grid || grid.style.display === 'none') return
+  grid.querySelectorAll<HTMLElement>('.fp-year-item').forEach(item => {
+    item.classList.toggle('fp-year-item--selected', parseInt(item.getAttribute('data-year') ?? '') === fp.currentYear)
+  })
+}
+
+const userOnReady = compAttrs.config?.onReady
+const userOnYearChange = compAttrs.config?.onYearChange
+const userOnMonthChange = compAttrs.config?.onMonthChange
+const userOnClose = compAttrs.config?.onClose
+
 compAttrs.config = {
   ...compAttrs.config,
+  locale: Spanish,
   prevArrow: '<i class="tabler-chevron-left v-icon" style="font-size: 20px; height: 20px; width: 20px;"></i>',
   nextArrow: '<i class="tabler-chevron-right v-icon" style="font-size: 20px; height: 20px; width: 20px;"></i>',
   allowInput: true,
   disableMobile: true,
+  onReady(selectedDates: Date[], dateStr: string, fp: any) {
+    setupYearGrid(fp)
+    if (typeof userOnReady === 'function') userOnReady(selectedDates, dateStr, fp)
+  },
+  onYearChange(selectedDates: Date[], dateStr: string, fp: any) {
+    syncYearGrid(fp)
+    if (typeof userOnYearChange === 'function') userOnYearChange(selectedDates, dateStr, fp)
+  },
+  onMonthChange(selectedDates: Date[], dateStr: string, fp: any) {
+    syncYearGrid(fp)
+    if (typeof userOnMonthChange === 'function') userOnMonthChange(selectedDates, dateStr, fp)
+  },
+  onClose(selectedDates: Date[], dateStr: string, fp: any) {
+    hideYearGrid(fp.calendarContainer)
+    if (typeof userOnClose === 'function') userOnClose(selectedDates, dateStr, fp)
+  },
 }
 
 // v-field clear prop
@@ -526,6 +636,60 @@ input[altinputclass="inlinePicker"] {
 
     .numInput.cur-year {
       font-weight: 400;
+    }
+  }
+
+  .fp-year-wrapper {
+    cursor: pointer;
+
+    // Hide the up/down spin arrows on the year input
+    .arrowUp,
+    .arrowDown {
+      display: none !important;
+    }
+
+    &:hover {
+      background: rgba(var(--v-theme-on-surface), 0.06);
+      border-radius: 4px;
+    }
+  }
+}
+
+// Year grid panel — overlays the calendar days
+.fp-year-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: none; // toggled via JS
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 0.75rem;
+  overflow-y: auto;
+  background-color: rgb(var(--v-theme-surface));
+  border-radius: inherit;
+
+  .fp-year-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 4px;
+    border-radius: 4px;
+    color: $body-color;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 400;
+    transition: background 0.15s ease-out, color 0.15s ease-out;
+
+    &:hover {
+      background: rgba(var(--v-theme-on-surface), 0.06);
+    }
+
+    &--selected {
+      background: rgb(var(--v-theme-primary));
+      color: rgb(var(--v-theme-on-primary));
+      font-weight: 600;
+
+      @include templateMixins.custom-elevation(var(--v-theme-primary), "sm");
     }
   }
 }

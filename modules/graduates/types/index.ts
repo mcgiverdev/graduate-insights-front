@@ -85,6 +85,7 @@ export interface Graduate {
   formacionesComplementarias?: GraduateComplementaryTrainingPayload[]
   trayectoriasLaborales?: GraduateWorkTrajectoryPayload[]
   cvPath?: string | null
+  fotoPath?: string | null
   contrasena?: string
   validated: boolean
 }
@@ -118,6 +119,7 @@ export interface GraduateApiResponse {
   formaciones_complementarias?: GraduateComplementaryTrainingPayload[] | null
   trayectorias_laborales?: GraduateWorkTrajectoryPayload[] | null
   cv_path?: string | null
+  foto_path?: string | null
   contrasena?: string | null
   validated?: boolean | null
 }
@@ -173,6 +175,7 @@ export interface GraduatePayload {
   trayectorias_laborales?: GraduateWorkTrajectoryPayload[]
   contrasena: string
   cv_path?: string
+  foto_path?: string
 }
 
 export interface GraduateWizardValues {
@@ -185,6 +188,7 @@ export interface GraduateWizardValues {
   estadoCivil: CivilStatus | ''
   nacionalidad: string
   fotografia?: string
+  fotoPath?: string
 
   correoPersonal: string
   correoInstitucional?: string
@@ -194,10 +198,11 @@ export interface GraduateWizardValues {
   departamento: string
   paisResidencia: string
   linkedin?: string
-  portafolio?: string
 
   facultadId?: number
   escuelaProfesionalId?: number
+  anioIngreso?: string
+  anioEgreso?: string
   fechaIngreso?: string
   fechaEgreso?: string
   grados: GraduateWizardDegreeItem[]

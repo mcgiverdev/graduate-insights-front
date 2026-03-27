@@ -21,11 +21,11 @@ export default defineNuxtRouteMiddleware(async to => {
 
     returnTo.value = to.fullPath
 
-    return navigateTo('/login')
+    return navigateTo('/iniciar-sesion')
   }
 
   // Si hay token y la ruta no es pública ni es la de validación, verificar si el usuario está validado
-  if (token.value && !to.meta.public && to.name !== 'validate-code') {
+  if (token.value && !to.meta.public && to.name !== 'validar-codigo') {
     try {
       const { data } = await useApi('/graduate-insights/v1/api/auth/me')
 
@@ -33,7 +33,7 @@ export default defineNuxtRouteMiddleware(async to => {
       // redirigir a la página de validación
       if (!data.data.verified) {
         return navigateTo({
-          path: '/validate-code',
+          path: '/validar-codigo',
           query: {
             email: data.data.email,
           },
@@ -44,7 +44,7 @@ export default defineNuxtRouteMiddleware(async to => {
       // Si hay error al obtener la información del usuario, redirigir al login
       token.value = null
 
-      return navigateTo('/login')
+      return navigateTo('/iniciar-sesion')
     }
   }
 })

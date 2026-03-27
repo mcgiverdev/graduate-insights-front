@@ -73,7 +73,7 @@ export const useAuthService = () => {
               success: true,
               message: loginData.message || 'Completa la verificación de tu cuenta.',
               redirectTo: {
-                path: '/validate-code',
+                path: '/validar-codigo',
                 query: { email },
               },
             }
@@ -138,7 +138,7 @@ export const useAuthService = () => {
         returnTo.value = currentPath
 
         // Redirigir al login
-        navigateTo('/login')
+        navigateTo('/iniciar-sesion')
 
         return true
       }
@@ -175,7 +175,7 @@ export const useAuthService = () => {
     clearUser()
 
     // Redirigir al login
-    navigateTo('/login', { replace: true, external: false })
+    navigateTo('/iniciar-sesion', { replace: true, external: false })
   }
 
   return {

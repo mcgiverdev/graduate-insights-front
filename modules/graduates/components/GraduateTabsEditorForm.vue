@@ -80,7 +80,7 @@ const universityOptions = ref<CatalogOptionItem[]>([])
 const tabItems = [
   { value: 'datos-basicos', title: 'Datos basicos' },
   { value: 'datos-contacto', title: 'Datos de contacto' },
-  { value: 'resumen-academico', title: 'Resumen academico' },
+  { value: 'resumen-academico', title: 'Datos academico' },
   { value: 'grados', title: 'Grados' },
   { value: 'idiomas', title: 'Idiomas' },
   { value: 'formacion-complementaria', title: 'Formacion complementaria' },
@@ -334,7 +334,7 @@ const wizardPayload = computed<GraduatePayload>(() => {
     anio_ingreso: getYearFromDate(values.value.fechaIngreso),
     anio_egreso: getYearFromDate(values.value.fechaEgreso),
     contrasena: values.value.dni.trim(),
-    cv_path: values.value.fotografia || undefined,
+    foto_path: values.value.fotografia || undefined,
   }
 
   if (degreesTouched.value)
@@ -386,7 +386,7 @@ const hydrateFromGraduate = (graduate: Graduate) => {
   values.value.escuelaProfesionalId = graduate.escuelaProfesionalId || undefined
   values.value.fechaIngreso = normalizeDateValue(graduate.anioIngreso)
   values.value.fechaEgreso = normalizeDateValue(graduate.anioEgreso)
-  values.value.fotografia = graduate.cvPath || ''
+  values.value.fotografia = graduate.fotoPath || ''
 
   values.value.grados = (graduate.grados || [])
     .map(item => ({
@@ -749,7 +749,7 @@ const submit = async () => {
     if (!result.success)
       return
 
-    await router.push(props.backRoute ?? `/graduates/${props.graduateId}`)
+    await router.push(props.backRoute ?? `/egresados/${props.graduateId}`)
   }
   finally {
     saving.value = false
@@ -764,7 +764,7 @@ const loadGraduateForEdit = async () => {
     const graduate = await fetchFn(props.graduateId)
 
     if (!graduate) {
-      await router.push(props.backRoute ?? '/graduates')
+      await router.push(props.backRoute ?? '/egresados')
 
       return
     }
@@ -852,7 +852,7 @@ watch(activeTab, () => {
           <VBtn
             variant="tonal"
             color="secondary"
-            :to="backRoute ?? `/graduates/${graduateId}`"
+            :to="backRoute ?? `/egresados/${graduateId}`"
           >
             {{ backRoute ? 'Volver al inicio' : 'Volver al detalle' }}
           </VBtn>
@@ -968,14 +968,6 @@ watch(activeTab, () => {
                 />
               </VCol>
 
-              <VCol cols="12">
-                <AppFileField
-                  v-model="values.fotografia"
-                  label="Fotografia (opcional)"
-                  accept=".png,.jpg,.jpeg,.webp"
-                  :error-messages="getFieldError('fotografia')"
-                />
-              </VCol>
             </VRow>
           </VWindowItem>
 

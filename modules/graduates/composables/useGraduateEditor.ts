@@ -64,7 +64,7 @@ export const useGraduateEditor = ({
       await fetchGraduates()
 
       if (wasCreating && createdGraduateId)
-        await router.push(`/graduates/${createdGraduateId}`)
+        await router.push(`/egresados/${createdGraduateId}`)
     }
   }
 

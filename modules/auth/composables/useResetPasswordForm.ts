@@ -179,7 +179,7 @@ export const useResetPasswordForm = () => {
       showSnackbar({ text: success.value, color: 'success' })
 
       setTimeout(() => {
-        navigateTo('/login', { replace: true })
+        navigateTo('/iniciar-sesion', { replace: true })
       }, 1000)
     }
     finally {

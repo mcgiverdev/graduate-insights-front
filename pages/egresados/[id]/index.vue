@@ -5,7 +5,8 @@ import {
   graduateService,
   useGraduateDetail,
 } from '@/src/features/graduates'
-import defaultAvatar from '@images/avatars/avatar-1.png'
+import avatarMale from '@images/avatars/avatar-1.png'
+import avatarFemale from '@images/avatars/avatar-4.png'
 
 definePageMeta({
   middleware: ['auth', 'role'],
@@ -73,7 +74,8 @@ const pageTitle = computed(() => {
   return `${graduate.value.nombres} ${graduate.value.apellidos}`
 })
 
-const avatarSrc = computed(() => graduate.value?.cvPath || defaultAvatar)
+const defaultAvatar = computed(() => graduate.value?.genero === 'F' ? avatarFemale : avatarMale)
+const avatarSrc = computed(() => graduate.value?.fotoPath || defaultAvatar.value)
 
 const summaryItems = computed(() => {
   if (!graduate.value)
@@ -187,7 +189,7 @@ const openEditWizard = async () => {
     return
 
   await router.push({
-    name: 'graduates-id-edit',
+    name: 'egresados-id-editar',
     params: { id: graduate.value.graduateId },
   })
 }
@@ -250,7 +252,7 @@ onMounted(async () => {
               <VBtn
                 variant="tonal"
                 color="secondary"
-                :to="{ path: '/graduates' }"
+                :to="{ path: '/egresados' }"
               >
                 Volver
               </VBtn>
@@ -279,7 +281,7 @@ onMounted(async () => {
               color="primary"
             >
               <VTab value="resumen-academico">
-                Resumen academico
+                Datos academico
               </VTab>
               <VTab value="grados">
                 Grados

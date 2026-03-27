@@ -192,7 +192,28 @@ export const graduateWizardStepTwoSchema = yup.object({
     .max(80, 'El pais de residencia no debe superar 80 caracteres')
     .required('El pais de residencia es obligatorio'),
   linkedin: optionalUrl(255, 'Ingrese una URL valida'),
-  portafolio: optionalUrl(255, 'Ingrese una URL valida'),
+  anioIngreso: yup
+    .string()
+    .transform(v => (typeof v === 'string' ? v.trim() : v))
+    .nullable()
+    .matches(/^\d{4}$|^$/, 'Ingrese un año valido (4 digitos)')
+    .optional(),
+  anioEgreso: yup
+    .string()
+    .transform(v => (typeof v === 'string' ? v.trim() : v))
+    .nullable()
+    .matches(/^\d{4}$|^$/, 'Ingrese un año valido (4 digitos)')
+    .optional()
+    .test(
+      'anio-egreso-after-ingreso',
+      'El año de egreso no puede ser anterior al año de ingreso',
+      function (value) {
+        const { anioIngreso } = this.parent
+        if (!value || !anioIngreso) return true
+
+        return parseInt(value) >= parseInt(anioIngreso)
+      },
+    ),
 })
 
 export const graduateWizardStepThreeSchema = yup.object({

@@ -37,18 +37,18 @@ const requestDelete = (graduateId: number) => {
 
 const openGraduateDetail = async (graduateId: number) => {
   await router.push({
-    name: 'graduates-id',
+    name: 'egresados-id',
     params: { id: graduateId },
   })
 }
 
 const openGraduateCreate = async () => {
-  await router.push({ name: 'graduates-new' })
+  await router.push({ name: 'egresados-nuevo' })
 }
 
 const openGraduateEdit = async (graduateId: number) => {
   await router.push({
-    name: 'graduates-id-edit',
+    name: 'egresados-id-editar',
     params: { id: graduateId },
   })
 }

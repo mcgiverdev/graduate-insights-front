@@ -23,7 +23,7 @@ export interface Graduate {
 export class GraduateResource extends Resource {
   constructor() {
     super({
-      name: 'graduates',
+      name: 'egresados',
       resourcePath: '/graduate-insights/v1/api/graduate',
       idField: 'graduate_id',
       perPage: 10,

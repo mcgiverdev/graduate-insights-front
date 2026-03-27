@@ -15,7 +15,7 @@ export default defineNuxtRouteMiddleware(async to => {
 
   // Si el usuario no tiene rol asignado, redirigir al login
   if (!role.value)
-    return navigateTo('/login')
+    return navigateTo('/iniciar-sesion')
 
   // Obtener el nombre de la ruta para verificar permisos
   const routeName = to.name?.toString()

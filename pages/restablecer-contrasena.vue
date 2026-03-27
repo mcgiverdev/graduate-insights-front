@@ -108,7 +108,7 @@ const {
             class="mb-4"
           >
             No encontramos el correo para este proceso. Vuelve a la
-            <NuxtLink class="text-primary" to="/forgot-password">
+            <NuxtLink class="text-primary" to="/recuperar-contrasena">
               pantalla de recuperación
             </NuxtLink>
             para solicitar un nuevo código.
@@ -232,7 +232,7 @@ const {
                 <span>¿Listo para ingresar?</span>
                 <NuxtLink
                   class="text-primary ms-1"
-                  to="/login"
+                  to="/iniciar-sesion"
                 >
                   Volver a iniciar sesión
                 </NuxtLink>

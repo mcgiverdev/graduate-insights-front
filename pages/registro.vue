@@ -41,7 +41,7 @@ const onSubmit = async () => {
 
   if (result.success) {
     await navigateTo({
-      path: '/validate-code',
+      path: '/validar-codigo',
       query: { email: form.correo.trim().toLowerCase() },
     })
   }
@@ -223,7 +223,7 @@ const onSubmit = async () => {
                 <span>¿Ya tienes una cuenta?</span>
                 <NuxtLink
                   class="text-primary ms-1"
-                  to="/login"
+                  to="/iniciar-sesion"
                 >
                   Inicia sesión
                 </NuxtLink>

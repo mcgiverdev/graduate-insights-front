@@ -21,7 +21,7 @@ export interface Employer {
 export class EmployerResource extends Resource {
   constructor() {
     super({
-      name: 'employers',
+      name: 'empleadores',
       resourcePath: '/graduate-insights/v1/api/employer',
       idField: 'employer_id',
       perPage: 10,

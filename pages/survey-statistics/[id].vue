@@ -208,7 +208,7 @@ useHead({
       <VBtn
         variant="text"
         prepend-icon="tabler-arrow-left"
-        @click="$router.push('/surveys')"
+        @click="$router.push('/encuestas')"
       >
         Volver a Encuestas
       </VBtn>

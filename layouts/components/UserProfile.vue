@@ -8,7 +8,7 @@ const { user, fetchUser, initials, avatarUrl } = useUser()
 const { logout } = useAuthService()
 
 const goToProfile = () => {
-  navigateTo('/profile')
+  navigateTo('/perfil')
 }
 
 onMounted(() => {

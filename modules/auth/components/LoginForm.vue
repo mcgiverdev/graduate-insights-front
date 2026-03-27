@@ -59,7 +59,7 @@ const submit = async () => {
           />
           <NuxtLink
             class="text-primary"
-            to="/forgot-password"
+            to="/recuperar-contrasena"
           >
             ¿Olvidaste tu contraseña?
           </NuxtLink>
@@ -83,7 +83,7 @@ const submit = async () => {
         </span>
         <NuxtLink
           class="text-primary ms-1 d-inline-block text-body-1"
-          to="/register"
+          to="/registro"
         >
           Crear una cuenta
         </NuxtLink>

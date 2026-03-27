@@ -13,7 +13,7 @@ export interface MyJobOffers {
 export class MyJobOffersResource extends Resource {
   constructor() {
     super({
-      name: 'my-job-offers',
+      name: 'mis-ofertas-empleo',
       resourcePath: '/graduate-insights/v1/api/job-offers',
       idField: 'job_offers_id',
       perPage: 10,

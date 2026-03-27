@@ -12,7 +12,7 @@ export interface EducationCenter {
 export class EducationCenterResource extends Resource {
   constructor() {
     super({
-      name: 'education-centers',
+      name: 'centros-educativos',
       resourcePath: '/graduate-insights/v1/api/education_center',
       idField: 'education_center_id',
       perPage: 10,

@@ -11,7 +11,7 @@ export default [
   // ── Feed ───────────────────────────────────────────────
   {
     title: 'Feed',
-    to: { name: 'feed' },
+    to: { name: 'noticias' },
     icon: { icon: 'tabler-news' },
     requiredRoles: [ROLES.GRADUADO, ROLES.DIRECTOR],
   },
@@ -24,17 +24,17 @@ export default [
     children: [
       {
         title: 'Graduados',
-        to: { name: 'graduates' },
+        to: { name: 'egresados' },
         icon: { icon: 'tabler-users' },
       },
       {
         title: 'Empleadores',
-        to: { name: 'employers' },
+        to: { name: 'empleadores' },
         icon: { icon: 'tabler-briefcase' },
       },
       {
         title: 'Directores',
-        to: { name: 'directors' },
+        to: { name: 'directores' },
         icon: { icon: 'tabler-shield-star' },
       },
     ],
@@ -48,7 +48,7 @@ export default [
     children: [
       {
         title: 'Centros Educativos',
-        to: { name: 'education-centers' },
+        to: { name: 'centros-educativos' },
         icon: { icon: 'tabler-school' },
       },
     ],
@@ -62,12 +62,12 @@ export default [
     children: [
       {
         title: 'Tipos de Eventos',
-        to: { name: 'event-types' },
+        to: { name: 'tipos-evento' },
         icon: { icon: 'tabler-calendar-stats' },
       },
       {
         title: 'Eventos',
-        to: { name: 'events' },
+        to: { name: 'eventos' },
         icon: { icon: 'tabler-calendar' },
       },
     ],
@@ -81,12 +81,12 @@ export default [
     children: [
       {
         title: 'Trabajos de Egresados',
-        to: { name: 'jobs' },
+        to: { name: 'empleos' },
         icon: { icon: 'tabler-briefcase-2' },
       },
       {
         title: 'Ofertas Laborales',
-        to: { name: 'job-offers' },
+        to: { name: 'ofertas-empleo' },
         icon: { icon: 'tabler-clipboard-list' },
       },
     ],
@@ -100,7 +100,7 @@ export default [
     children: [
       {
         title: 'Gestión de Encuestas',
-        to: { name: 'surveys' },
+        to: { name: 'encuestas' },
         icon: { icon: 'tabler-clipboard-check' },
       },
     ],
@@ -114,7 +114,7 @@ export default [
     children: [
       {
         title: 'Configuración Email',
-        to: 'email-config',
+        to: 'config-correo',
         icon: { icon: 'tabler-mail-cog' },
       },
     ],
@@ -128,17 +128,17 @@ export default [
     children: [
       {
         title: 'Mi Perfil Académico',
-        to: 'my-profile',
+        to: 'mi-perfil',
         icon: { icon: 'tabler-school' },
       },
       {
         title: 'Mis Encuestas',
-        to: 'my-surveys',
+        to: 'mis-encuestas',
         icon: { icon: 'tabler-clipboard-text' },
       },
       {
         title: 'Mis Trabajos',
-        to: 'my-jobs',
+        to: 'mis-empleos',
         icon: { icon: 'tabler-briefcase' },
       },
     ],
@@ -152,7 +152,7 @@ export default [
     children: [
       {
         title: 'Gestionar Ofertas',
-        to: { name: 'my-job-offers' },
+        to: { name: 'mis-ofertas-empleo' },
         icon: { icon: 'tabler-calendar-plus' },
       },
     ],

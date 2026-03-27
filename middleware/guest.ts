@@ -14,7 +14,7 @@ export default defineNuxtRouteMiddleware(async to => {
 
     if (!data?.data?.verified) {
       return navigateTo({
-        path: '/validate-code',
+        path: '/validar-codigo',
         query: {
           email: data?.data?.email,
         },
