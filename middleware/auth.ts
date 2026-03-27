@@ -21,7 +21,7 @@ export default defineNuxtRouteMiddleware(async to => {
 
     returnTo.value = to.fullPath
 
-    return navigateTo('/iniciar-sesion')
+    return navigateTo('/login')
   }
 
   // Si hay token y la ruta no es pública ni es la de validación, verificar si el usuario está validado
@@ -44,7 +44,7 @@ export default defineNuxtRouteMiddleware(async to => {
       // Si hay error al obtener la información del usuario, redirigir al login
       token.value = null
 
-      return navigateTo('/iniciar-sesion')
+      return navigateTo('/login')
     }
   }
 })

@@ -136,7 +136,7 @@ const {
                 <span>¿Recordaste tu contraseña?</span>
                 <NuxtLink
                   class="text-primary ms-1"
-                  to="/iniciar-sesion"
+                  to="/login"
                 >
                   Volver al inicio de sesión
                 </NuxtLink>

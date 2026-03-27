@@ -6,7 +6,7 @@ export default defineNuxtPlugin(async () => {
   const { user, fetchUser } = useUser()
 
   // Rutas públicas que no requieren autenticación
-  const publicRoutes = ['/iniciar-sesion', '/validar-codigo']
+  const publicRoutes = ['/login', '/validar-codigo']
 
   // Función para verificar autenticación
   const checkAuth = async (to: any) => {
@@ -33,7 +33,7 @@ export default defineNuxtPlugin(async () => {
 
       returnTo.value = to.fullPath
 
-      return '/iniciar-sesion'
+      return '/login'
     }
 
     // Si hay token y la ruta no es pública ni es la de validación, verificar el usuario
@@ -53,7 +53,7 @@ export default defineNuxtPlugin(async () => {
             sameSite: isSecure ? 'strict' : 'lax',
           })
           returnTo.value = to.fullPath
-          return '/iniciar-sesion'
+          return '/login'
         }
 
         // Si el usuario no está verificado, redirigir a validación
@@ -76,7 +76,7 @@ export default defineNuxtPlugin(async () => {
 
         returnTo.value = to.fullPath
 
-        return '/iniciar-sesion'
+        return '/login'
       }
     }
 

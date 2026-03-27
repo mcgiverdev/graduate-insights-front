@@ -232,7 +232,7 @@ const {
                 <span>¿Listo para ingresar?</span>
                 <NuxtLink
                   class="text-primary ms-1"
-                  to="/iniciar-sesion"
+                  to="/login"
                 >
                   Volver a iniciar sesión
                 </NuxtLink>

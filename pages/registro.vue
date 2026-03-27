@@ -223,7 +223,7 @@ const onSubmit = async () => {
                 <span>¿Ya tienes una cuenta?</span>
                 <NuxtLink
                   class="text-primary ms-1"
-                  to="/iniciar-sesion"
+                  to="/login"
                 >
                   Inicia sesión
                 </NuxtLink>

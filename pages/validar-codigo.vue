@@ -16,6 +16,12 @@ const route = useRoute()
 const email = computed(() => route.query.email?.toString() || '')
 
 const handleVerified = () => navigateTo('/', { replace: true })
+
+const goToLogin = () => {
+  const token = useCookie('accessToken', { path: '/' })
+  token.value = null
+  navigateTo('/login', { replace: true })
+}
 </script>
 
 <template>
@@ -66,6 +72,15 @@ const handleVerified = () => navigateTo('/', { replace: true })
 
         <VCardText>
           <VerificationForm @verified="handleVerified" />
+
+          <div class="text-center mt-4">
+            <a
+              class="text-primary text-body-2 cursor-pointer"
+              @click="goToLogin"
+            >
+              ← Volver al inicio de sesión
+            </a>
+          </div>
         </VCardText>
       </VCard>
     </div>

@@ -138,7 +138,7 @@ export const useAuthService = () => {
         returnTo.value = currentPath
 
         // Redirigir al login
-        navigateTo('/iniciar-sesion')
+        navigateTo('/login')
 
         return true
       }
@@ -175,7 +175,7 @@ export const useAuthService = () => {
     clearUser()
 
     // Redirigir al login
-    navigateTo('/iniciar-sesion', { replace: true, external: false })
+    navigateTo('/login', { replace: true, external: false })
   }
 
   return {

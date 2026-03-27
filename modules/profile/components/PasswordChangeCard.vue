@@ -46,6 +46,7 @@ const handleSubmit = async () => {
           type="submit"
           color="primary"
           block
+          class="mt-4"
           :loading="submitting"
         >
           Guardar nueva contraseña
