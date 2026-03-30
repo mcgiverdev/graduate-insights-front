@@ -57,6 +57,10 @@ class GraduateService extends BaseApiService {
     return this.get<CatalogOptionItem[]>(`${BASE_ENDPOINT}/catalog/universities`)
   }
 
+  async createUniversity(nombre: string): Promise<CatalogOptionItem> {
+    return this.post<CatalogOptionItem>(`${BASE_ENDPOINT}/catalog/universities`, { body: { nombre } })
+  }
+
   async fetchList(filters: GraduateFilters = {}): Promise<ListResponse<Graduate>> {
     const params: Record<string, string | number | boolean> = {
       search: filters.search ?? '',

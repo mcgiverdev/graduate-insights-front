@@ -78,6 +78,23 @@ const degreeTypeOptions = ref<CatalogOptionItem[]>([])
 const titulationModeOptions = ref<CatalogOptionItem[]>([])
 const languageCatalogOptions = ref<CatalogOptionItem[]>([])
 const universityOptions = ref<CatalogOptionItem[]>([])
+const universitySearch = ref('')
+const universityCreating = ref(false)
+
+const addNewUniversity = async () => {
+  const nombre = universitySearch.value.trim()
+  if (!nombre || universityCreating.value) return
+  universityCreating.value = true
+  try {
+    const created = await graduateService.createUniversity(nombre)
+    if (!universityOptions.value.some(u => u.id === created.id))
+      universityOptions.value.push(created)
+    degreeDraft.value.universidadId = created.id
+    universitySearch.value = ''
+  }
+  catch { /* ignore */ }
+  finally { universityCreating.value = false }
+}
 
 // ── Dialog state ──────────────────────────────────────────────────────────────
 const degreeDialogOpen = ref(false)
@@ -1223,13 +1240,26 @@ onMounted(async () => {
                       cols="12"
                       md="4"
                     >
-                      <AppSelect
+                      <AppAutocomplete
                         v-model="degreeDraft.universidadId"
                         label="Universidad"
                         :items="universityOptions"
                         item-title="nombre"
                         item-value="id"
-                      />
+                        clearable
+                        @update:search="val => universitySearch = val ?? ''"
+                      >
+                        <template v-if="universitySearch.trim()" #append>
+                          <VBtn
+                            icon="tabler-plus"
+                            size="small"
+                            variant="tonal"
+                            color="primary"
+                            :loading="universityCreating"
+                            @mousedown.prevent.stop="addNewUniversity"
+                          />
+                        </template>
+                      </AppAutocomplete>
                     </VCol>
                     <VCol
                       v-if="isOtroDegreeType"
