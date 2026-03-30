@@ -4,10 +4,11 @@ import { useUser } from '@/composables/useUser'
 export default defineNuxtRouteMiddleware(async to => {
   const { canAccessRoute, role } = useRoles()
   const { fetchUser } = useUser()
+  const isSecure = process.client && window.location.protocol === 'https:'
   const token = useCookie('accessToken', {
     path: '/',
-    secure: true,
-    sameSite: 'strict',
+    secure: isSecure,
+    sameSite: isSecure ? 'strict' : 'lax',
   })
 
   if (!role.value && token.value)

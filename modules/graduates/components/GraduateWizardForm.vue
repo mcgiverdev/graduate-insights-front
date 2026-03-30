@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ValidationError } from 'yup'
 import { computed, onMounted, ref, watch } from 'vue'
+import { departamentoOptions, getDistritos, getProvincias } from '../data/peruGeoData'
 import { useRouter } from 'vue-router'
 import { useGraduateForm } from '../composables/useGraduateForm'
 import { graduateService } from '../services/GraduateService'
@@ -49,13 +50,6 @@ const sexOptions: Array<{ title: string; value: Gender }> = [
   { title: 'Masculino', value: 'M' },
   { title: 'Femenino', value: 'F' },
   { title: 'Otro', value: 'Otro' },
-]
-
-const departamentoOptions = [
-  'Amazonas', 'Áncash', 'Apurímac', 'Arequipa', 'Ayacucho', 'Cajamarca',
-  'Callao', 'Cusco', 'Huancavelica', 'Huánuco', 'Ica', 'Junín',
-  'La Libertad', 'Lambayeque', 'Lima', 'Loreto', 'Madre de Dios', 'Moquegua',
-  'Pasco', 'Piura', 'Puno', 'San Martín', 'Tacna', 'Tumbes', 'Ucayali',
 ]
 
 const workModalityOptions = [
@@ -150,9 +144,11 @@ const values = ref<GraduateWizardValues>({
   correoPersonal: '',
   correoInstitucional: '',
   celular: '',
+  viveEnPeru: true,
   direccionActual: '',
-  ciudad: '',
   departamento: '',
+  provincia: '',
+  distrito: '',
   paisResidencia: '',
   linkedin: '',
 
@@ -166,6 +162,30 @@ const values = ref<GraduateWizardValues>({
   idiomas: [],
   formacionesComplementarias: [],
   trayectoriasLaborales: [],
+})
+
+// ── Geo cascada ───────────────────────────────────────────────────────────────
+const provinciaOptions = computed(() => getProvincias(values.value.departamento ?? ''))
+const distritoOptions = computed(() => getDistritos(values.value.departamento ?? '', values.value.provincia ?? ''))
+
+watch(() => values.value.viveEnPeru, (vivePeru) => {
+  if (!vivePeru) {
+    values.value.departamento = ''
+    values.value.provincia = ''
+    values.value.distrito = ''
+  }
+  else {
+    values.value.paisResidencia = ''
+  }
+})
+
+watch(() => values.value.departamento, () => {
+  values.value.provincia = ''
+  values.value.distrito = ''
+})
+
+watch(() => values.value.provincia, () => {
+  values.value.distrito = ''
 })
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -465,10 +485,12 @@ const wizardPayload = computed<GraduatePayload>(() => {
     correo_institucional: values.value.correoInstitucional?.trim() || undefined,
     dni: values.value.dni.trim(),
     celular: values.value.celular.trim(),
-    direccion_actual: values.value.direccionActual.trim() || undefined,
-    ciudad: values.value.ciudad.trim() || undefined,
-    departamento: values.value.departamento.trim() || undefined,
-    pais_residencia: values.value.paisResidencia.trim() || undefined,
+    vive_en_peru: values.value.viveEnPeru,
+    direccion_actual: values.value.direccionActual?.trim() || undefined,
+    departamento: values.value.departamento?.trim() || undefined,
+    provincia: values.value.provincia?.trim() || undefined,
+    distrito: values.value.distrito?.trim() || undefined,
+    pais_residencia: values.value.paisResidencia?.trim() || undefined,
     linkedin: values.value.linkedin?.trim() || undefined,
     escuela_profesional_id: values.value.escuelaProfesionalId || undefined,
     anio_ingreso: values.value.anioIngreso?.trim() || undefined,
@@ -792,41 +814,74 @@ onMounted(async () => {
                 />
               </VCol>
 
-              <VCol cols="12" md="6">
-                <AppTextField
-                  v-model="values.direccionActual"
-                  label="Direccion actual *"
-                  maxlength="150"
-                  :error-messages="getFieldError('direccionActual')"
+              <VCol cols="12">
+                <VSwitch
+                  v-model="values.viveEnPeru"
+                  label="¿Vive actualmente en Perú?"
+                  color="primary"
+                  hide-details
                 />
               </VCol>
 
-              <VCol cols="12" md="4">
-                <AppTextField
-                  v-model="values.ciudad"
-                  label="Ciudad *"
-                  maxlength="80"
-                  :error-messages="getFieldError('ciudad')"
-                />
-              </VCol>
+              <template v-if="values.viveEnPeru">
+                <VCol cols="12" md="6">
+                  <AppTextField
+                    v-model="values.direccionActual"
+                    label="Dirección actual"
+                    maxlength="150"
+                    :error-messages="getFieldError('direccionActual')"
+                  />
+                </VCol>
 
-              <VCol cols="12" md="4">
-                <AppSelect
-                  v-model="values.departamento"
-                  label="Departamento *"
-                  :items="departamentoOptions"
-                  :error-messages="getFieldError('departamento')"
-                />
-              </VCol>
+                <VCol cols="12" md="6">
+                  <AppSelect
+                    v-model="values.departamento"
+                    label="Departamento"
+                    :items="departamentoOptions"
+                    :error-messages="getFieldError('departamento')"
+                  />
+                </VCol>
 
-              <VCol cols="12" md="4">
-                <AppTextField
-                  v-model="values.paisResidencia"
-                  label="Pais de residencia *"
-                  maxlength="80"
-                  :error-messages="getFieldError('paisResidencia')"
-                />
-              </VCol>
+                <VCol cols="12" md="6">
+                  <AppSelect
+                    v-model="values.provincia"
+                    label="Provincia"
+                    :items="provinciaOptions"
+                    :disabled="!values.departamento"
+                    :error-messages="getFieldError('provincia')"
+                  />
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <AppSelect
+                    v-model="values.distrito"
+                    label="Distrito"
+                    :items="distritoOptions"
+                    :disabled="!values.provincia"
+                    :error-messages="getFieldError('distrito')"
+                  />
+                </VCol>
+              </template>
+
+              <template v-else>
+                <VCol cols="12" md="6">
+                  <AppTextField
+                    v-model="values.direccionActual"
+                    label="Dirección actual"
+                    maxlength="150"
+                    :error-messages="getFieldError('direccionActual')"
+                  />
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <AppTextField
+                    v-model="values.paisResidencia"
+                    label="País de residencia"
+                    maxlength="80"
+                    :error-messages="getFieldError('paisResidencia')"
+                  />
+                </VCol>
+              </template>
 
               <VCol cols="12" md="6">
                 <AppTextField

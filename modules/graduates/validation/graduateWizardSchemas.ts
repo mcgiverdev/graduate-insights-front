@@ -175,22 +175,12 @@ export const graduateWizardStepTwoSchema = yup.object({
     .email('Ingrese un correo institucional valido')
     .optional(),
   celular: yup.string().matches(phoneRegex, 'El celular debe iniciar con 9 y tener 9 digitos').required('El celular es obligatorio'),
-  direccionActual: yup
-    .string()
-    .trim()
-    .max(150, 'La direccion actual no debe superar 150 caracteres')
-    .required('La direccion actual es obligatoria'),
-  ciudad: yup.string().trim().max(80, 'La ciudad no debe superar 80 caracteres').required('La ciudad es obligatoria'),
-  departamento: yup
-    .string()
-    .trim()
-    .max(80, 'El departamento no debe superar 80 caracteres')
-    .required('El departamento es obligatorio'),
-  paisResidencia: yup
-    .string()
-    .trim()
-    .max(80, 'El pais de residencia no debe superar 80 caracteres')
-    .required('El pais de residencia es obligatorio'),
+  viveEnPeru: yup.boolean().optional(),
+  direccionActual: yup.string().trim().max(150, 'La direccion actual no debe superar 150 caracteres').optional(),
+  departamento: yup.string().trim().max(80, 'El departamento no debe superar 80 caracteres').optional(),
+  provincia: yup.string().trim().max(80, 'La provincia no debe superar 80 caracteres').optional(),
+  distrito: yup.string().trim().max(80, 'El distrito no debe superar 80 caracteres').optional(),
+  paisResidencia: yup.string().trim().max(80, 'El pais de residencia no debe superar 80 caracteres').optional(),
   linkedin: optionalUrl(255, 'Ingrese una URL valida'),
   anioIngreso: yup
     .string()

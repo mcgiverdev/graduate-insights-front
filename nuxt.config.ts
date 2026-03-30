@@ -142,13 +142,24 @@ export default defineNuxtConfig({
 
     build: {
       chunkSizeWarningLimit: 5000,
+      rollupOptions: {
+        output: {
+          manualChunks(id: string) {
+            if (id.includes('apexcharts') || id.includes('vue3-apexcharts'))
+              return 'vendor-apexcharts'
+            if (id.includes('chart.js') || id.includes('vue-chartjs'))
+              return 'vendor-chartjs'
+            if (id.includes('mapbox-gl'))
+              return 'vendor-mapbox'
+            if (id.includes('@tiptap'))
+              return 'vendor-tiptap'
+          },
+        },
+      },
     },
 
     optimizeDeps: {
       exclude: ['vuetify'],
-      entries: [
-        './**/*.vue',
-      ],
     },
 
     plugins: [
@@ -175,12 +186,6 @@ export default defineNuxtConfig({
     '@nuxtjs/i18n',
     '@nuxtjs/device',
     '@pinia/nuxt',
-    async (options, nuxt) => {
-      nuxt.hooks.hook('vite:extendConfig', config => {
-        if (config.plugins)
-          config.plugins.push(vuetify())
-      })
-    },
   ],
 
   // Avoid treating the business `modules/` directory as Nuxt local modules.

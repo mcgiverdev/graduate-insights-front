@@ -8,6 +8,13 @@ import {
 import avatarMale from '@images/avatars/avatar-1.png'
 import avatarFemale from '@images/avatars/avatar-4.png'
 
+const { public: { apiBaseUrl } } = useRuntimeConfig()
+
+const getFileUrl = (path: string | null | undefined): string | null => {
+  if (!path) return null
+  return `${apiBaseUrl}/graduate-insights/v1/api/files/download/${path}`
+}
+
 definePageMeta({
   middleware: ['auth', 'role'],
   layout: 'default',
@@ -75,7 +82,8 @@ const pageTitle = computed(() => {
 })
 
 const defaultAvatar = computed(() => graduate.value?.genero === 'F' ? avatarFemale : avatarMale)
-const avatarSrc = computed(() => graduate.value?.fotoPath || defaultAvatar.value)
+const avatarSrc = computed(() => getFileUrl(graduate.value?.fotoPath) || defaultAvatar.value)
+const cvUrl = computed(() => getFileUrl(graduate.value?.cvPath))
 
 const summaryItems = computed(() => {
   if (!graduate.value)
@@ -85,12 +93,11 @@ const summaryItems = computed(() => {
     { label: 'Codigo universitario', value: graduate.value.codigoUniversitario || '-' },
     { label: 'Facultad', value: resolvedFacultyName.value },
     { label: 'Escuela profesional', value: resolvedSchoolName.value },
-    { label: 'Anio de ingreso', value: graduate.value.anioIngreso || '-' },
-    { label: 'Anio de egreso', value: graduate.value.anioEgreso || '-' },
+    { label: 'Año de ingreso', value: graduate.value.anioIngreso || '-' },
+    { label: 'Año de egreso', value: graduate.value.anioEgreso || '-' },
     { label: 'Nacionalidad', value: graduate.value.nacionalidad || '-' },
     { label: 'Estado civil', value: graduate.value.estadoCivil || '-' },
     { label: 'LinkedIn', value: graduate.value.linkedin || '-' },
-    { label: 'Portafolio', value: graduate.value.portafolio || '-' },
   ]
 })
 
@@ -235,10 +242,27 @@ onMounted(async () => {
               <div><strong>Genero:</strong> {{ graduate?.genero || '-' }}</div>
               <div><strong>Nacimiento:</strong> {{ formatDate(graduate?.fechaNacimiento) }}</div>
               <div><strong>Direccion:</strong> {{ graduate?.direccionActual || '-' }}</div>
-              <div><strong>Ciudad:</strong> {{ graduate?.ciudad || '-' }}</div>
-              <div><strong>Departamento:</strong> {{ graduate?.departamento || '-' }}</div>
-              <div><strong>Pais:</strong> {{ graduate?.paisResidencia || '-' }}</div>
+              <template v-if="graduate?.viveEnPeru !== false">
+                <div><strong>Departamento:</strong> {{ graduate?.departamento || '-' }}</div>
+                <div><strong>Provincia:</strong> {{ graduate?.provincia || '-' }}</div>
+                <div><strong>Distrito:</strong> {{ graduate?.distrito || '-' }}</div>
+              </template>
+              <template v-else>
+                <div><strong>Pais:</strong> {{ graduate?.paisResidencia || '-' }}</div>
+              </template>
             </div>
+
+            <VBtn
+              v-if="cvUrl"
+              variant="tonal"
+              color="primary"
+              :href="cvUrl"
+              target="_blank"
+              prepend-icon="tabler-file-text"
+              class="w-100"
+            >
+              Ver CV
+            </VBtn>
           </VCardText>
         </VCard>
       </VCol>

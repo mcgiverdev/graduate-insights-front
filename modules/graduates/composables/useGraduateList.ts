@@ -4,15 +4,18 @@ import { useSnackbar } from '@/composables/useSnackbar'
 import { graduateService } from '../services/GraduateService'
 import type { Graduate } from '../types'
 
-export const useGraduateList = () => {
-  const items = ref<Graduate[]>([])
-  const loading = ref(false)
-  const page = ref(1)
-  const itemsPerPage = ref(10)
-  const totalItems = ref(0)
-  const search = ref('')
-  const showOnlyPending = ref(false)
+// Estado a nivel de módulo — persiste entre navegaciones (mismo patrón que useUser)
+const items = ref<Graduate[]>([])
+const loading = ref(false)
+const page = ref(1)
+const itemsPerPage = ref(10)
+const totalItems = ref(0)
+const search = ref('')
+const showOnlyPending = ref(false)
+let lastFetchedAt = 0
+const CACHE_TTL_MS = 30_000 // 30 segundos
 
+export const useGraduateList = () => {
   const { showSnackbar } = useSnackbar()
 
   const fetchGraduates = async () => {
@@ -27,6 +30,7 @@ export const useGraduateList = () => {
 
       items.value = data
       totalItems.value = paginate?.totalElements ?? data.length
+      lastFetchedAt = Date.now()
     }
     catch (error: any) {
       console.error('Error al cargar graduados:', error)
@@ -37,7 +41,11 @@ export const useGraduateList = () => {
     }
   }
 
-  onMounted(fetchGraduates)
+  onMounted(() => {
+    const isStale = Date.now() - lastFetchedAt > CACHE_TTL_MS
+    if (items.value.length === 0 || isStale)
+      fetchGraduates()
+  })
 
   watchDebounced(search, () => {
     page.value = 1

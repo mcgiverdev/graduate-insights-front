@@ -71,10 +71,13 @@ export interface Graduate {
   estado: string
   dni: string
   celular: string
-  direccionActual: string
-  ciudad: string
-  departamento: string
-  paisResidencia: string
+  direccionActual?: string
+  ciudad?: string
+  departamento?: string
+  provincia?: string
+  distrito?: string
+  paisResidencia?: string
+  viveEnPeru?: boolean
   linkedin: string
   portafolio: string
   escuelaProfesionalId?: number
@@ -108,7 +111,10 @@ export interface GraduateApiResponse {
   direccion_actual?: string | null
   ciudad?: string | null
   departamento?: string | null
+  provincia?: string | null
+  distrito?: string | null
   pais_residencia?: string | null
+  vive_en_peru?: boolean | null
   linkedin?: string | null
   portafolio?: string | null
   escuela_profesional_id?: number | null
@@ -163,7 +169,10 @@ export interface GraduatePayload {
   direccion_actual?: string
   ciudad?: string
   departamento?: string
+  provincia?: string
+  distrito?: string
   pais_residencia?: string
+  vive_en_peru?: boolean
   linkedin?: string
   portafolio?: string
   escuela_profesional_id?: number
@@ -193,10 +202,12 @@ export interface GraduateWizardValues {
   correoPersonal: string
   correoInstitucional?: string
   celular: string
-  direccionActual: string
-  ciudad: string
-  departamento: string
-  paisResidencia: string
+  viveEnPeru: boolean
+  direccionActual?: string
+  departamento?: string
+  provincia?: string
+  distrito?: string
+  paisResidencia?: string
   linkedin?: string
 
   facultadId?: number
