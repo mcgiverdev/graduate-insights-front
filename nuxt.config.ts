@@ -141,7 +141,7 @@ export default defineNuxtConfig({
     },
 
     build: {
-      chunkSizeWarningLimit: 5000,
+      chunkSizeWarningLimit: 3000,
       rollupOptions: {
         output: {
           manualChunks(id: string) {
@@ -153,6 +153,18 @@ export default defineNuxtConfig({
               return 'vendor-mapbox'
             if (id.includes('@tiptap'))
               return 'vendor-tiptap'
+            if (id.includes('node_modules/vue/') || id.includes('node_modules/@vue/'))
+              return 'vendor-vue'
+            if (id.includes('node_modules/pinia'))
+              return 'vendor-pinia'
+            if (id.includes('node_modules/@vueuse/'))
+              return 'vendor-vueuse'
+            if (id.includes('node_modules/vee-validate') || id.includes('node_modules/zod'))
+              return 'vendor-validation'
+            if (id.includes('node_modules/flatpickr') || id.includes('vue-flatpickr'))
+              return 'vendor-flatpickr'
+            if (id.includes('node_modules/@iconify/'))
+              return 'vendor-iconify'
           },
         },
       },

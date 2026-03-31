@@ -28,22 +28,34 @@ export interface UserData {
 
 const user = ref<UserData | null>(null)
 const loading = ref(false)
+let fetchPromise: Promise<void> | null = null
 
 export const useUser = () => {
+  const setUser = (userData: UserData | null) => {
+    user.value = userData
+  }
+
   const fetchUser = async () => {
+    // Deduplicar llamadas concurrentes: si ya hay una en vuelo, reusar la misma promesa
+    if (fetchPromise)
+      return fetchPromise
+
     loading.value = true
-    try {
-      const response = await useApi('/graduate-insights/v1/api/auth/me')
-      if (response.data?.success)
-        user.value = response.data.data
-    }
-    catch (error) {
-      console.error('Error fetching user:', error)
-      user.value = null
-    }
-    finally {
-      loading.value = false
-    }
+    fetchPromise = useApi('/graduate-insights/v1/api/auth/me')
+      .then((response) => {
+        if (response.data?.success)
+          user.value = response.data.data
+      })
+      .catch((error) => {
+        console.error('Error fetching user:', error)
+        user.value = null
+      })
+      .finally(() => {
+        loading.value = false
+        fetchPromise = null
+      })
+
+    return fetchPromise
   }
 
   const initials = computed(() => {
@@ -84,6 +96,7 @@ export const useUser = () => {
     user,
     loading,
     fetchUser,
+    setUser,
     initials,
     avatarUrl,
     role,

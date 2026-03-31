@@ -13,32 +13,39 @@ const totalItems = ref(0)
 const search = ref('')
 const showOnlyPending = ref(false)
 let lastFetchedAt = 0
+let fetchPromise: Promise<void> | null = null
 const CACHE_TTL_MS = 30_000 // 30 segundos
 
 export const useGraduateList = () => {
   const { showSnackbar } = useSnackbar()
 
   const fetchGraduates = async () => {
+    // Evitar llamadas concurrentes: reusar la promesa en vuelo si ya existe
+    if (fetchPromise)
+      return fetchPromise
+
     loading.value = true
-    try {
-      const { items: data, paginate } = await graduateService.fetchList({
-        page: page.value,
-        size: itemsPerPage.value,
-        search: search.value,
-        validated: showOnlyPending.value ? false : undefined,
+    fetchPromise = graduateService.fetchList({
+      page: page.value,
+      size: itemsPerPage.value,
+      search: search.value,
+      validated: showOnlyPending.value ? false : undefined,
+    })
+      .then(({ items: data, paginate }) => {
+        items.value = data
+        totalItems.value = paginate?.totalElements ?? data.length
+        lastFetchedAt = Date.now()
+      })
+      .catch((error: any) => {
+        console.error('Error al cargar graduados:', error)
+        showSnackbar({ text: 'No se pudieron cargar los graduados', color: 'error' })
+      })
+      .finally(() => {
+        loading.value = false
+        fetchPromise = null
       })
 
-      items.value = data
-      totalItems.value = paginate?.totalElements ?? data.length
-      lastFetchedAt = Date.now()
-    }
-    catch (error: any) {
-      console.error('Error al cargar graduados:', error)
-      showSnackbar({ text: 'No se pudieron cargar los graduados', color: 'error' })
-    }
-    finally {
-      loading.value = false
-    }
+    return fetchPromise
   }
 
   onMounted(() => {

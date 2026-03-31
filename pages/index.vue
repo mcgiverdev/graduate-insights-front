@@ -1,36 +1,13 @@
 <script setup lang="ts">
-import {
-  ArcElement,
-  BarElement,
-  CategoryScale,
-  Chart as ChartJS,
-  Legend,
-  LineElement,
-  LinearScale,
-  PointElement,
-  Title,
-  Tooltip,
-} from 'chart.js'
-import { computed, ref, watch } from 'vue'
-import { Bar, Line, Pie } from 'vue-chartjs'
+import { computed, defineAsyncComponent, ref, watch } from 'vue'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import { useGraduateDashboard } from '@/src/features/graduate-dashboard'
 import { useRoles } from '@/composables/useRoles'
 import { StatisticsButton, useSurveyStatisticsDashboard } from '@/src/features/survey-statistics'
 import { formatReadableDate } from '@/utils/dateUtils'
 
-// Chart.js registration
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  BarElement,
-  ArcElement,
-)
+// Chart.js se carga solo cuando el Director abre el dashboard (lazy)
+const ChartRenderer = defineAsyncComponent(() => import('@/components/ChartRenderer.vue'))
 
 // Configuración de la página
 definePageMeta({
@@ -161,7 +138,7 @@ watch(isGraduate, async newIsGraduate => {
     await loadGraduateDashboard()
     graduateDashboardLoaded.value = true
   }
-})
+}, { immediate: true })
 </script>
 
 <template>
@@ -550,23 +527,10 @@ watch(isGraduate, async newIsGraduate => {
                   class="chart-container"
                   style="block-size: 300px;"
                 >
-                  <!-- Pie Chart -->
-                  <Pie
-                    v-if="chart.chart_type === 'pie'"
+                  <ChartRenderer
+                    :chart-type="chart.chart_type"
                     :data="formatChartData(chart)"
-                    :options="pieChartOptions"
-                  />
-                  <!-- Line Chart -->
-                  <Line
-                    v-else-if="chart.chart_type === 'line'"
-                    :data="formatChartData(chart)"
-                    :options="chartOptions"
-                  />
-                  <!-- Bar Chart -->
-                  <Bar
-                    v-else-if="chart.chart_type === 'bar'"
-                    :data="formatChartData(chart)"
-                    :options="chartOptions"
+                    :options="chart.chart_type === 'pie' ? pieChartOptions : chartOptions"
                   />
                 </div>
               </VCardText>

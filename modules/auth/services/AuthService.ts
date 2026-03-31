@@ -1,6 +1,7 @@
 import { useRuntimeConfig } from '#imports'
 import { useApi } from '@/composables/useApi'
 import type { ApiError } from '@/composables/useApi'
+import { useUser } from '@/composables/useUser'
 import type {
   LoginResult,
   PasswordChangePayload,
@@ -153,6 +154,11 @@ class AuthModuleService {
           },
         }
       }
+
+      // Poblar el estado global del usuario para evitar una llamada extra a /auth/me
+      // en el guard de autenticación (auth.client.ts)
+      const { setUser } = useUser()
+      setUser(meResponse.data as any)
 
       return { success: true, message: loginData.message || 'Sesión iniciada correctamente' }
     }
