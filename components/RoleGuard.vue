@@ -31,13 +31,17 @@ const canShow = computed(() => {
   // Si no se especificó ni permiso ni roles, mostrar para usuarios logueados
   return true
 })
+
+// El fallback solo se muestra si hay usuario logueado pero sin permiso,
+// no durante el logout (cuando role es null y la navegación aún no completó)
+const showFallback = computed(() => props.fallback && !canShow.value && !!role.value)
 </script>
 
 <template>
   <div v-if="canShow">
     <slot />
   </div>
-  <div v-else-if="fallback">
+  <div v-else-if="showFallback">
     <slot name="fallback">
       <div class="text-center pa-4">
         <VIcon

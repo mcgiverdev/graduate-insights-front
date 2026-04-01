@@ -41,6 +41,7 @@ interface Props {
   backRoute?: string
   pageTitle?: string
   pageSubtitle?: string
+  sectionEdit?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -49,12 +50,14 @@ const props = withDefaults(defineProps<Props>(), {
   backRoute: undefined,
   pageTitle: 'Editar Graduado',
   pageSubtitle: 'Gestiona informacion personal, contacto y trayectoria academica desde un solo panel.',
+  sectionEdit: false,
 })
 
 const router = useRouter()
 const { saveGraduate, submitting, serverErrors, clearServerErrors } = useGraduateForm()
 
 const activeTab = ref('datos-basicos')
+const editingSection = ref<string | null>(null)
 const localErrors = ref<Record<string, string>>({})
 const loadingData = ref(false)
 const saving = ref(false)
@@ -96,12 +99,12 @@ const addNewUniversity = async () => {
 }
 
 const tabItems = [
-  { value: 'datos-basicos', title: 'Datos basicos' },
+  { value: 'datos-basicos', title: 'Datos básicos' },
   { value: 'datos-contacto', title: 'Datos de contacto' },
-  { value: 'resumen-academico', title: 'Datos academico' },
+  { value: 'resumen-academico', title: 'Datos académicos' },
   { value: 'grados', title: 'Grados' },
   { value: 'idiomas', title: 'Idiomas' },
-  { value: 'formacion-complementaria', title: 'Formacion complementaria' },
+  { value: 'formacion-complementaria', title: 'Formación complementaria' },
   { value: 'trayectoria-laboral', title: 'Trayectoria laboral' },
 ]
 
@@ -826,6 +829,47 @@ const loadGraduateForEdit = async () => {
   }
 }
 
+const sectionReadOnly = (section: string) => props.sectionEdit && editingSection.value !== section
+
+const facultadNombre = computed(() =>
+  facultyOptions.value.find(f => f.id === values.value.facultadId)?.nombre ?? '',
+)
+
+const escuelaNombre = computed(() =>
+  professionalSchoolOptions.value.find(s => s.id === values.value.escuelaProfesionalId)?.nombre ?? '',
+)
+
+const startEdit = (section: string) => {
+  editingSection.value = section
+}
+
+const cancelEdit = async () => {
+  await loadGraduateForEdit()
+  editingSection.value = null
+}
+
+const submitSection = async () => {
+  if (loadingData.value || saving.value)
+    return
+
+  const valid = await validateAllBeforeSave()
+  if (!valid)
+    return
+
+  saving.value = true
+  try {
+    const result = props.saveFn
+      ? await props.saveFn(wizardPayload.value, props.graduateId)
+      : await saveGraduate(wizardPayload.value, props.graduateId)
+
+    if (result.success)
+      editingSection.value = null
+  }
+  finally {
+    saving.value = false
+  }
+}
+
 onMounted(async () => {
   await loadFaculties()
   await loadProfessionalSchools()
@@ -906,6 +950,7 @@ watch(activeTab, () => {
             {{ backRoute ? 'Volver al inicio' : 'Volver al detalle' }}
           </VBtn>
           <VBtn
+            v-if="!sectionEdit"
             color="primary"
             :loading="submitting || saving"
             :disabled="loadingData || saving"
@@ -942,12 +987,23 @@ watch(activeTab, () => {
 
         <VWindow v-model="activeTab">
           <VWindowItem value="datos-basicos">
+            <div class="d-flex justify-space-between align-center mb-4">
+              <span class="text-subtitle-1 font-weight-medium">Datos básicos</span>
+              <div v-if="sectionEdit" class="d-flex gap-2">
+                <template v-if="editingSection === 'datos-basicos'">
+                  <VBtn size="small" variant="outlined" :disabled="saving" @click="cancelEdit">Cancelar</VBtn>
+                  <VBtn size="small" color="primary" :loading="saving" @click="submitSection">Guardar</VBtn>
+                </template>
+                <VBtn v-else size="small" color="primary" variant="tonal" prepend-icon="tabler-edit" @click="startEdit('datos-basicos')">Editar</VBtn>
+              </div>
+            </div>
             <VRow>
               <VCol cols="12" md="6">
                 <AppTextField
                   v-model="values.codigoUniversitario"
                   label="Codigo de egresado / universitario *"
                   maxlength="20"
+                  :readonly="sectionReadOnly('datos-basicos')"
                   :error-messages="getFieldError('codigoUniversitario')"
                 />
               </VCol>
@@ -957,6 +1013,7 @@ watch(activeTab, () => {
                   v-model="values.dni"
                   label="DNI o documento de identidad *"
                   maxlength="8"
+                  :readonly="sectionReadOnly('datos-basicos')"
                   :error-messages="getFieldError('dni')"
                 />
               </VCol>
@@ -966,6 +1023,7 @@ watch(activeTab, () => {
                   v-model="values.nombres"
                   label="Nombres *"
                   maxlength="100"
+                  :readonly="sectionReadOnly('datos-basicos')"
                   :error-messages="getFieldError('nombres')"
                 />
               </VCol>
@@ -975,6 +1033,7 @@ watch(activeTab, () => {
                   v-model="values.apellidos"
                   label="Apellidos *"
                   maxlength="100"
+                  :readonly="sectionReadOnly('datos-basicos')"
                   :error-messages="getFieldError('apellidos')"
                 />
               </VCol>
@@ -984,6 +1043,7 @@ watch(activeTab, () => {
                   v-model="values.fechaNacimiento"
                   label="Fecha de nacimiento *"
                   :config="{ dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true }"
+                  :disabled="sectionReadOnly('datos-basicos')"
                   :error-messages="getFieldError('fechaNacimiento', 'fechaNacimiento')"
                 />
               </VCol>
@@ -995,6 +1055,7 @@ watch(activeTab, () => {
                   :items="sexOptions"
                   item-title="title"
                   item-value="value"
+                  :readonly="sectionReadOnly('datos-basicos')"
                   :error-messages="getFieldError('sexo', 'genero')"
                 />
               </VCol>
@@ -1004,6 +1065,7 @@ watch(activeTab, () => {
                   v-model="values.estadoCivil"
                   label="Estado civil *"
                   :items="civilStatusOptions"
+                  :readonly="sectionReadOnly('datos-basicos')"
                   :error-messages="getFieldError('estadoCivil')"
                 />
               </VCol>
@@ -1013,6 +1075,7 @@ watch(activeTab, () => {
                   v-model="values.nacionalidad"
                   label="Nacionalidad *"
                   maxlength="60"
+                  :readonly="sectionReadOnly('datos-basicos')"
                   :error-messages="getFieldError('nacionalidad')"
                 />
               </VCol>
@@ -1021,6 +1084,16 @@ watch(activeTab, () => {
           </VWindowItem>
 
           <VWindowItem value="datos-contacto">
+            <div class="d-flex justify-space-between align-center mb-4">
+              <span class="text-subtitle-1 font-weight-medium">Datos de contacto</span>
+              <div v-if="sectionEdit" class="d-flex gap-2">
+                <template v-if="editingSection === 'datos-contacto'">
+                  <VBtn size="small" variant="outlined" :disabled="saving" @click="cancelEdit">Cancelar</VBtn>
+                  <VBtn size="small" color="primary" :loading="saving" @click="submitSection">Guardar</VBtn>
+                </template>
+                <VBtn v-else size="small" color="primary" variant="tonal" prepend-icon="tabler-edit" @click="startEdit('datos-contacto')">Editar</VBtn>
+              </div>
+            </div>
             <VRow>
               <VCol cols="12" md="6">
                 <AppTextField
@@ -1028,6 +1101,7 @@ watch(activeTab, () => {
                   label="Correo electronico personal *"
                   type="email"
                   maxlength="100"
+                  :readonly="sectionReadOnly('datos-contacto')"
                   :error-messages="getFieldError('correoPersonal', 'correo')"
                 />
               </VCol>
@@ -1038,6 +1112,7 @@ watch(activeTab, () => {
                   label="Correo institucional"
                   type="email"
                   maxlength="100"
+                  :readonly="sectionReadOnly('datos-contacto')"
                   :error-messages="getFieldError('correoInstitucional')"
                 />
               </VCol>
@@ -1047,6 +1122,7 @@ watch(activeTab, () => {
                   v-model="values.celular"
                   label="Numero de celular *"
                   maxlength="9"
+                  :readonly="sectionReadOnly('datos-contacto')"
                   :error-messages="getFieldError('celular')"
                 />
               </VCol>
@@ -1057,6 +1133,7 @@ watch(activeTab, () => {
                   label="¿Vive actualmente en Perú?"
                   color="primary"
                   hide-details
+                  :readonly="sectionReadOnly('datos-contacto')"
                 />
               </VCol>
 
@@ -1066,6 +1143,7 @@ watch(activeTab, () => {
                     v-model="values.direccionActual"
                     label="Dirección actual"
                     maxlength="150"
+                    :readonly="sectionReadOnly('datos-contacto')"
                     :error-messages="getFieldError('direccionActual')"
                   />
                 </VCol>
@@ -1075,6 +1153,7 @@ watch(activeTab, () => {
                     v-model="values.departamento"
                     label="Departamento"
                     :items="departamentoOptions"
+                    :readonly="sectionReadOnly('datos-contacto')"
                     :error-messages="getFieldError('departamento')"
                   />
                 </VCol>
@@ -1085,6 +1164,7 @@ watch(activeTab, () => {
                     label="Provincia"
                     :items="provinciaOptions"
                     :disabled="!values.departamento"
+                    :readonly="sectionReadOnly('datos-contacto')"
                     :error-messages="getFieldError('provincia')"
                   />
                 </VCol>
@@ -1095,6 +1175,7 @@ watch(activeTab, () => {
                     label="Distrito"
                     :items="distritoOptions"
                     :disabled="!values.provincia"
+                    :readonly="sectionReadOnly('datos-contacto')"
                     :error-messages="getFieldError('distrito')"
                   />
                 </VCol>
@@ -1106,6 +1187,7 @@ watch(activeTab, () => {
                     v-model="values.direccionActual"
                     label="Dirección actual"
                     maxlength="150"
+                    :readonly="sectionReadOnly('datos-contacto')"
                     :error-messages="getFieldError('direccionActual')"
                   />
                 </VCol>
@@ -1115,6 +1197,7 @@ watch(activeTab, () => {
                     v-model="values.paisResidencia"
                     label="País de residencia"
                     maxlength="80"
+                    :readonly="sectionReadOnly('datos-contacto')"
                     :error-messages="getFieldError('paisResidencia')"
                   />
                 </VCol>
@@ -1125,6 +1208,7 @@ watch(activeTab, () => {
                   v-model="values.linkedin"
                   label="LinkedIn"
                   maxlength="255"
+                  :readonly="sectionReadOnly('datos-contacto')"
                   :error-messages="getFieldError('linkedin')"
                 />
               </VCol>
@@ -1134,6 +1218,7 @@ watch(activeTab, () => {
                   v-model="values.portafolio"
                   label="Portafolio"
                   maxlength="255"
+                  :readonly="sectionReadOnly('datos-contacto')"
                   :error-messages="getFieldError('portafolio')"
                 />
               </VCol>
@@ -1141,9 +1226,26 @@ watch(activeTab, () => {
           </VWindowItem>
 
           <VWindowItem value="resumen-academico">
+            <div class="d-flex justify-space-between align-center mb-4">
+              <span class="text-subtitle-1 font-weight-medium">Datos académicos</span>
+              <div v-if="sectionEdit" class="d-flex gap-2">
+                <template v-if="editingSection === 'resumen-academico'">
+                  <VBtn size="small" variant="outlined" :disabled="saving" @click="cancelEdit">Cancelar</VBtn>
+                  <VBtn size="small" color="primary" :loading="saving" @click="submitSection">Guardar</VBtn>
+                </template>
+                <VBtn v-else size="small" color="primary" variant="tonal" prepend-icon="tabler-edit" @click="startEdit('resumen-academico')">Editar</VBtn>
+              </div>
+            </div>
             <VRow>
               <VCol cols="12" md="6">
+                <AppTextField
+                  v-if="sectionEdit"
+                  :model-value="facultadNombre"
+                  label="Facultad"
+                  readonly
+                />
                 <AppSelect
+                  v-else
                   v-model="values.facultadId"
                   label="Facultad"
                   :items="facultyOptions"
@@ -1154,7 +1256,14 @@ watch(activeTab, () => {
               </VCol>
 
               <VCol cols="12" md="6">
+                <AppTextField
+                  v-if="sectionEdit"
+                  :model-value="escuelaNombre"
+                  label="Escuela profesional"
+                  readonly
+                />
                 <AppSelect
+                  v-else
                   v-model="values.escuelaProfesionalId"
                   label="Escuela profesional"
                   :items="professionalSchoolOptions"
@@ -1169,6 +1278,7 @@ watch(activeTab, () => {
                   v-model="values.fechaIngreso"
                   label="Fecha de ingreso"
                   :config="{ dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true }"
+                  :disabled="sectionReadOnly('resumen-academico')"
                   :error-messages="getFieldError('fechaIngreso', 'anioIngreso')"
                 />
               </VCol>
@@ -1178,6 +1288,7 @@ watch(activeTab, () => {
                   v-model="values.fechaEgreso"
                   label="Fecha de egreso"
                   :config="{ dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true, minDate: values.fechaIngreso || undefined }"
+                  :disabled="sectionReadOnly('resumen-academico')"
                   :error-messages="getFieldError('fechaEgreso', 'anioEgreso')"
                 />
               </VCol>
@@ -1189,13 +1300,30 @@ watch(activeTab, () => {
               <div class="text-subtitle-1 font-weight-medium">
                 Grados registrados
               </div>
-              <VBtn
-                color="primary"
-                prepend-icon="tabler-plus"
-                @click="openCreateDegreeDialog"
-              >
-                Agregar grado
-              </VBtn>
+              <div class="d-flex gap-2">
+                <VBtn
+                  v-if="!sectionEdit || editingSection === 'grados'"
+                  color="primary"
+                  prepend-icon="tabler-plus"
+                  @click="openCreateDegreeDialog"
+                >
+                  Agregar grado
+                </VBtn>
+                <VBtn
+                  v-if="sectionEdit && editingSection !== 'grados'"
+                  size="small"
+                  color="primary"
+                  variant="tonal"
+                  prepend-icon="tabler-edit"
+                  @click="startEdit('grados')"
+                >
+                  Editar
+                </VBtn>
+                <template v-if="sectionEdit && editingSection === 'grados'">
+                  <VBtn size="small" variant="outlined" @click="cancelEdit">Cancelar</VBtn>
+                  <VBtn size="small" color="primary" :loading="saving" @click="submitSection">Guardar</VBtn>
+                </template>
+              </div>
             </div>
 
             <VAlert
@@ -1224,22 +1352,24 @@ watch(activeTab, () => {
                   <td>{{ row.fechaGrado }}</td>
                   <td>{{ row.universidad }}</td>
                   <td class="text-right">
-                    <VBtn
-                      size="small"
-                      variant="text"
-                      color="primary"
-                      @click="openEditDegreeDialog(row.index)"
-                    >
-                      Editar
-                    </VBtn>
-                    <VBtn
-                      size="small"
-                      variant="text"
-                      color="error"
-                      @click="removeDegree(row.index)"
-                    >
-                      Eliminar
-                    </VBtn>
+                    <template v-if="!sectionEdit || editingSection === 'grados'">
+                      <VBtn
+                        size="small"
+                        variant="text"
+                        color="primary"
+                        @click="openEditDegreeDialog(row.index)"
+                      >
+                        Editar
+                      </VBtn>
+                      <VBtn
+                        size="small"
+                        variant="text"
+                        color="error"
+                        @click="removeDegree(row.index)"
+                      >
+                        Eliminar
+                      </VBtn>
+                    </template>
                   </td>
                 </tr>
               </tbody>
@@ -1251,13 +1381,30 @@ watch(activeTab, () => {
               <div class="text-subtitle-1 font-weight-medium">
                 Idiomas registrados
               </div>
-              <VBtn
-                color="primary"
-                prepend-icon="tabler-plus"
-                @click="openCreateLanguageDialog"
-              >
-                Agregar idioma
-              </VBtn>
+              <div class="d-flex gap-2">
+                <VBtn
+                  v-if="!sectionEdit || editingSection === 'idiomas'"
+                  color="primary"
+                  prepend-icon="tabler-plus"
+                  @click="openCreateLanguageDialog"
+                >
+                  Agregar idioma
+                </VBtn>
+                <VBtn
+                  v-if="sectionEdit && editingSection !== 'idiomas'"
+                  size="small"
+                  color="primary"
+                  variant="tonal"
+                  prepend-icon="tabler-edit"
+                  @click="startEdit('idiomas')"
+                >
+                  Editar
+                </VBtn>
+                <template v-if="sectionEdit && editingSection === 'idiomas'">
+                  <VBtn size="small" variant="outlined" @click="cancelEdit">Cancelar</VBtn>
+                  <VBtn size="small" color="primary" :loading="saving" @click="submitSection">Guardar</VBtn>
+                </template>
+              </div>
             </div>
 
             <VAlert
@@ -1288,22 +1435,24 @@ watch(activeTab, () => {
                   <td>{{ row.aprendizaje }}</td>
                   <td>{{ row.vigencia }}</td>
                   <td class="text-right">
-                    <VBtn
-                      size="small"
-                      variant="text"
-                      color="primary"
-                      @click="openEditLanguageDialog(row.index)"
-                    >
-                      Editar
-                    </VBtn>
-                    <VBtn
-                      size="small"
-                      variant="text"
-                      color="error"
-                      @click="removeLanguage(row.index)"
-                    >
-                      Eliminar
-                    </VBtn>
+                    <template v-if="!sectionEdit || editingSection === 'idiomas'">
+                      <VBtn
+                        size="small"
+                        variant="text"
+                        color="primary"
+                        @click="openEditLanguageDialog(row.index)"
+                      >
+                        Editar
+                      </VBtn>
+                      <VBtn
+                        size="small"
+                        variant="text"
+                        color="error"
+                        @click="removeLanguage(row.index)"
+                      >
+                        Eliminar
+                      </VBtn>
+                    </template>
                   </td>
                 </tr>
               </tbody>
@@ -1315,13 +1464,30 @@ watch(activeTab, () => {
               <div class="text-subtitle-1 font-weight-medium">
                 Formacion complementaria
               </div>
-              <VBtn
-                color="primary"
-                prepend-icon="tabler-plus"
-                @click="openCreateComplementaryTrainingDialog"
-              >
-                Agregar formacion
-              </VBtn>
+              <div class="d-flex gap-2">
+                <VBtn
+                  v-if="!sectionEdit || editingSection === 'formacion-complementaria'"
+                  color="primary"
+                  prepend-icon="tabler-plus"
+                  @click="openCreateComplementaryTrainingDialog"
+                >
+                  Agregar formacion
+                </VBtn>
+                <VBtn
+                  v-if="sectionEdit && editingSection !== 'formacion-complementaria'"
+                  size="small"
+                  color="primary"
+                  variant="tonal"
+                  prepend-icon="tabler-edit"
+                  @click="startEdit('formacion-complementaria')"
+                >
+                  Editar
+                </VBtn>
+                <template v-if="sectionEdit && editingSection === 'formacion-complementaria'">
+                  <VBtn size="small" variant="outlined" @click="cancelEdit">Cancelar</VBtn>
+                  <VBtn size="small" color="primary" :loading="saving" @click="submitSection">Guardar</VBtn>
+                </template>
+              </div>
             </div>
 
             <VAlert
@@ -1350,22 +1516,24 @@ watch(activeTab, () => {
                   <td>{{ row.institucion }}</td>
                   <td>{{ row.vigencia }}</td>
                   <td class="text-right">
-                    <VBtn
-                      size="small"
-                      variant="text"
-                      color="primary"
-                      @click="openEditComplementaryTrainingDialog(row.index)"
-                    >
-                      Editar
-                    </VBtn>
-                    <VBtn
-                      size="small"
-                      variant="text"
-                      color="error"
-                      @click="removeComplementaryTraining(row.index)"
-                    >
-                      Eliminar
-                    </VBtn>
+                    <template v-if="!sectionEdit || editingSection === 'formacion-complementaria'">
+                      <VBtn
+                        size="small"
+                        variant="text"
+                        color="primary"
+                        @click="openEditComplementaryTrainingDialog(row.index)"
+                      >
+                        Editar
+                      </VBtn>
+                      <VBtn
+                        size="small"
+                        variant="text"
+                        color="error"
+                        @click="removeComplementaryTraining(row.index)"
+                      >
+                        Eliminar
+                      </VBtn>
+                    </template>
                   </td>
                 </tr>
               </tbody>
@@ -1377,13 +1545,30 @@ watch(activeTab, () => {
               <div class="text-subtitle-1 font-weight-medium">
                 Trayectoria laboral
               </div>
-              <VBtn
-                color="primary"
-                prepend-icon="tabler-plus"
-                @click="openCreateWorkTrajectoryDialog"
-              >
-                Agregar trayectoria
-              </VBtn>
+              <div class="d-flex gap-2">
+                <VBtn
+                  v-if="!sectionEdit || editingSection === 'trayectoria-laboral'"
+                  color="primary"
+                  prepend-icon="tabler-plus"
+                  @click="openCreateWorkTrajectoryDialog"
+                >
+                  Agregar trayectoria
+                </VBtn>
+                <VBtn
+                  v-if="sectionEdit && editingSection !== 'trayectoria-laboral'"
+                  size="small"
+                  color="primary"
+                  variant="tonal"
+                  prepend-icon="tabler-edit"
+                  @click="startEdit('trayectoria-laboral')"
+                >
+                  Editar
+                </VBtn>
+                <template v-if="sectionEdit && editingSection === 'trayectoria-laboral'">
+                  <VBtn size="small" variant="outlined" @click="cancelEdit">Cancelar</VBtn>
+                  <VBtn size="small" color="primary" :loading="saving" @click="submitSection">Guardar</VBtn>
+                </template>
+              </div>
             </div>
 
             <VAlert
@@ -1416,22 +1601,24 @@ watch(activeTab, () => {
                   <td>{{ row.vigencia }}</td>
                   <td>{{ row.estado }}</td>
                   <td class="text-right">
-                    <VBtn
-                      size="small"
-                      variant="text"
-                      color="primary"
-                      @click="openEditWorkTrajectoryDialog(row.index)"
-                    >
-                      Editar
-                    </VBtn>
-                    <VBtn
-                      size="small"
-                      variant="text"
-                      color="error"
-                      @click="removeWorkTrajectory(row.index)"
-                    >
-                      Eliminar
-                    </VBtn>
+                    <template v-if="!sectionEdit || editingSection === 'trayectoria-laboral'">
+                      <VBtn
+                        size="small"
+                        variant="text"
+                        color="primary"
+                        @click="openEditWorkTrajectoryDialog(row.index)"
+                      >
+                        Editar
+                      </VBtn>
+                      <VBtn
+                        size="small"
+                        variant="text"
+                        color="error"
+                        @click="removeWorkTrajectory(row.index)"
+                      >
+                        Eliminar
+                      </VBtn>
+                    </template>
                   </td>
                 </tr>
               </tbody>

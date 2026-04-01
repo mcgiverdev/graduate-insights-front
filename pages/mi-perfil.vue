@@ -78,6 +78,7 @@ onMounted(async () => {
       back-route="/"
       page-title="Mi Perfil Academico"
       page-subtitle="Completa y actualiza tu informacion personal, contacto y trayectoria academica."
+      section-edit
     />
   </div>
 </template>

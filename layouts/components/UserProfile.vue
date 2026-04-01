@@ -148,7 +148,7 @@ onMounted(() => {
           <VDivider class="my-2" />
 
           <!-- 👉 Logout -->
-          <VListItem @click="logout">
+          <VListItem class="logout-item" @click="logout">
             <template #prepend>
               <VIcon
                 class="me-2"
@@ -165,3 +165,14 @@ onMounted(() => {
     </VAvatar>
   </VBadge>
 </template>
+
+<style scoped>
+.logout-item:hover {
+  color: rgb(var(--v-theme-error)) !important;
+}
+
+.logout-item:hover :deep(.v-icon),
+.logout-item:hover :deep(.v-list-item-title) {
+  color: rgb(var(--v-theme-error)) !important;
+}
+</style>
