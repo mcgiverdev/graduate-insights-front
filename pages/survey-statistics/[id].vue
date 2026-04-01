@@ -7,7 +7,7 @@ import {
 } from 'chart.js'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { Doughnut } from 'vue-chartjs'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useSnackbar } from '@/composables/useSnackbar'
 import {
   QuestionChartViewer,
@@ -24,10 +24,16 @@ ChartJS.register(ArcElement, Tooltip, Legend)
 definePageMeta({
   middleware: 'auth',
   layout: 'default',
+  path: '/estadisticas-encuesta/:id',
 })
 
 const route = useRoute()
+const router = useRouter()
 const { showSnackbar } = useSnackbar()
+
+function goBackToSurveys() {
+  router.push({ path: '/encuestas' })
+}
 
 const {
   statistics,
@@ -208,7 +214,7 @@ useHead({
       <VBtn
         variant="text"
         prepend-icon="tabler-arrow-left"
-        @click="$router.push('/encuestas')"
+        @click="goBackToSurveys"
       >
         Volver a Encuestas
       </VBtn>

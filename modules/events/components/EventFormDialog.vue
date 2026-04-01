@@ -92,7 +92,7 @@ const closeDialog = () => {
           @submit="handleSubmit"
         >
           <VRow>
-            <VCol cols="12" md="6">
+            <VCol cols="12" md="12">
               <Field
                 name="nombre"
                 v-slot="{ field, errorMessage }"

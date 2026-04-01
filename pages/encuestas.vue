@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { computed, onUnmounted, watch } from 'vue'
 import RoleGuard from '@/components/RoleGuard.vue'
 import { ROLES } from '@/composables/useRoles'
 import { useSnackbar } from '@/composables/useSnackbar'
-import { SurveyBuilder, SurveyList, useSurveysPage } from '@/src/features/surveys'
+import { SurveyBuilder, SurveyList, SurveyPreview, useSurveysPage } from '@/src/features/surveys'
+import { useLayoutConfigStore } from '@layouts/stores/config'
 
 definePageMeta({
   middleware: ['auth', 'role'],
@@ -14,13 +16,40 @@ const { snackbar } = useSnackbar()
 const {
   currentView,
   editingSurvey,
+  previewSurvey,
   showCreateForm,
   showEditForm,
   backToList,
   handleSurveySaved,
   handleViewSurvey,
+  closePreview,
   handleDuplicateSurvey,
 } = useSurveysPage()
+
+const isPreviewOpen = computed({
+  get: () => previewSurvey.value !== null,
+  set: (val) => { if (!val) closePreview() },
+})
+
+// Forzar ancho completo (fluid) al entrar en modo editor y restaurar al salir.
+// Se usa useLayoutConfigStore directamente porque es la fuente que lee el layout.
+const layoutConfig = useLayoutConfigStore()
+let previousContentWidth = layoutConfig.appContentWidth
+
+watch(currentView, (view) => {
+  if (view !== 'list') {
+    previousContentWidth = layoutConfig.appContentWidth
+    layoutConfig.appContentWidth = 'fluid'
+  }
+  else {
+    layoutConfig.appContentWidth = previousContentWidth
+  }
+}, { immediate: true })
+
+// Restaurar si el usuario navega fuera de la página sin volver al listado
+onUnmounted(() => {
+  layoutConfig.appContentWidth = previousContentWidth
+})
 </script>
 
 <template>
@@ -68,6 +97,55 @@ const {
       </VCard>
     </template>
   </RoleGuard>
+
+  <!-- Diálogo de previsualización de encuesta -->
+  <VDialog
+    v-model="isPreviewOpen"
+    max-width="760"
+    scrollable
+  >
+    <VCard v-if="previewSurvey">
+      <VCardTitle class="d-flex align-center justify-space-between pa-4 pb-2">
+        <div class="d-flex align-center gap-2">
+          <VIcon icon="tabler-eye" color="primary" />
+          <span>Vista Previa — {{ previewSurvey.title }}</span>
+        </div>
+        <VBtn
+          icon
+          variant="text"
+          size="small"
+          @click="closePreview"
+        >
+          <VIcon icon="tabler-x" />
+        </VBtn>
+      </VCardTitle>
+      <VDivider />
+      <VCardText class="pa-4">
+        <SurveyPreview
+          :survey="previewSurvey"
+          :title="previewSurvey.title"
+          :description="previewSurvey.description"
+        />
+      </VCardText>
+      <VDivider />
+      <VCardActions class="justify-end pa-3">
+        <VBtn
+          variant="tonal"
+          color="primary"
+          prepend-icon="tabler-edit"
+          @click="() => { closePreview(); showEditForm(previewSurvey!) }"
+        >
+          Editar encuesta
+        </VBtn>
+        <VBtn
+          variant="outlined"
+          @click="closePreview"
+        >
+          Cerrar
+        </VBtn>
+      </VCardActions>
+    </VCard>
+  </VDialog>
 
   <!-- Notificaciones -->
   <VSnackbar

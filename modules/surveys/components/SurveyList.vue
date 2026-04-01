@@ -279,7 +279,7 @@ onMounted(() => {
           </VBtn>
 
           <StatisticsButton
-            v-if="item.id && item.status === SurveyStatus.ACTIVE"
+            v-if="item.id"
             :survey-id="item.id"
             variant="outlined"
             size="small"

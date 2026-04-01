@@ -1,6 +1,7 @@
 export {
   SurveyBuilder,
   SurveyList,
+  SurveyPreview,
   useSurveysPage,
   useSurveyService,
 } from '../../../modules/surveys/public-api'

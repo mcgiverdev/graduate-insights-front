@@ -6,6 +6,7 @@ type SurveysView = 'list' | 'create' | 'edit'
 export const useSurveysPage = () => {
   const currentView = ref<SurveysView>('list')
   const editingSurvey = ref<Survey | null>(null)
+  const previewSurvey = ref<Survey | null>(null)
 
   const showCreateForm = () => {
     editingSurvey.value = null
@@ -27,7 +28,11 @@ export const useSurveysPage = () => {
   }
 
   const handleViewSurvey = (survey: Survey) => {
-    showEditForm(survey)
+    previewSurvey.value = survey
+  }
+
+  const closePreview = () => {
+    previewSurvey.value = null
   }
 
   const handleDuplicateSurvey = (survey: Survey) => {
@@ -49,11 +54,13 @@ export const useSurveysPage = () => {
   return {
     currentView,
     editingSurvey,
+    previewSurvey,
     showCreateForm,
     showEditForm,
     backToList,
     handleSurveySaved,
     handleViewSurvey,
+    closePreview,
     handleDuplicateSurvey,
   }
 }

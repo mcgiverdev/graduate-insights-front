@@ -743,8 +743,6 @@ function togglePreview() {
 <style scoped>
 .survey-builder {
   margin-block: 0;
-  margin-inline: auto;
-  max-inline-size: 1200px;
 }
 
 .questions-list {

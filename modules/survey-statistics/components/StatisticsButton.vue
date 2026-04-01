@@ -35,8 +35,7 @@ function navigateToStatistics() {
   }
 
   router.push({
-    name: 'survey-statistics-id',
-    params: { id: props.surveyId },
+    path: `/estadisticas-encuesta/${props.surveyId}`,
   })
 }
 </script>
@@ -61,5 +60,6 @@ function navigateToStatistics() {
       />
       {{ buttonText }}
     </template>
+    <slot />
   </VBtn>
 </template>

@@ -108,18 +108,36 @@ watch(questionForm, (newVal) => {
   }
 }, { deep: true })
 
-// Watch para actualizar cuando la prop question cambie (modo inline)
+// Watch para actualizar cuando la prop question cambie externamente (p.ej. al reordenar preguntas).
+// Se omite la re-inicialización si los valores ya coinciden con el estado local para evitar el loop:
+// usuario escribe → emit → padre actualiza questions[i] → prop cambia → Watch reinicializa → bug
 watch(() => props.question, (newQuestion) => {
-  if (newQuestion) {
-    questionForm.value = {
-      question_text: newQuestion.question_text,
-      question_type: newQuestion.question_type,
-      required: newQuestion.required,
-      options: newQuestion.options.map(opt => ({
-        option_text: opt.option_text,
-        order_number: opt.order_number,
-      })),
-    }
+  if (!newQuestion)
+    return
+
+  const f = questionForm.value
+
+  const sameText = newQuestion.question_text === f.question_text
+  const sameType = newQuestion.question_type === f.question_type
+  const sameRequired = newQuestion.required === f.required
+  const sameOptions
+    = newQuestion.options.length === f.options.length
+    && newQuestion.options.every((opt, i) =>
+      opt.option_text === f.options[i]?.option_text
+      && opt.order_number === f.options[i]?.order_number,
+    )
+
+  if (sameText && sameType && sameRequired && sameOptions)
+    return
+
+  questionForm.value = {
+    question_text: newQuestion.question_text,
+    question_type: newQuestion.question_type,
+    required: newQuestion.required,
+    options: newQuestion.options.map(opt => ({
+      option_text: opt.option_text,
+      order_number: opt.order_number,
+    })),
   }
 }, { deep: true })
 
@@ -223,7 +241,6 @@ defineExpose({
             >
               <template #item="{ props: itemProps, item }">
                 <VListItem v-bind="itemProps">
-                  <VListItemTitle>{{ item.raw.title }}</VListItemTitle>
                   <VListItemSubtitle>{{ item.raw.description }}</VListItemSubtitle>
                 </VListItem>
               </template>
@@ -403,7 +420,6 @@ defineExpose({
         >
           <template #item="{ props: itemProps, item }">
             <VListItem v-bind="itemProps">
-              <VListItemTitle>{{ item.raw.title }}</VListItemTitle>
               <VListItemSubtitle>{{ item.raw.description }}</VListItemSubtitle>
             </VListItem>
           </template>
