@@ -111,7 +111,7 @@ const dashboardSubtitle = computed(() => {
   if (isDirector.value)
     return 'Resumen de encuestas y estadísticas del sistema'
   if (isEmployer.value)
-    return 'Gestiona tus ofertas laborales y consulta perfiles de graduados'
+    return 'Publica ofertas laborales y conecta con egresados'
   if (isGraduate.value)
     return 'Accede a tus encuestas pendientes y gestiona tu perfil profesional'
 
@@ -709,7 +709,7 @@ watch(isGraduate, async newIsGraduate => {
                     ¡Bienvenido {{ user?.name }}!
                   </h2>
                   <p class="text-body-1 mb-0">
-                    Tu plataforma para encontrar el talento perfecto
+                    Publica ofertas laborales y conecta con los mejores egresados
                   </p>
                 </div>
               </div>
@@ -717,11 +717,10 @@ watch(isGraduate, async newIsGraduate => {
           </VCard>
         </VCol>
 
-        <!-- Quick Actions for Employers -->
+        <!-- Acción principal: Gestionar Ofertas -->
         <VCol
           cols="12"
           md="6"
-          lg="3"
         >
           <VCard class="text-center h-100">
             <VCardText class="pa-6">
@@ -732,33 +731,33 @@ watch(isGraduate, async newIsGraduate => {
                 class="mb-4"
               >
                 <VIcon
-                  icon="tabler-users"
+                  icon="tabler-clipboard-plus"
                   size="28"
                 />
               </VAvatar>
               <h3 class="text-h6 mb-2">
-                Explorar Graduados
+                Mis Ofertas Laborales
               </h3>
               <p class="text-body-2 text-medium-emphasis mb-4">
-                Encuentra perfiles de graduados que se ajusten a tus necesidades
+                Crea y administra tus publicaciones de empleo para atraer egresados calificados
               </p>
               <VBtn
                 color="primary"
-                variant="outlined"
-                to="/egresados"
+                variant="elevated"
+                to="/mis-ofertas-empleo"
               >
-                Ver Graduados
+                Gestionar Ofertas
               </VBtn>
             </VCardText>
           </VCard>
         </VCol>
 
+        <!-- Información de ayuda -->
         <VCol
           cols="12"
           md="6"
-          lg="3"
         >
-          <VCard class="text-center h-100">
+          <VCard class="h-100">
             <VCardText class="pa-6">
               <VAvatar
                 color="success"
@@ -767,93 +766,30 @@ watch(isGraduate, async newIsGraduate => {
                 class="mb-4"
               >
                 <VIcon
-                  icon="tabler-file-text"
+                  icon="tabler-info-circle"
                   size="28"
                 />
               </VAvatar>
-              <h3 class="text-h6 mb-2">
-                Encuestas
+              <h3 class="text-h6 mb-3">
+                ¿Cómo publicar una oferta?
               </h3>
-              <p class="text-body-2 text-medium-emphasis mb-4">
-                Accede y gestiona encuestas para obtener insights valiosos
-              </p>
-              <VBtn
-                color="success"
-                variant="outlined"
-                to="/encuestas"
-              >
-                Ver Encuestas
-              </VBtn>
-            </VCardText>
-          </VCard>
-        </VCol>
-
-        <VCol
-          cols="12"
-          md="6"
-          lg="3"
-        >
-          <VCard class="text-center h-100">
-            <VCardText class="pa-6">
-              <VAvatar
-                color="info"
-                variant="tonal"
-                size="56"
-                class="mb-4"
-              >
-                <VIcon
-                  icon="tabler-building"
-                  size="28"
-                />
-              </VAvatar>
-              <h3 class="text-h6 mb-2">
-                Empresas
-              </h3>
-              <p class="text-body-2 text-medium-emphasis mb-4">
-                Gestiona la información de tu empresa y oportunidades laborales
-              </p>
-              <VBtn
-                color="info"
-                variant="outlined"
-                to="/empleadores"
-              >
-                Ver Empresas
-              </VBtn>
-            </VCardText>
-          </VCard>
-        </VCol>
-
-        <VCol
-          cols="12"
-          md="6"
-          lg="3"
-        >
-          <VCard class="text-center h-100">
-            <VCardText class="pa-6">
-              <VAvatar
-                color="warning"
-                variant="tonal"
-                size="56"
-                class="mb-4"
-              >
-                <VIcon
-                  icon="tabler-chart-bar"
-                  size="28"
-                />
-              </VAvatar>
-              <h3 class="text-h6 mb-2">
-                Estadísticas
-              </h3>
-              <p class="text-body-2 text-medium-emphasis mb-4">
-                Analiza tendencias y estadísticas del mercado laboral
-              </p>
-              <VBtn
-                color="warning"
-                variant="outlined"
-                disabled
-              >
-                Próximamente
-              </VBtn>
+              <VList density="compact">
+                <VListItem prepend-icon="tabler-circle-check" class="px-0">
+                  <VListItemTitle class="text-body-2">
+                    Ve a "Mis Ofertas" en el menú lateral
+                  </VListItemTitle>
+                </VListItem>
+                <VListItem prepend-icon="tabler-circle-check" class="px-0">
+                  <VListItemTitle class="text-body-2">
+                    Haz clic en "Nueva oferta" y completa el formulario
+                  </VListItemTitle>
+                </VListItem>
+                <VListItem prepend-icon="tabler-circle-check" class="px-0">
+                  <VListItemTitle class="text-body-2">
+                    Los egresados recibirán una notificación automáticamente
+                  </VListItemTitle>
+                </VListItem>
+              </VList>
             </VCardText>
           </VCard>
         </VCol>

@@ -59,9 +59,21 @@ const questionData = computed(() => {
   return statistics.value.question_statistics.find(q => q.question_id === props.questionId)
 })
 
-// Verificar si es una pregunta de texto
+// Tipos que no tienen gráfico (respuesta libre)
+const TEXT_BASED_TYPES = ['TEXT', 'EMAIL', 'PHONE', 'DATE']
+
+function translateType(type?: string): string {
+  const types: Record<string, string> = {
+    TEXT: 'Texto', EMAIL: 'Email', PHONE: 'Teléfono', DATE: 'Fecha',
+    YES_NO: 'Sí/No', SCALE: 'Escala', NUMBER: 'Número',
+    SINGLE_CHOICE: 'Opción Única', MULTIPLE_CHOICE: 'Opción Múltiple',
+  }
+
+  return types[type || ''] || type || ''
+}
+
 const isTextQuestion = computed(() => {
-  return questionData.value?.type === 'TEXT'
+  return TEXT_BASED_TYPES.includes(questionData.value?.type || '')
 })
 
 // Chart data procesado desde la API
@@ -289,7 +301,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Pregunta de Texto -->
+      <!-- Pregunta de respuesta libre (texto, email, teléfono, fecha) -->
       <div v-else-if="isTextQuestion">
         <TextQuestionViewer
           v-if="questionData && questionData.type === 'TEXT'"
@@ -302,11 +314,13 @@ onMounted(() => {
           <VIcon
             size="64"
             color="grey-lighten-1"
-          >
-            tabler-text
-          </VIcon>
-          <div class="mt-2 text-grey">
-            No se encontraron datos para esta pregunta de texto
+            icon="tabler-text-caption"
+          />
+          <div class="mt-4 text-h6 text-medium-emphasis">
+            Pregunta de respuesta libre
+          </div>
+          <div class="mt-2 text-body-2 text-medium-emphasis">
+            Las preguntas de tipo {{ translateType(questionData?.type) }} no generan gráficos de distribución.
           </div>
         </div>
       </div>

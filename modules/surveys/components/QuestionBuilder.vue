@@ -57,6 +57,27 @@ const needsOptions = computed(() => {
   ].includes(questionForm.value.question_type)
 })
 
+// Auto-poblar opciones por defecto para YES_NO y SCALE cuando están vacías
+function autoPopulateSpecialOptions() {
+  if (questionForm.value.options.length > 0)
+    return
+  if (questionForm.value.question_type === QuestionType.YES_NO) {
+    questionForm.value.options = [
+      { option_text: 'Sí', order_number: 1 },
+      { option_text: 'No', order_number: 2 },
+    ]
+  }
+  else if (questionForm.value.question_type === QuestionType.SCALE) {
+    questionForm.value.options = [
+      { option_text: '1 - Muy malo', order_number: 1 },
+      { option_text: '2 - Malo', order_number: 2 },
+      { option_text: '3 - Regular', order_number: 3 },
+      { option_text: '4 - Bueno', order_number: 4 },
+      { option_text: '5 - Muy bueno', order_number: 5 },
+    ]
+  }
+}
+
 // Inicializar formulario si hay una pregunta para editar
 if (props.question) {
   questionForm.value = {
@@ -68,6 +89,7 @@ if (props.question) {
       order_number: opt.order_number,
     })),
   }
+  autoPopulateSpecialOptions()
 }
 
 // Watch para manejar cambios en el tipo de pregunta
@@ -76,24 +98,9 @@ watch(() => questionForm.value.question_type, (newType, oldType) => {
   if (!needsOptions.value && questionForm.value.options.length > 0)
     questionForm.value.options = []
 
-  // Si cambia a YES_NO, crear opciones predeterminadas
-  if (newType === QuestionType.YES_NO && oldType !== QuestionType.YES_NO) {
-    questionForm.value.options = [
-      { option_text: 'Si', order_number: 1 },
-      { option_text: 'No', order_number: 2 },
-    ]
-  }
-
-  // Si cambia a SCALE, crear opciones predeterminadas de escala 1-5
-  if (newType === QuestionType.SCALE && oldType !== QuestionType.SCALE) {
-    questionForm.value.options = [
-      { option_text: '1 - Muy insatisfecho', order_number: 1 },
-      { option_text: '2 - Insatisfecho', order_number: 2 },
-      { option_text: '3 - Neutral', order_number: 3 },
-      { option_text: '4 - Satisfecho', order_number: 4 },
-      { option_text: '5 - Muy satisfecho', order_number: 5 },
-    ]
-  }
+  // Si cambia a YES_NO o SCALE, auto-poblar opciones por defecto
+  if (newType !== oldType)
+    autoPopulateSpecialOptions()
 })
 
 // En modo inline, emitir cambios al padre cuando el formulario cambia
@@ -139,6 +146,7 @@ watch(() => props.question, (newQuestion) => {
       order_number: opt.order_number,
     })),
   }
+  autoPopulateSpecialOptions()
 }, { deep: true })
 
 // Metodos para manejar opciones

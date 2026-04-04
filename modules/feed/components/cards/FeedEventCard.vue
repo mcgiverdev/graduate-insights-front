@@ -1,12 +1,21 @@
 <script setup lang="ts">
 import type { FeedItem } from '../../types'
-import { formatReadableDate } from '@/utils/dateUtils'
+import { formatDateOnly } from '@/utils/dateUtils'
 
 interface Props {
   event: FeedItem
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
+
+function irAlEvento() {
+  if (!props.event.enlace_inscripcion)
+    return
+  const url = props.event.enlace_inscripcion.startsWith('http')
+    ? props.event.enlace_inscripcion
+    : `https://${props.event.enlace_inscripcion}`
+  window.open(url, '_blank')
+}
 </script>
 
 <template>
@@ -25,7 +34,7 @@ defineProps<Props>()
         {{ event.titulo }}
       </VCardTitle>
       <VCardSubtitle v-if="event.tipo_evento">
-        {{ event.tipo_evento }} · {{ formatReadableDate(event.fecha_creacion) }}
+        {{ event.tipo_evento }} · {{ formatDateOnly(event.fecha_creacion) }}
       </VCardSubtitle>
     </VCardItem>
 
@@ -38,15 +47,18 @@ defineProps<Props>()
     <VDivider />
 
     <VCardText class="d-flex align-center justify-space-between pt-2">
-      <div class="d-flex align-center">
-        <VIcon
-          icon="tabler-user"
-          size="20"
-          class="me-2"
-          color="secondary"
-        />
-        <span class="text-secondary text-body-2">{{ event.fuente }}</span>
-      </div>
+      <VBtn
+        v-if="event.enlace_inscripcion"
+        color="primary"
+        variant="elevated"
+        size="small"
+        prepend-icon="tabler-external-link"
+        @click="irAlEvento"
+      >
+        Ver evento
+      </VBtn>
+      <div v-else />
+
       <VChip
         v-if="event.tipo_evento"
         color="primary"

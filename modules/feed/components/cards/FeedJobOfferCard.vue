@@ -1,12 +1,23 @@
 <script setup lang="ts">
 import type { FeedItem } from '../../types'
-import { formatReadableDate } from '@/utils/dateUtils'
+import { formatDateOnly } from '@/utils/dateUtils'
+import { useRoles } from '@/composables/useRoles'
 
 interface Props {
   jobOffer: FeedItem
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
+const { isGraduate } = useRoles()
+
+function postular() {
+  if (!props.jobOffer.link)
+    return
+  const url = props.jobOffer.link.startsWith('http')
+    ? props.jobOffer.link
+    : `https://${props.jobOffer.link}`
+  window.open(url, '_blank')
+}
 </script>
 
 <template>
@@ -25,7 +36,7 @@ defineProps<Props>()
         {{ jobOffer.titulo }}
       </VCardTitle>
       <VCardSubtitle v-if="jobOffer.empresa">
-        {{ jobOffer.empresa }} · {{ formatReadableDate(jobOffer.fecha_creacion) }}
+        {{ jobOffer.empresa }} · {{ formatDateOnly(jobOffer.fecha_creacion) }}
       </VCardSubtitle>
     </VCardItem>
 
@@ -38,15 +49,18 @@ defineProps<Props>()
     <VDivider />
 
     <VCardText class="d-flex align-center justify-space-between pt-2">
-      <div class="d-flex align-center">
-        <VIcon
-          icon="tabler-building"
-          size="20"
-          class="me-2"
-          color="secondary"
-        />
-        <span class="text-secondary text-body-2">{{ jobOffer.fuente }}</span>
-      </div>
+      <VBtn
+        v-if="isGraduate && jobOffer.link"
+        color="success"
+        variant="elevated"
+        size="small"
+        prepend-icon="tabler-send"
+        @click="postular"
+      >
+        Postular
+      </VBtn>
+      <div v-else />
+
       <VChip
         color="success"
         size="small"

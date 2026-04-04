@@ -13,24 +13,5 @@
       />
       Gestión Educativa
     </span>
-    <!-- 👉 Footer: right content -->
-    <span class="d-md-flex gap-x-4 text-primary d-none">
-      <a
-        href="javascript:void(0)"
-        target="noopener noreferrer"
-      >Privacidad</a>
-      <a
-        href="javascript:void(0)"
-        target="noopener noreferrer"
-      >Términos</a>
-      <a
-        href="javascript:void(0)"
-        target="noopener noreferrer"
-      >Soporte</a>
-      <a
-        href="javascript:void(0)"
-        target="noopener noreferrer"
-      >Ayuda</a>
-    </span>
   </div>
 </template>

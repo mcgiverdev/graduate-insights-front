@@ -56,6 +56,7 @@ export interface GraduateSurveyListItem {
   completed: boolean
   created_date: string
   question_count: number
+  status?: string
 }
 
 // Interfaz para el detalle completo de la encuesta

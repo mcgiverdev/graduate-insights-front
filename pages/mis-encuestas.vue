@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import RoleGuard from '@/components/RoleGuard.vue'
 import { ROLES } from '@/composables/useRoles'
-import { useSnackbar } from '@/composables/useSnackbar'
 import {
   GraduateSurveyList,
   SurveyForm,
@@ -15,7 +14,6 @@ definePageMeta({
 })
 
 // Composables
-const { snackbar } = useSnackbar()
 const {
   currentView,
   selectedSurvey,
@@ -74,14 +72,6 @@ const {
     </template>
   </RoleGuard>
 
-  <!-- Notificaciones -->
-  <VSnackbar
-    v-model="snackbar.show"
-    :color="snackbar.color"
-    :timeout="snackbar.timeout"
-  >
-    {{ snackbar.text }}
-  </VSnackbar>
 </template>
 
 <style scoped>

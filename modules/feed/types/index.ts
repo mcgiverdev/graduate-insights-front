@@ -11,6 +11,8 @@ export interface FeedItem {
   estado: string
   tipo_evento?: string
   empresa?: string
+  link?: string
+  enlace_inscripcion?: string
 }
 
 export interface FeedListParams {

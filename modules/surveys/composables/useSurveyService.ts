@@ -131,9 +131,14 @@ async function createSurvey(survey: CreateSurveyRequest) {
     }
   }
   catch (error: any) {
+    const errors = error.data?.errors
+    const message = errors
+      ? Object.values(errors).join('. ')
+      : (error.data?.message || 'Error al crear la encuesta')
+
     return {
       success: false,
-      message: error.data?.message || 'Error al crear la encuesta',
+      message,
       error: error.data || error,
     }
   }
@@ -161,11 +166,14 @@ async function updateSurvey(id: number, survey: CreateSurveyRequest) {
     }
   }
   catch (error: any) {
-    console.error('Error updating survey:', error)
+    const errors = error.data?.errors
+    const message = errors
+      ? Object.values(errors).join('. ')
+      : (error.data?.message || 'Error al actualizar la encuesta')
 
     return {
       success: false,
-      message: error.data?.message || 'Error al actualizar la encuesta',
+      message,
       error: error.data || error,
     }
   }

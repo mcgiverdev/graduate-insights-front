@@ -2,7 +2,6 @@
 import { computed, onUnmounted, watch } from 'vue'
 import RoleGuard from '@/components/RoleGuard.vue'
 import { ROLES } from '@/composables/useRoles'
-import { useSnackbar } from '@/composables/useSnackbar'
 import { SurveyBuilder, SurveyList, SurveyPreview, useSurveysPage } from '@/src/features/surveys'
 import { useLayoutConfigStore } from '@layouts/stores/config'
 
@@ -12,7 +11,6 @@ definePageMeta({
 })
 
 // Composables
-const { snackbar } = useSnackbar()
 const {
   currentView,
   editingSurvey,
@@ -133,7 +131,7 @@ onUnmounted(() => {
           variant="tonal"
           color="primary"
           prepend-icon="tabler-edit"
-          @click="() => { closePreview(); showEditForm(previewSurvey!) }"
+          @click="() => { showEditForm(previewSurvey!); closePreview() }"
         >
           Editar encuesta
         </VBtn>
@@ -147,14 +145,6 @@ onUnmounted(() => {
     </VCard>
   </VDialog>
 
-  <!-- Notificaciones -->
-  <VSnackbar
-    v-model="snackbar.show"
-    :color="snackbar.color"
-    :timeout="snackbar.timeout"
-  >
-    {{ snackbar.text }}
-  </VSnackbar>
 </template>
 
 <style scoped>

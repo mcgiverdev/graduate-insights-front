@@ -17,6 +17,7 @@ const {
   getSurveyStats,
   getCompletedSurveys,
   getPendingSurveys,
+  getClosedSurveys,
 } = useGraduateSurveyService()
 
 const { showSnackbar } = useSnackbar()
@@ -25,6 +26,7 @@ const { showSnackbar } = useSnackbar()
 const stats = computed(() => getSurveyStats())
 const completedSurveys = computed(() => getCompletedSurveys())
 const pendingSurveys = computed(() => getPendingSurveys())
+const closedSurveys = computed(() => getClosedSurveys())
 
 // Métodos
 const loadSurveys = async () => {
@@ -307,6 +309,81 @@ onMounted(() => {
                   Ver Respuestas
                 </VBtn>
               </VCardActions>
+            </VCard>
+          </VCol>
+        </VRow>
+      </VCardText>
+    </VCard>
+
+    <!-- Encuestas Cerradas -->
+    <VCard
+      v-if="closedSurveys.length > 0"
+      class="mb-6"
+    >
+      <VCardTitle class="d-flex align-center">
+        <VIcon
+          icon="tabler-lock"
+          class="me-2"
+          color="error"
+        />
+        Encuestas Cerradas
+        <VSpacer />
+        <VChip
+          color="error"
+          size="small"
+        >
+          {{ closedSurveys.length }}
+        </VChip>
+      </VCardTitle>
+
+      <VDivider />
+
+      <VCardText>
+        <VRow>
+          <VCol
+            v-for="survey in closedSurveys"
+            :key="`closed-${survey.survey_id}`"
+            cols="12"
+            md="6"
+          >
+            <VCard
+              variant="outlined"
+              class="h-100"
+            >
+              <VCardItem>
+                <VCardTitle class="text-h6 d-flex align-center gap-2">
+                  {{ survey.title }}
+                  <VChip
+                    color="error"
+                    size="small"
+                    variant="flat"
+                  >
+                    CERRADO
+                  </VChip>
+                </VCardTitle>
+                <VCardSubtitle>
+                  <VChip
+                    color="error"
+                    size="x-small"
+                    class="me-2"
+                  >
+                    {{ survey.survey_type.name }}
+                  </VChip>
+                  {{ survey.question_count }} pregunta{{ survey.question_count !== 1 ? 's' : '' }}
+                </VCardSubtitle>
+              </VCardItem>
+
+              <VCardText>
+                <p class="text-body-2 text-medium-emphasis">
+                  {{ survey.description }}
+                </p>
+                <p class="text-caption mt-2">
+                  Creada el {{ formatDate(survey.created_date) }}
+                </p>
+                <p class="text-caption text-error mt-1">
+                  Esta encuesta ya no acepta respuestas.
+                </p>
+              </VCardText>
             </VCard>
           </VCol>
         </VRow>

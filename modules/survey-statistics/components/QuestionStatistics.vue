@@ -225,6 +225,22 @@ function getChartDataForQuestion(question: QuestionStatistic) {
   }
 }
 
+function translateQuestionType(type: string): string {
+  const types: Record<string, string> = {
+    YES_NO: 'Sí/No',
+    SCALE: 'Escala',
+    TEXT: 'Texto',
+    NUMBER: 'Número',
+    DATE: 'Fecha',
+    EMAIL: 'Email',
+    PHONE: 'Teléfono',
+    SINGLE_CHOICE: 'Opción Única',
+    MULTIPLE_CHOICE: 'Opción Múltiple',
+  }
+
+  return types[type] || type
+}
+
 function formatOptionName(option: string): string {
   const optionMap: Record<string, string> = {
     // Mapeos para escala de satisfacción
@@ -279,7 +295,7 @@ function formatOptionName(option: string): string {
                     size="small"
                     color="primary"
                   >
-                    {{ question.type }}
+                    {{ translateQuestionType(question.type) }}
                   </VChip>
                 </div>
               </div>
@@ -294,15 +310,6 @@ function formatOptionName(option: string): string {
                       {{ Math.round(question.response_rate) }}% respuestas
                     </div>
                   </div>
-                  <VBtn
-                    size="small"
-                    color="primary"
-                    variant="outlined"
-                    prepend-icon="tabler-chart-bar"
-                    @click="emit('question-selected', question.question_id)"
-                  >
-                    Ver Gráficos
-                  </VBtn>
                 </div>
               </div>
             </div>

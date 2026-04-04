@@ -34,6 +34,30 @@ export const formatReadableDate = (dateString: string | null | undefined): strin
 }
 
 /**
+ * Formatea una fecha mostrando solo día, mes y año (sin hora)
+ */
+export const formatDateOnly = (dateString: string | null | undefined): string => {
+  if (!dateString)
+    return '-'
+
+  try {
+    const date = new Date(dateString)
+
+    if (isNaN(date.getTime()))
+      return '-'
+
+    return new Intl.DateTimeFormat('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(date)
+  }
+  catch {
+    return '-'
+  }
+}
+
+/**
  * Formatea una fecha con hora en formato completo
  */
 export function formatDateTime(dateString?: string): string {

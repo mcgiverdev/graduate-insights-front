@@ -33,13 +33,25 @@ interface Props {
 // Composables
 const { statistics } = useSurveyStatisticsService()
 
+const MONTH_TRANSLATIONS: Record<string, string> = {
+  JANUARY: 'Enero', FEBRUARY: 'Febrero', MARCH: 'Marzo', APRIL: 'Abril',
+  MAY: 'Mayo', JUNE: 'Junio', JULY: 'Julio', AUGUST: 'Agosto',
+  SEPTEMBER: 'Septiembre', OCTOBER: 'Octubre', NOVEMBER: 'Noviembre', DECEMBER: 'Diciembre',
+  january: 'Enero', february: 'Febrero', march: 'Marzo', april: 'Abril',
+  may: 'Mayo', june: 'Junio', july: 'Julio', august: 'Agosto',
+  september: 'Septiembre', october: 'Octubre', november: 'Noviembre', december: 'Diciembre',
+  enero: 'Enero', febrero: 'Febrero', marzo: 'Marzo', abril: 'Abril',
+  mayo: 'Mayo', junio: 'Junio', julio: 'Julio', agosto: 'Agosto',
+  septiembre: 'Septiembre', octubre: 'Octubre', noviembre: 'Noviembre', diciembre: 'Diciembre',
+}
+
 // Generar datos de tendencia basados en responses_by_month
 const trendsChartData = computed(() => {
   if (!statistics.value?.responses_by_month)
     return { labels: [], datasets: [] }
 
   const monthsData = statistics.value.responses_by_month
-  const labels = Object.keys(monthsData)
+  const labels = Object.keys(monthsData).map(k => MONTH_TRANSLATIONS[k] || k)
   const data = Object.values(monthsData)
 
   if (labels.length === 0)
@@ -55,6 +67,9 @@ const trendsChartData = computed(() => {
       borderWidth: 2,
       fill: false,
       tension: 0.1,
+      pointRadius: 6,
+      pointHoverRadius: 8,
+      spanGaps: true,
     }],
   }
 })

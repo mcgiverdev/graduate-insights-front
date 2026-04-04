@@ -10,7 +10,6 @@ import { Doughnut } from 'vue-chartjs'
 import { useRoute, useRouter } from 'vue-router'
 import { useSnackbar } from '@/composables/useSnackbar'
 import {
-  QuestionChartViewer,
   QuestionStatistics,
   SimpleTrendsViewer,
   StatisticsOverview,
@@ -45,10 +44,17 @@ const {
 } = useSurveyStatisticsService()
 
 const activeTab = ref('overview')
-const selectedQuestionId = ref<number | null>(null)
 const error = ref<string | null>(null)
 
-const doughnutOptions = computed(() => getDoughnutChartConfig())
+const doughnutOptions = computed(() => ({
+  ...getDoughnutChartConfig(),
+  plugins: {
+    legend: {
+      display: true,
+      position: 'right' as const,
+    },
+  },
+}))
 
 const genderChartData = computed(() => {
   if (!statistics.value?.responses_by_gender)
@@ -104,11 +110,6 @@ const tabs = [
     title: 'Análisis por Pregunta',
     icon: 'tabler-help-circle',
   },
-  {
-    value: 'question-charts',
-    title: 'Gráficos de Preguntas',
-    icon: 'tabler-chart-bar',
-  },
 ]
 
 async function loadStatistics() {
@@ -145,10 +146,6 @@ async function handleExport(format: 'csv' | 'excel' | 'pdf' = 'csv') {
   }
 }
 
-function handleQuestionSelect(questionId: number) {
-  selectedQuestionId.value = questionId
-  activeTab.value = 'question-charts'
-}
 
 const surveyMetadata = computed(() => {
   if (!statistics.value)
@@ -339,10 +336,19 @@ useHead({
               </div>
               <div class="font-weight-medium">
                 <VChip
-                  :color="surveyMetadata.status === 'ACTIVE' ? 'success' : 'warning'"
+                  :color="surveyMetadata.status === 'ACTIVE' ? 'success'
+                    : surveyMetadata.status === 'CLOSED' ? 'error'
+                    : surveyMetadata.status === 'DRAFT' ? 'warning'
+                    : surveyMetadata.status === 'PAUSED' ? 'info'
+                    : 'default'"
                   size="small"
                 >
-                  {{ surveyMetadata.status }}
+                  {{ surveyMetadata.status === 'ACTIVE' ? 'Activa'
+                    : surveyMetadata.status === 'CLOSED' ? 'Cerrada'
+                    : surveyMetadata.status === 'DRAFT' ? 'Borrador'
+                    : surveyMetadata.status === 'PAUSED' ? 'Pausada'
+                    : surveyMetadata.status === 'COMPLETED' ? 'Completada'
+                    : surveyMetadata.status }}
                 </VChip>
               </div>
             </VCol>
@@ -527,64 +533,9 @@ useHead({
           <QuestionStatistics
             v-else
             :statistics="processedStatistics"
-            @question-selected="handleQuestionSelect"
           />
         </VWindowItem>
 
-        <!-- Tab 4: Gráficos de Preguntas -->
-        <VWindowItem value="question-charts">
-          <VRow>
-            <VCol
-              cols="12"
-              class="mb-4"
-            >
-              <VCard
-                variant="tonal"
-                color="info"
-              >
-                <VCardText class="d-flex align-center">
-                  <VIcon
-                    icon="tabler-info-circle"
-                    class="me-2"
-                  />
-                  <div>
-                    <div class="font-weight-medium">
-                      Gráficos por Pregunta
-                    </div>
-                    <div class="text-body-2">
-                      Seleccione una pregunta de la pestaña "Análisis por Pregunta"
-                      o ingrese el ID de la pregunta manualmente.
-                    </div>
-                  </div>
-                </VCardText>
-              </VCard>
-            </VCol>
-
-            <VCol
-              cols="12"
-              md="4"
-            >
-              <VTextField
-                v-model.number="selectedQuestionId"
-                type="number"
-                label="ID de Pregunta"
-                placeholder="Ingrese el ID de la pregunta"
-                min="1"
-                outlined
-              />
-            </VCol>
-          </VRow>
-
-          <VRow v-if="selectedQuestionId">
-            <VCol cols="12">
-              <QuestionChartViewer
-                :survey-id="surveyId"
-                :question-id="selectedQuestionId"
-                :question-text="statistics?.question_statistics?.find(q => q.question_id === selectedQuestionId)?.question_text"
-              />
-            </VCol>
-          </VRow>
-        </VWindowItem>
       </VWindow>
     </div>
 

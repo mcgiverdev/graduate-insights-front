@@ -323,8 +323,33 @@ onMounted(() => {
                   </p>
                 </div>
 
-                <!-- Respuesta Sí/No y opción única -->
-                <div v-else-if="['YES_NO', 'SINGLE_CHOICE', 'SCALE'].includes(question.question_type)">
+                <!-- Respuesta Sí/No -->
+                <div v-else-if="question.question_type === 'YES_NO'">
+                  <div class="d-flex align-center mb-2">
+                    <VIcon
+                      icon="tabler-check-circle"
+                      class="me-2"
+                    />
+                    <strong>Respuesta:</strong>
+                  </div>
+                  <VChip
+                    v-if="question.text_response"
+                    color="success"
+                    variant="tonal"
+                    size="large"
+                  >
+                    {{ question.text_response === 'SI' ? 'Sí' : 'No' }}
+                  </VChip>
+                  <p
+                    v-else
+                    class="text-medium-emphasis mb-0"
+                  >
+                    No respondido
+                  </p>
+                </div>
+
+                <!-- Escala y opción única -->
+                <div v-else-if="['SINGLE_CHOICE', 'SCALE'].includes(question.question_type)">
                   <div class="d-flex align-center mb-2">
                     <VIcon
                       icon="tabler-check-circle"
@@ -332,24 +357,44 @@ onMounted(() => {
                     />
                     <strong>Opción seleccionada:</strong>
                   </div>
-                  <div v-if="getSelectedOptions(question).length > 0">
+                  <!-- SCALE sin opciones en BD: muestra text_response numérico -->
+                  <div v-if="question.question_type === 'SCALE' && (!question.options || question.options.length === 0)">
                     <VChip
-                      v-for="option in getSelectedOptions(question)"
-                      :key="option.id"
+                      v-if="question.text_response"
                       color="success"
                       variant="tonal"
                       size="large"
-                      class="me-2"
                     >
-                      {{ option.option_text }}
+                      {{ question.text_response }}
                     </VChip>
+                    <p
+                      v-else
+                      class="text-medium-emphasis mb-0"
+                    >
+                      No respondido
+                    </p>
                   </div>
-                  <p
-                    v-else
-                    class="text-medium-emphasis mb-0"
-                  >
-                    No respondido
-                  </p>
+                  <!-- Con opciones en BD -->
+                  <div v-else>
+                    <div v-if="getSelectedOptions(question).length > 0">
+                      <VChip
+                        v-for="option in getSelectedOptions(question)"
+                        :key="option.id"
+                        color="success"
+                        variant="tonal"
+                        size="large"
+                        class="me-2"
+                      >
+                        {{ option.option_text }}
+                      </VChip>
+                    </div>
+                    <p
+                      v-else
+                      class="text-medium-emphasis mb-0"
+                    >
+                      No respondido
+                    </p>
+                  </div>
                 </div>
 
                 <!-- Respuesta de opción múltiple -->

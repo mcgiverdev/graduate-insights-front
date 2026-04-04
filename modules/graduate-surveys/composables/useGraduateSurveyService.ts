@@ -117,7 +117,11 @@ export const useGraduateSurveyService = () => {
   }
 
   const getPendingSurveys = () => {
-    return surveys.value.filter(survey => !survey.completed)
+    return surveys.value.filter(survey => !survey.completed && survey.status !== 'CLOSED')
+  }
+
+  const getClosedSurveys = () => {
+    return surveys.value.filter(survey => !survey.completed && survey.status === 'CLOSED')
   }
 
   const getSurveyStats = () => {
@@ -157,7 +161,15 @@ export const useGraduateSurveyService = () => {
         const answer = answers[q.question_id]
         const response: SurveyQuestionResponse = { question_id: q.question_id }
 
-        if (['YES_NO', 'SINGLE_CHOICE', 'SCALE'].includes(q.question_type))
+        if (q.question_type === 'YES_NO')
+          response.text_response = String(answer)
+        else if (q.question_type === 'SCALE') {
+          if (q.options && q.options.length > 0)
+            response.selected_option_ids = answer ? [answer] : []
+          else
+            response.text_response = String(answer)
+        }
+        else if (q.question_type === 'SINGLE_CHOICE')
           response.selected_option_ids = answer ? [answer] : []
         else if (q.question_type === 'MULTIPLE_CHOICE')
           response.selected_option_ids = Array.isArray(answer) ? answer : []
@@ -200,5 +212,6 @@ export const useGraduateSurveyService = () => {
     getSurveysByType,
     buildResponsesFromAnswers,
     saveDraft,
+    getClosedSurveys,
   }
 }

@@ -133,10 +133,17 @@ const getAnswerDisplay = (question: GraduateSurveyQuestion) => {
   if (answer === undefined || answer === null || answer === '')
     return null
 
-  if (['YES_NO', 'SINGLE_CHOICE', 'SCALE'].includes(question.question_type)) {
-    const option = question.options.find(o => o.id === answer)
+  if (question.question_type === 'YES_NO')
+    return answer === 'SI' ? 'Sí' : answer === 'NO' ? 'No' : String(answer)
 
-    return option?.option_text ?? String(answer)
+  if (['SINGLE_CHOICE', 'SCALE'].includes(question.question_type)) {
+    if (question.options && question.options.length > 0) {
+      const option = question.options.find(o => o.id === answer)
+
+      return option?.option_text ?? String(answer)
+    }
+
+    return String(answer)
   }
 
   if (question.question_type === 'MULTIPLE_CHOICE') {
@@ -176,6 +183,19 @@ const getInputType = (type: string) => {
 
   return inputTypes[type] || 'text'
 }
+
+const SCALE_FALLBACK = [
+  { id: '1', option_text: '1 - Muy malo' },
+  { id: '2', option_text: '2 - Malo' },
+  { id: '3', option_text: '3 - Regular' },
+  { id: '4', option_text: '4 - Bueno' },
+  { id: '5', option_text: '5 - Muy bueno' },
+]
+
+const getScaleOptions = (question: GraduateSurveyQuestion) =>
+  (question.options && question.options.length > 0)
+    ? question.options.map(o => ({ id: o.id as string | number, option_text: o.option_text }))
+    : SCALE_FALLBACK
 
 const isCheckboxChecked = (questionId: number, optionId: number) => {
   const current = answers[questionId]
@@ -220,7 +240,13 @@ const initializeForm = () => {
           answers[question.question_id] = question.number_response ?? null
           break
         case 'YES_NO':
+          answers[question.question_id] = question.text_response || null
+          break
         case 'SCALE':
+          answers[question.question_id] = (question.options && question.options.length > 0)
+            ? (question.selected_option_ids?.[0] ?? null)
+            : (question.text_response || null)
+          break
         case 'SINGLE_CHOICE':
           answers[question.question_id] = question.selected_option_ids?.[0] ?? null
           break
@@ -346,13 +372,6 @@ onMounted(() => {
               >
                 Guardado {{ timeAgo }}
               </VChip>
-              <VBtn
-                color="primary"
-                :disabled="!canSubmit"
-                @click="enterReviewMode"
-              >
-                Enviar respuestas
-              </VBtn>
             </div>
           </div>
           <VProgressLinear
@@ -515,10 +534,13 @@ onMounted(() => {
                     @update:model-value="(value: any) => answers[question.question_id] = value"
                   >
                     <VRadio
-                      v-for="option in question.options"
-                      :key="`yes_no_${option.id}`"
-                      :label="option.option_text"
-                      :value="option.id"
+                      label="Sí"
+                      value="SI"
+                      color="primary"
+                    />
+                    <VRadio
+                      label="No"
+                      value="NO"
                       color="primary"
                     />
                   </VRadioGroup>
@@ -532,7 +554,7 @@ onMounted(() => {
                     @update:model-value="(value: any) => answers[question.question_id] = value"
                   >
                     <VRadio
-                      v-for="option in question.options"
+                      v-for="option in getScaleOptions(question)"
                       :key="`scale_${option.id}`"
                       :label="option.option_text"
                       :value="option.id"
@@ -591,7 +613,7 @@ onMounted(() => {
             v-if="!reviewMode"
             class="mt-4"
           >
-            <VCardActions>
+            <VCardActions class="pa-4">
               <VBtn
                 variant="outlined"
                 color="error"

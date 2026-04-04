@@ -13,6 +13,28 @@ const props = defineProps<Props>()
 // Estado para las respuestas de la vista previa
 const answers = ref<{ [key: number]: any }>({})
 
+const YES_NO_OPTIONS = [
+  { option_text: 'Sí', order_number: 1 },
+  { option_text: 'No', order_number: 2 },
+]
+
+const SCALE_OPTIONS = [
+  { option_text: '1 - Muy malo', order_number: 1 },
+  { option_text: '2 - Malo', order_number: 2 },
+  { option_text: '3 - Regular', order_number: 3 },
+  { option_text: '4 - Bueno', order_number: 4 },
+  { option_text: '5 - Muy bueno', order_number: 5 },
+]
+
+function getPreviewOptions(question: { question_type: QuestionType, options: any[] }) {
+  if (question.question_type === QuestionType.YES_NO)
+    return question.options.length > 0 ? question.options : YES_NO_OPTIONS
+  if (question.question_type === QuestionType.SCALE)
+    return question.options.length > 0 ? question.options : SCALE_OPTIONS
+
+  return question.options
+}
+
 function handleAnswer(questionIndex: number, value: any) {
   answers.value[questionIndex] = value
 }
@@ -111,7 +133,7 @@ function getQuestionTypeIcon(type: QuestionType) {
               inline
             >
               <VRadio
-                v-for="option in question.options"
+                v-for="option in getPreviewOptions(question)"
                 :key="option.order_number"
                 :label="option.option_text"
                 :value="option.option_text"
@@ -125,7 +147,7 @@ function getQuestionTypeIcon(type: QuestionType) {
               inline
             >
               <VRadio
-                v-for="option in question.options"
+                v-for="option in getPreviewOptions(question)"
                 :key="option.order_number"
                 :label="option.option_text"
                 :value="option.option_text"

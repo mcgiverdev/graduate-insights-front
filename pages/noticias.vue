@@ -19,51 +19,25 @@ definePageMeta({
 
 <template>
   <VContainer>
-    <VRow>
-      <VCol cols="12">
-        <h1 class="text-h4 mb-6">
-          Feed de Noticias
-        </h1>
-      </VCol>
-    </VRow>
+    <!-- Encabezado + filtros en la misma fila -->
+    <div class="d-flex align-center justify-space-between flex-wrap gap-3 mb-6">
+      <h1 class="text-h4">
+        Feed de Noticias
+      </h1>
 
-    <VRow>
-      <VCol
-        cols="12"
-        md="8"
-        lg="9"
-      >
-        <FeedList
-          :items="items"
-          :loading="loading"
-          :has-more="hasMore"
-          @load-more="loadMore"
-        />
-      </VCol>
+      <FeedFilters
+        :show-events="filters.showEvents"
+        :show-jobs="filters.showJobs"
+        @update:show-events="setShowEvents"
+        @update:show-jobs="setShowJobs"
+      />
+    </div>
 
-      <!-- Sidebar -->
-      <VCol
-        cols="12"
-        md="4"
-        lg="3"
-      >
-        <FeedFilters
-          :show-events="filters.showEvents"
-          :show-jobs="filters.showJobs"
-          @update:show-events="setShowEvents"
-          @update:show-jobs="setShowJobs"
-        />
-      </VCol>
-    </VRow>
+    <FeedList
+      :items="items"
+      :loading="loading"
+      :has-more="hasMore"
+      @load-more="loadMore"
+    />
   </VContainer>
 </template>
-
-<style scoped>
-.v-card {
-  transition: transform 0.2s;
-}
-
-.v-card:hover {
-  transform: translateY(-2px);
-}
-</style>

@@ -31,10 +31,25 @@ function getStatusDisplayColor(status: string): string {
   switch (status) {
     case 'ACTIVE': return 'success'
     case 'COMPLETED': return 'info'
+    case 'CLOSED': return 'error'
     case 'DRAFT': return 'warning'
+    case 'PAUSED': return 'info'
     case 'CANCELLED': return 'error'
     default: return 'default'
   }
+}
+
+function translateStatus(status: string): string {
+  const map: Record<string, string> = {
+    ACTIVE: 'Activa',
+    COMPLETED: 'Completada',
+    CLOSED: 'Cerrada',
+    DRAFT: 'Borrador',
+    PAUSED: 'Pausada',
+    CANCELLED: 'Cancelada',
+  }
+
+  return map[status] || status
 }
 </script>
 
@@ -57,7 +72,7 @@ function getStatusDisplayColor(status: string): string {
             size="small"
             variant="outlined"
           >
-            {{ statistics?.status }}
+            {{ translateStatus(statistics?.status || '') }}
           </VChip>
         </div>
       </div>
