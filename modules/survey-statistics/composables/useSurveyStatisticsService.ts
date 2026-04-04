@@ -486,13 +486,17 @@ async function exportSurveyData(surveyId: number, format: 'csv' | 'excel' | 'pdf
       },
     )
 
-    // Crear y descargar el archivo
-    const blob = new Blob([response.data])
+    const ext = format === 'excel' ? 'xlsx' : format
+    const mimeTypes: Record<string, string> = {
+      csv: 'text/csv',
+      excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      pdf: 'application/pdf',
+    }
+    const blob = new Blob([response.data], { type: mimeTypes[format] || 'application/octet-stream' })
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
-
     link.href = url
-    link.download = `survey-${surveyId}-statistics.${format}`
+    link.download = `reporte_encuesta_${surveyId}.${ext}`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -500,7 +504,7 @@ async function exportSurveyData(surveyId: number, format: 'csv' | 'excel' | 'pdf
 
     return {
       success: true,
-      message: `Archivo ${format.toUpperCase()} descargado correctamente`,
+      message: `Reporte ${ext.toUpperCase()} descargado correctamente`,
     }
   }
   catch (error: any) {
@@ -511,6 +515,42 @@ async function exportSurveyData(surveyId: number, format: 'csv' | 'excel' | 'pdf
       message: error.data?.message || 'Error al exportar los datos',
       error: error.data || error,
     }
+  }
+  finally {
+    loadingExport.value = false
+  }
+}
+
+async function exportGeneralReport(format: 'csv' | 'excel' | 'pdf' = 'csv') {
+  loadingExport.value = true
+
+  try {
+    const response = await useApi<Blob>(
+      `/graduate-insights/v1/api/survey-statistics/export/general?format=${format}`,
+      { method: 'GET', responseType: 'blob' },
+    )
+
+    const ext = format === 'excel' ? 'xlsx' : format
+    const mimeTypes: Record<string, string> = {
+      csv: 'text/csv',
+      excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      pdf: 'application/pdf',
+    }
+    const blob = new Blob([response.data], { type: mimeTypes[format] || 'application/octet-stream' })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `reporte_general_encuestas.${ext}`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+
+    return { success: true, message: `Reporte general ${ext.toUpperCase()} descargado correctamente` }
+  }
+  catch (error: any) {
+    console.error('Error exporting general report:', error)
+    return { success: false, message: error.data?.message || 'Error al exportar el reporte general', error: error.data || error }
   }
   finally {
     loadingExport.value = false
@@ -561,6 +601,7 @@ export function useSurveyStatisticsService() {
     fetchTrends,
     fetchDemographics,
     exportSurveyData,
+    exportGeneralReport,
     clearStatistics,
     clearDashboard,
     clearAll,

@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { computed, onUnmounted, watch } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import RoleGuard from '@/components/RoleGuard.vue'
 import { ROLES } from '@/composables/useRoles'
+import { useSnackbar } from '@/composables/useSnackbar'
 import { SurveyBuilder, SurveyList, SurveyPreview, useSurveysPage } from '@/src/features/surveys'
+import { useSurveyStatisticsService } from '@/src/features/survey-statistics'
 import { useLayoutConfigStore } from '@layouts/stores/config'
 
 definePageMeta({
@@ -48,6 +50,17 @@ watch(currentView, (view) => {
 onUnmounted(() => {
   layoutConfig.appContentWidth = previousContentWidth
 })
+
+const { exportGeneralReport, loadingExport } = useSurveyStatisticsService()
+const { showSnackbar } = useSnackbar()
+
+async function handleGeneralExport(format: 'csv' | 'excel' | 'pdf') {
+  const result = await exportGeneralReport(format)
+  showSnackbar({
+    text: result.message || (result.success ? 'Reporte descargado' : 'Error al exportar'),
+    color: result.success ? 'success' : 'error',
+  })
+}
 </script>
 
 <template>
@@ -57,13 +70,42 @@ onUnmounted(() => {
   >
     <div class="surveys-page">
       <!-- Vista de listado -->
-      <SurveyList
-        v-if="currentView === 'list'"
-        @create-survey="showCreateForm"
-        @view-survey="handleViewSurvey"
-        @edit-survey="showEditForm"
-        @duplicate-survey="handleDuplicateSurvey"
-      />
+      <div v-if="currentView === 'list'">
+        <!-- Reporte general -->
+        <div class="d-flex justify-end mb-3">
+          <VMenu>
+            <template #activator="{ props }">
+              <VBtn
+                v-bind="props"
+                :loading="loadingExport"
+                variant="outlined"
+                prepend-icon="tabler-file-analytics"
+              >
+                Reporte General
+                <VIcon icon="tabler-chevron-down" class="ms-1" />
+              </VBtn>
+            </template>
+            <VList>
+              <VListItem prepend-icon="tabler-file-text" @click="handleGeneralExport('csv')">
+                <VListItemTitle>Exportar CSV</VListItemTitle>
+              </VListItem>
+              <VListItem prepend-icon="tabler-file-spreadsheet" @click="handleGeneralExport('excel')">
+                <VListItemTitle>Exportar Excel (.xlsx)</VListItemTitle>
+              </VListItem>
+              <VListItem prepend-icon="tabler-file-type-pdf" @click="handleGeneralExport('pdf')">
+                <VListItemTitle>Exportar PDF</VListItemTitle>
+              </VListItem>
+            </VList>
+          </VMenu>
+        </div>
+
+        <SurveyList
+          @create-survey="showCreateForm"
+          @view-survey="handleViewSurvey"
+          @edit-survey="showEditForm"
+          @duplicate-survey="handleDuplicateSurvey"
+        />
+      </div>
 
       <!-- Vista de creación/edición -->
       <SurveyBuilder
