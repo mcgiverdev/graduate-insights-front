@@ -34,15 +34,42 @@ interface Props {
 const { statistics } = useSurveyStatisticsService()
 
 const MONTH_TRANSLATIONS: Record<string, string> = {
-  JANUARY: 'Enero', FEBRUARY: 'Febrero', MARCH: 'Marzo', APRIL: 'Abril',
-  MAY: 'Mayo', JUNE: 'Junio', JULY: 'Julio', AUGUST: 'Agosto',
-  SEPTEMBER: 'Septiembre', OCTOBER: 'Octubre', NOVEMBER: 'Noviembre', DECEMBER: 'Diciembre',
-  january: 'Enero', february: 'Febrero', march: 'Marzo', april: 'Abril',
-  may: 'Mayo', june: 'Junio', july: 'Julio', august: 'Agosto',
-  september: 'Septiembre', october: 'Octubre', november: 'Noviembre', december: 'Diciembre',
-  enero: 'Enero', febrero: 'Febrero', marzo: 'Marzo', abril: 'Abril',
-  mayo: 'Mayo', junio: 'Junio', julio: 'Julio', agosto: 'Agosto',
-  septiembre: 'Septiembre', octubre: 'Octubre', noviembre: 'Noviembre', diciembre: 'Diciembre',
+  JANUARY: 'Enero',
+  FEBRUARY: 'Febrero',
+  MARCH: 'Marzo',
+  APRIL: 'Abril',
+  MAY: 'Mayo',
+  JUNE: 'Junio',
+  JULY: 'Julio',
+  AUGUST: 'Agosto',
+  SEPTEMBER: 'Septiembre',
+  OCTOBER: 'Octubre',
+  NOVEMBER: 'Noviembre',
+  DECEMBER: 'Diciembre',
+  january: 'Enero',
+  february: 'Febrero',
+  march: 'Marzo',
+  april: 'Abril',
+  may: 'Mayo',
+  june: 'Junio',
+  july: 'Julio',
+  august: 'Agosto',
+  september: 'Septiembre',
+  october: 'Octubre',
+  november: 'Noviembre',
+  december: 'Diciembre',
+  enero: 'Enero',
+  febrero: 'Febrero',
+  marzo: 'Marzo',
+  abril: 'Abril',
+  mayo: 'Mayo',
+  junio: 'Junio',
+  julio: 'Julio',
+  agosto: 'Agosto',
+  septiembre: 'Septiembre',
+  octubre: 'Octubre',
+  noviembre: 'Noviembre',
+  diciembre: 'Diciembre',
 }
 
 // Generar datos de tendencia basados en responses_by_month
@@ -186,4 +213,3 @@ const hasData = computed(() => {
   position: relative;
 }
 </style>
-

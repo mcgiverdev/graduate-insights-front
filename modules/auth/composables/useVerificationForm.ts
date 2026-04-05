@@ -1,6 +1,6 @@
 import { reactive } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
 import { authModuleService } from '../services/AuthService'
+import { useSnackbar } from '@/composables/useSnackbar'
 
 const RESEND_INTERVAL = 60
 
@@ -38,6 +38,7 @@ export const useVerificationForm = () => {
   const submit = async () => {
     if (!state.email) {
       state.error = 'No se proporcionó un correo electrónico'
+
       return { success: false }
     }
 
@@ -46,6 +47,7 @@ export const useVerificationForm = () => {
       const result = await authModuleService.verifyCode({ email: state.email, code: state.otp })
       if (!result.success) {
         state.error = result.message || 'El código ingresado no es válido'
+
         return result
       }
 
@@ -67,6 +69,7 @@ export const useVerificationForm = () => {
   const resend = async () => {
     if (!state.email) {
       state.error = 'No se proporcionó un correo electrónico'
+
       return { success: false }
     }
 

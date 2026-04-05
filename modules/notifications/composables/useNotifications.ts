@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue'
-import type { Notification } from '@layouts/types'
 import type { AppNotification } from '../types'
 import { notificationApiService } from '../services/NotificationApiService'
+import type { Notification } from '@layouts/types'
 
 function formatRelativeTime(dateStr: string | null): string {
   if (!dateStr)
@@ -50,6 +50,7 @@ export function useNotifications() {
     loading.value = true
     try {
       const data = await notificationApiService.fetchAll()
+
       notifications.value = data.map(toUiNotification)
     }
     catch {
@@ -71,7 +72,7 @@ export function useNotifications() {
   }
 
   async function markUnread(ids: number[]) {
-    ids.forEach((id) => {
+    ids.forEach(id => {
       const n = notifications.value.find(x => x.id === id)
       if (n)
         n.isSeen = false

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import FlatPickr from 'vue-flatpickr-component'
 import { useTheme } from 'vuetify'
-import { useUniqueId } from '@/composables/useUniqueId'
 
 // @ts-expect-error There won't be declaration file for it
 import { VField, filterFieldProps, makeVFieldProps } from 'vuetify/lib/components/VField/VField'
@@ -12,10 +11,11 @@ import { VInput, makeVInputProps } from 'vuetify/lib/components/VInput/VInput'
 // @ts-expect-error There won't be declaration file for it
 import { filterInputAttrs } from 'vuetify/lib/util/helpers'
 
+import { Spanish } from 'flatpickr/dist/l10n/es'
 import { useConfigStore } from '@core/stores/config'
 
 // @ts-expect-error no declaration file for locale
-import { Spanish } from 'flatpickr/dist/l10n/es'
+import { useUniqueId } from '@/composables/useUniqueId'
 
 // inherit Attribute make false
 defineOptions({
@@ -80,16 +80,20 @@ const setMonthNavVisible = (calendar: HTMLElement, visible: boolean) => {
   const prevBtn = calendar.querySelector<HTMLElement>('.flatpickr-prev-month')
   const nextBtn = calendar.querySelector<HTMLElement>('.flatpickr-next-month')
   const display = visible ? '' : 'none'
-  if (prevBtn) prevBtn.style.display = display
-  if (nextBtn) nextBtn.style.display = display
+  if (prevBtn)
+    prevBtn.style.display = display
+  if (nextBtn)
+    nextBtn.style.display = display
 }
 
 const showYearGrid = (calendar: HTMLElement, currentYear: number) => {
   const grid = calendar.querySelector('.fp-year-grid') as HTMLElement | null
-  if (!grid) return
+  if (!grid)
+    return
 
   grid.querySelectorAll<HTMLElement>('.fp-year-item').forEach(item => {
-    const y = parseInt(item.getAttribute('data-year') ?? '')
+    const y = Number.parseInt(item.getAttribute('data-year') ?? '')
+
     item.classList.toggle('fp-year-item--selected', y === currentYear)
   })
 
@@ -97,28 +101,33 @@ const showYearGrid = (calendar: HTMLElement, currentYear: number) => {
   setMonthNavVisible(calendar, false)
 
   const selected = grid.querySelector<HTMLElement>('.fp-year-item--selected')
-  if (selected) selected.scrollIntoView({ block: 'center', behavior: 'instant' })
+  if (selected)
+    selected.scrollIntoView({ block: 'center', behavior: 'instant' })
 }
 
 const hideYearGrid = (calendar: HTMLElement) => {
   const grid = calendar.querySelector<HTMLElement>('.fp-year-grid')
-  if (grid) grid.style.display = 'none'
+  if (grid)
+    grid.style.display = 'none'
   setMonthNavVisible(calendar, true)
 }
 
 const setupYearGrid = (fp: any) => {
-  if (!fp?.calendarContainer || fp.calendarContainer.querySelector('.fp-year-grid')) return
+  if (!fp?.calendarContainer || fp.calendarContainer.querySelector('.fp-year-grid'))
+    return
 
   const calendar = fp.calendarContainer as HTMLElement
   const currentYear = new Date().getFullYear()
 
   // Build year grid panel
   const grid = document.createElement('div')
+
   grid.className = 'fp-year-grid'
   grid.style.display = 'none'
 
   for (let year = currentYear + 2; year >= 1920; year--) {
     const item = document.createElement('span')
+
     item.className = 'fp-year-item'
     item.setAttribute('data-year', String(year))
     item.textContent = String(year)
@@ -127,9 +136,10 @@ const setupYearGrid = (fp: any) => {
 
   grid.addEventListener('click', (e: Event) => {
     const target = e.target as HTMLElement
-    if (!target.classList.contains('fp-year-item')) return
-    const year = parseInt(target.getAttribute('data-year') ?? '')
-    if (!isNaN(year)) {
+    if (!target.classList.contains('fp-year-item'))
+      return
+    const year = Number.parseInt(target.getAttribute('data-year') ?? '')
+    if (!Number.isNaN(year)) {
       fp.changeYear(year)
       hideYearGrid(calendar)
     }
@@ -141,9 +151,11 @@ const setupYearGrid = (fp: any) => {
   const yearEl = fp.currentYearElement as HTMLElement | null
   if (yearEl) {
     const wrapper = yearEl.parentNode as HTMLElement
+
     wrapper.classList.add('fp-year-wrapper')
     wrapper.addEventListener('click', (e: Event) => {
       e.stopPropagation()
+
       const visible = (calendar.querySelector<HTMLElement>('.fp-year-grid')?.style.display ?? 'none') !== 'none'
       if (visible)
         hideYearGrid(calendar)
@@ -155,9 +167,10 @@ const setupYearGrid = (fp: any) => {
 
 const syncYearGrid = (fp: any) => {
   const grid = fp?.calendarContainer?.querySelector<HTMLElement>('.fp-year-grid')
-  if (!grid || grid.style.display === 'none') return
+  if (!grid || grid.style.display === 'none')
+    return
   grid.querySelectorAll<HTMLElement>('.fp-year-item').forEach(item => {
-    item.classList.toggle('fp-year-item--selected', parseInt(item.getAttribute('data-year') ?? '') === fp.currentYear)
+    item.classList.toggle('fp-year-item--selected', Number.parseInt(item.getAttribute('data-year') ?? '') === fp.currentYear)
   })
 }
 
@@ -175,19 +188,23 @@ compAttrs.config = {
   disableMobile: true,
   onReady(selectedDates: Date[], dateStr: string, fp: any) {
     setupYearGrid(fp)
-    if (typeof userOnReady === 'function') userOnReady(selectedDates, dateStr, fp)
+    if (typeof userOnReady === 'function')
+      userOnReady(selectedDates, dateStr, fp)
   },
   onYearChange(selectedDates: Date[], dateStr: string, fp: any) {
     syncYearGrid(fp)
-    if (typeof userOnYearChange === 'function') userOnYearChange(selectedDates, dateStr, fp)
+    if (typeof userOnYearChange === 'function')
+      userOnYearChange(selectedDates, dateStr, fp)
   },
   onMonthChange(selectedDates: Date[], dateStr: string, fp: any) {
     syncYearGrid(fp)
-    if (typeof userOnMonthChange === 'function') userOnMonthChange(selectedDates, dateStr, fp)
+    if (typeof userOnMonthChange === 'function')
+      userOnMonthChange(selectedDates, dateStr, fp)
   },
   onClose(selectedDates: Date[], dateStr: string, fp: any) {
     hideYearGrid(fp.calendarContainer)
-    if (typeof userOnClose === 'function') userOnClose(selectedDates, dateStr, fp)
+    if (typeof userOnClose === 'function')
+      userOnClose(selectedDates, dateStr, fp)
   },
 }
 
@@ -301,7 +318,7 @@ const elementId = computed(() => {
       class="position-relative v-text-field"
       :style="props.style"
     >
-      <template #default="{ id, isDirty, isValid, isDisabled, isReadonly, validate }">
+      <template #default="{ isDirty, isValid, isDisabled, isReadonly, validate }">
         <!-- v-field -->
         <VField
           v-bind="{ ...fieldProps, label: undefined }"
@@ -323,8 +340,8 @@ const elementId = computed(() => {
               <FlatPickr
                 v-if="!isInlinePicker"
                 v-bind="compAttrs"
-                ref="refFlatPicker"
                 :id="elementId"
+                ref="refFlatPicker"
                 :model-value="modelValue"
                 :placeholder="props.placeholder"
                 :readonly="isReadonly.value"

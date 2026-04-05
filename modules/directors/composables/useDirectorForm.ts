@@ -1,8 +1,8 @@
 import { ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
-import type { RequestResult } from '@/infrastructure/http/types'
 import { directorService } from '../services/DirectorService'
 import type { DirectorPayload } from '../types'
+import { useSnackbar } from '@/composables/useSnackbar'
+import type { RequestResult } from '@/infrastructure/http/types'
 
 const formFields = ['nombres', 'apellidos', 'fechaNacimiento', 'genero', 'correo', 'dni', 'celular', 'contrasena']
 
@@ -37,21 +37,25 @@ export const useDirectorForm = () => {
         await directorService.create(payload)
 
       showSnackbar({ text: directorId !== undefined && directorId !== null ? 'Director actualizado' : 'Director creado', color: 'success' })
+
       return { success: true }
     }
     catch (error: any) {
       if (error?.data?.errors) {
         const mapped: Record<string, string> = {}
+
         Object.entries(error.data.errors).forEach(([field, message]) => {
           const normalized = normalizeFieldName(field)
           if (normalized)
             mapped[normalized] = String(message)
         })
         serverErrors.value = mapped
+
         return { success: false, message: error?.data?.message }
       }
 
       showSnackbar({ text: error?.message || 'No se pudo guardar el director', color: 'error' })
+
       return { success: false, message: error?.message }
     }
     finally {

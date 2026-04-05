@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { Form, Field } from 'vee-validate'
+import { Field, Form } from 'vee-validate'
 import type { FormContext } from 'vee-validate'
 import { computed, ref, watch } from 'vue'
-import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import type { EventType, EventTypeFormValues } from '../types'
 import { eventTypeFormSchema } from '../validation/eventTypeFormSchema'
 import { toFormValues } from '../utils/mappers'
+import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 
 interface Props {
   modelValue: boolean
@@ -84,8 +84,8 @@ const closeDialog = () => {
           @submit="handleSubmit"
         >
           <Field
-            name="nombre"
             v-slot="{ field, errorMessage }"
+            name="nombre"
           >
             <AppTextField
               :model-value="field.value"

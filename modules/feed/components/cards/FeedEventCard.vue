@@ -11,9 +11,11 @@ const props = defineProps<Props>()
 function irAlEvento() {
   if (!props.event.enlace_inscripcion)
     return
+
   const url = props.event.enlace_inscripcion.startsWith('http')
     ? props.event.enlace_inscripcion
     : `https://${props.event.enlace_inscripcion}`
+
   window.open(url, '_blank')
 }
 </script>

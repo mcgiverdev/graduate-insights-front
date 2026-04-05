@@ -36,7 +36,10 @@ definePageMeta({
         >
           <VCardItem class="justify-center pb-2">
             <VCardTitle>
-              <NuxtLink to="/" class="d-flex flex-column align-center text-decoration-none">
+              <NuxtLink
+                to="/"
+                class="d-flex flex-column align-center text-decoration-none"
+              >
                 <div class="auth-logo-img mb-3">
                   <VNodeRenderer :nodes="themeConfig.app.logo" />
                 </div>

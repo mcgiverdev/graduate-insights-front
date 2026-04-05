@@ -1,4 +1,4 @@
-export default defineNuxtRouteMiddleware(async to => {
+export default defineNuxtRouteMiddleware(async () => {
   const token = useCookie('accessToken', {
     path: '/',
     secure: true,

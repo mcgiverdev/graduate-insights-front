@@ -7,12 +7,15 @@ const FEMALE_AVATARS = [2, 4, 6, 8, 10, 12, 14]
 function getDefaultAvatar(id: number, genero?: string): string {
   if (genero === 'M') {
     const idx = id % MALE_AVATARS.length
+
     return `/avatars/avatar-${MALE_AVATARS[idx]}.png`
   }
   if (genero === 'F') {
     const idx = id % FEMALE_AVATARS.length
+
     return `/avatars/avatar-${FEMALE_AVATARS[idx]}.png`
   }
+
   return `/avatars/avatar-${(id % 15) + 1}.png`
 }
 
@@ -42,11 +45,11 @@ export const useUser = () => {
 
     loading.value = true
     fetchPromise = useApi('/graduate-insights/v1/api/auth/me')
-      .then((response) => {
+      .then(response => {
         if (response.data?.success)
           user.value = response.data.data
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error fetching user:', error)
         user.value = null
       })
@@ -75,6 +78,7 @@ export const useUser = () => {
       return user.value.avatar
     if (user.value?.id)
       return getDefaultAvatar(user.value.id, user.value.genero)
+
     return null
   })
 

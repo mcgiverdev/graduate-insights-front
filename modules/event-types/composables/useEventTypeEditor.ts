@@ -1,11 +1,11 @@
 import { ref } from 'vue'
-import type { RequestResult } from '@/infrastructure/http/types'
 import type {
   EventType,
   EventTypeFormValues,
   EventTypePayload,
 } from '../types'
 import { toPayload } from '../utils/mappers'
+import type { RequestResult } from '@/infrastructure/http/types'
 
 interface UseEventTypeEditorOptions {
   fetchEventTypes: () => Promise<void>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
+import type { FeedItem } from '../types'
 import FeedEventCard from './cards/FeedEventCard.vue'
 import FeedJobOfferCard from './cards/FeedJobOfferCard.vue'
-import type { FeedItem } from '../types'
 
 interface Props {
   items: FeedItem[]
@@ -11,7 +11,7 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'load-more'): void
+  (e: 'loadMore'): void
 }
 
 const props = defineProps<Props>()
@@ -25,7 +25,7 @@ const setupIntersectionObserver = () => {
     entries => {
       const target = entries[0]
       if (target.isIntersecting && !props.loading && props.hasMore)
-        emit('load-more')
+        emit('loadMore')
     },
     {
       rootMargin: '100px',

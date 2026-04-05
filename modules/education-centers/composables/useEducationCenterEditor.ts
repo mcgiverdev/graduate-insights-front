@@ -1,6 +1,4 @@
 import { ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
-import type { RequestResult } from '@/infrastructure/http/types'
 import { educationCenterService } from '../services/EducationCenterService'
 import type {
   EducationCenter,
@@ -8,6 +6,8 @@ import type {
   EducationCenterPayload,
 } from '../types'
 import { toPayload } from '../utils/mappers'
+import type { RequestResult } from '@/infrastructure/http/types'
+import { useSnackbar } from '@/composables/useSnackbar'
 
 interface UseEducationCenterEditorOptions {
   fetchEducationCenters: () => Promise<void>
@@ -41,6 +41,7 @@ export const useEducationCenterEditor = ({
       if (!center) {
         showSnackbar({ text: 'No se encontró el centro educativo seleccionado', color: 'error' })
         isFormVisible.value = false
+
         return
       }
 

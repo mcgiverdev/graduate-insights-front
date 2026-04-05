@@ -27,18 +27,22 @@ const jobs = ref<MyJob[]>([])
 const jobOffers = ref<MyJobOffer[]>([])
 const loading = ref(false)
 const lastError = ref<string | null>(null)
+
 const surveyStatsState = ref({
   total: 0,
   completed: 0,
   pending: 0,
   completionRate: 0,
 })
+
 const pendingSurveysState = ref<GraduateSurveyListItem[]>([])
 const completedSurveysState = ref<GraduateSurveyListItem[]>([])
+
 const jobStatsState = ref({
   totalJobs: 0,
   activeJobs: 0,
 })
+
 const profileCompleteState = ref(false)
 
 const toMyJob = (job: MyJobApiResponse): MyJob => ({

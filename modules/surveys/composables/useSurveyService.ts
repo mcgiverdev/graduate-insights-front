@@ -1,5 +1,4 @@
 import { ref } from 'vue'
-import { useApi } from '@/composables/useApi'
 import type {
   CreateSurveyRequest,
   Survey,
@@ -7,6 +6,7 @@ import type {
   SurveyResponse,
   SurveyTypesResponse,
 } from '../types'
+import { useApi } from '@/composables/useApi'
 
 const surveys = ref<Survey[]>([])
 const totalSurveys = ref(0)
@@ -132,6 +132,7 @@ async function createSurvey(survey: CreateSurveyRequest) {
   }
   catch (error: any) {
     const errors = error.data?.errors
+
     const message = errors
       ? Object.values(errors).join('. ')
       : (error.data?.message || 'Error al crear la encuesta')
@@ -167,6 +168,7 @@ async function updateSurvey(id: number, survey: CreateSurveyRequest) {
   }
   catch (error: any) {
     const errors = error.data?.errors
+
     const message = errors
       ? Object.values(errors).join('. ')
       : (error.data?.message || 'Error al actualizar la encuesta')

@@ -1,5 +1,5 @@
-import { $api } from '@/utils/api'
 import type { FeedItem, FeedListParams, FeedListResult } from '../types'
+import { $api } from '@/utils/api'
 
 interface FeedApiPaginate {
   total_pages?: number

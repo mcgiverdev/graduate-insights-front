@@ -487,14 +487,17 @@ async function exportSurveyData(surveyId: number, format: 'csv' | 'excel' | 'pdf
     )
 
     const ext = format === 'excel' ? 'xlsx' : format
+
     const mimeTypes: Record<string, string> = {
       csv: 'text/csv',
       excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       pdf: 'application/pdf',
     }
+
     const blob = new Blob([response.data], { type: mimeTypes[format] || 'application/octet-stream' })
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
+
     link.href = url
     link.download = `reporte_encuesta_${surveyId}.${ext}`
     document.body.appendChild(link)
@@ -531,14 +534,17 @@ async function exportGeneralReport(format: 'csv' | 'excel' | 'pdf' = 'csv') {
     )
 
     const ext = format === 'excel' ? 'xlsx' : format
+
     const mimeTypes: Record<string, string> = {
       csv: 'text/csv',
       excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       pdf: 'application/pdf',
     }
+
     const blob = new Blob([response.data], { type: mimeTypes[format] || 'application/octet-stream' })
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
+
     link.href = url
     link.download = `reporte_general_encuestas.${ext}`
     document.body.appendChild(link)
@@ -550,6 +556,7 @@ async function exportGeneralReport(format: 'csv' | 'excel' | 'pdf' = 'csv') {
   }
   catch (error: any) {
     console.error('Error exporting general report:', error)
+
     return { success: false, message: error.data?.message || 'Error al exportar el reporte general', error: error.data || error }
   }
   finally {

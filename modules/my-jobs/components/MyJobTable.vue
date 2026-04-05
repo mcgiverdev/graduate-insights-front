@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import type { MyJob } from '../types'
+import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 
 interface Props {
   items: MyJob[]

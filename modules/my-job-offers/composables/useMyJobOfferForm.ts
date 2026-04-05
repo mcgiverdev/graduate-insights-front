@@ -1,8 +1,8 @@
 import { ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
-import type { RequestResult } from '@/infrastructure/http/types'
 import { myJobOfferService } from '../services/MyJobOfferService'
 import type { MyJobOfferPayload } from '../types'
+import { useSnackbar } from '@/composables/useSnackbar'
+import type { RequestResult } from '@/infrastructure/http/types'
 
 const formFields = ['titulo', 'link', 'descripcion']
 
@@ -37,21 +37,25 @@ export const useMyJobOfferForm = () => {
         await myJobOfferService.create(payload)
 
       showSnackbar({ text: jobOfferId !== undefined && jobOfferId !== null ? 'Oferta actualizada' : 'Oferta creada', color: 'success' })
+
       return { success: true }
     }
     catch (error: any) {
       if (error?.data?.errors) {
         const mapped: Record<string, string> = {}
+
         Object.entries(error.data.errors).forEach(([field, message]) => {
           const normalized = normalizeFieldName(field)
           if (normalized)
             mapped[normalized] = String(message)
         })
         serverErrors.value = mapped
+
         return { success: false, message: error?.data?.message }
       }
 
       showSnackbar({ text: error?.message || 'No se pudo guardar la oferta laboral', color: 'error' })
+
       return { success: false, message: error?.message }
     }
     finally {

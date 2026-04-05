@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Column, TableActions } from '../types'
-import { TableActions as TableActionsComponent } from '.'
+import { TableActionsComponent } from '.'
 
 interface Props {
   columns: Column[]

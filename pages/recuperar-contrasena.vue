@@ -20,6 +20,7 @@ const authThemeImg = useGenerateImageVariant(
 )
 
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
+
 const {
   email,
   loading,

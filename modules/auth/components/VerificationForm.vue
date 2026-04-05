@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
-import { useRoute } from '#imports'
 import { useVerificationForm } from '../composables/useVerificationForm'
+import { useRoute } from '#imports'
 
 const emit = defineEmits<{ (e: 'verified'): void }>()
 
@@ -17,6 +17,7 @@ const route = useRoute()
 
 onMounted(() => {
   const email = route.query.email?.toString() || ''
+
   setEmail(email)
 })
 

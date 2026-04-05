@@ -64,9 +64,15 @@ const TEXT_BASED_TYPES = ['TEXT', 'EMAIL', 'PHONE', 'DATE']
 
 function translateType(type?: string): string {
   const types: Record<string, string> = {
-    TEXT: 'Texto', EMAIL: 'Email', PHONE: 'Teléfono', DATE: 'Fecha',
-    YES_NO: 'Sí/No', SCALE: 'Escala', NUMBER: 'Número',
-    SINGLE_CHOICE: 'Opción Única', MULTIPLE_CHOICE: 'Opción Múltiple',
+    TEXT: 'Texto',
+    EMAIL: 'Email',
+    PHONE: 'Teléfono',
+    DATE: 'Fecha',
+    YES_NO: 'Sí/No',
+    SCALE: 'Escala',
+    NUMBER: 'Número',
+    SINGLE_CHOICE: 'Opción Única',
+    MULTIPLE_CHOICE: 'Opción Múltiple',
   }
 
   return types[type || ''] || type || ''
@@ -477,4 +483,3 @@ onMounted(() => {
   position: relative;
 }
 </style>
-

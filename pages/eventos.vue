@@ -31,6 +31,7 @@ const { directorOptions, eventTypeOptions, loadingOptions, loadOptions } = useEv
 
 const isConfirmVisible = ref(false)
 const eventIdToDelete = ref<number | null>(null)
+
 const {
   isFormVisible,
   selectedEvent,

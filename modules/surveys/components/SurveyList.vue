@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useSurveyService } from '../composables/useSurveyService'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import { useSnackbar } from '@/composables/useSnackbar'
 import { StatisticsButton } from '@/src/features/survey-statistics'
-import { useSurveyService } from '../composables/useSurveyService'
 import type { Survey } from '@/modules/surveys/types'
 import { SurveyStatus, SurveyType } from '@/modules/surveys/types'
 import { formatReadableDate } from '@/utils/dateUtils'

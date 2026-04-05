@@ -8,7 +8,7 @@ interface Props {
   description?: string
 }
 
-const props = defineProps<Props>()
+defineProps<Props>()
 
 // Estado para las respuestas de la vista previa
 const answers = ref<{ [key: number]: any }>({})
@@ -26,17 +26,13 @@ const SCALE_OPTIONS = [
   { option_text: '5 - Muy bueno', order_number: 5 },
 ]
 
-function getPreviewOptions(question: { question_type: QuestionType, options: any[] }) {
+function getPreviewOptions(question: { question_type: QuestionType; options: any[] }) {
   if (question.question_type === QuestionType.YES_NO)
     return question.options.length > 0 ? question.options : YES_NO_OPTIONS
   if (question.question_type === QuestionType.SCALE)
     return question.options.length > 0 ? question.options : SCALE_OPTIONS
 
   return question.options
-}
-
-function handleAnswer(questionIndex: number, value: any) {
-  answers.value[questionIndex] = value
 }
 
 function getQuestionTypeIcon(type: QuestionType) {
@@ -125,7 +121,7 @@ function getQuestionTypeIcon(type: QuestionType) {
           </div>
 
           <!-- Campo de respuesta según el tipo -->
-          <div class="ml-8">
+          <div class="ms-8">
             <!-- Sí/No -->
             <VRadioGroup
               v-if="question.question_type === QuestionType.YES_NO"

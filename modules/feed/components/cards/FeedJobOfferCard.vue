@@ -13,9 +13,11 @@ const { isGraduate } = useRoles()
 function postular() {
   if (!props.jobOffer.link)
     return
+
   const url = props.jobOffer.link.startsWith('http')
     ? props.jobOffer.link
     : `https://${props.jobOffer.link}`
+
   window.open(url, '_blank')
 }
 </script>

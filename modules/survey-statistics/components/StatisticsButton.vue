@@ -24,7 +24,7 @@ const props = withDefaults(defineProps<Props>(), {
 const router = useRouter()
 
 const isValidSurveyId = computed(() => {
-  return props.surveyId && !isNaN(props.surveyId) && props.surveyId > 0
+  return props.surveyId && !Number.isNaN(props.surveyId) && props.surveyId > 0
 })
 
 function navigateToStatistics() {

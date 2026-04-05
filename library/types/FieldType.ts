@@ -129,7 +129,7 @@ export class FieldTypeRegistry {
           return true
         if (typeof value !== 'string')
           return 'Debe ser una hora'
-        if (!/^([01]?\d|2[0-3]):[0-5]\d$/.test(value))
+        if (!/^(?:[01]?\d|2[0-3]):[0-5]\d$/.test(value))
           return 'Formato de hora inválido (HH:mm)'
 
         return true

@@ -1,17 +1,19 @@
+import type { AppNotification } from '../types'
 import { BaseApiService } from '@/infrastructure/http/BaseApiService'
 import type { ApiEnvelope } from '@/infrastructure/http/types'
-import type { AppNotification } from '../types'
 
 const BASE = '/graduate-insights/v1/api/notifications'
 
 class NotificationApiService extends BaseApiService {
   async fetchAll(): Promise<AppNotification[]> {
     const response = await this.get<ApiEnvelope<AppNotification[]>>(BASE)
+
     return response.data ?? []
   }
 
   async getUnreadCount(): Promise<number> {
     const response = await this.get<ApiEnvelope<number>>(`${BASE}/unread-count`)
+
     return response.data ?? 0
   }
 

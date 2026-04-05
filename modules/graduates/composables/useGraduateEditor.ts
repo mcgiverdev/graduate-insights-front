@@ -1,10 +1,10 @@
 import { ref } from 'vue'
-import { useRouter } from '#imports'
-import { useSnackbar } from '@/composables/useSnackbar'
 import { graduateService } from '../services/GraduateService'
 import type { Graduate, GraduateFormValues, GraduatePayload } from '../types'
 import { toPayload } from '../utils/mappers'
 import type { GraduateSaveResult } from './useGraduateForm'
+import { useSnackbar } from '@/composables/useSnackbar'
+import { useRouter } from '#imports'
 
 interface UseGraduateEditorOptions {
   fetchGraduates: () => Promise<void>
@@ -39,6 +39,7 @@ export const useGraduateEditor = ({
       if (!graduate) {
         showSnackbar({ text: 'No se encontró el graduado seleccionado', color: 'error' })
         isFormVisible.value = false
+
         return
       }
 

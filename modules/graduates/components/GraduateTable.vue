@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import type { Graduate } from '../types'
+import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 
 interface Props {
   items: Graduate[]
@@ -74,6 +74,7 @@ const getRowGraduateId = (tableItem: { raw?: Graduate | null } | Graduate | null
     return null
 
   const numericValue = Number(rawValue)
+
   return Number.isFinite(numericValue) ? numericValue : null
 }
 

@@ -23,7 +23,7 @@ const props = withDefaults(defineProps<FormGeneratorProps>(), {
   serverErrors: () => ({}),
 })
 
-const emit = defineEmits<{(e: 'submit', values: Record<string, any>): void; (e: 'cancel'): void }>()
+const emit = defineEmits<{ (e: 'submit', values: Record<string, any>): void; (e: 'cancel'): void }>()
 
 const hasAttemptedSubmit = ref(false)
 const serverErrorBag = ref<Record<string, string>>({})
@@ -63,6 +63,7 @@ const buildInitialValues = () => {
       : props.initialData?.[name]
 
     const fallback = field.type === 'file' ? null : ''
+
     values[name] = props.initialData?.[name] ?? defaultValue ?? fallback
   })
 
@@ -148,6 +149,13 @@ const { values, errors, setFieldValue, validate, validateField, setFieldError, r
   validateOnMount: false,
 })
 
+const clearServerErrors = () => {
+  const fieldsWithErrors = Object.keys(serverErrorBag.value)
+
+  serverErrorBag.value = {}
+  fieldsWithErrors.forEach(name => setFieldError(name, undefined))
+}
+
 watch(initialValues, newValues => {
   resetForm({
     values: newValues,
@@ -156,12 +164,6 @@ watch(initialValues, newValues => {
   hasAttemptedSubmit.value = false
   clearServerErrors()
 })
-
-const clearServerErrors = () => {
-  const fieldsWithErrors = Object.keys(serverErrorBag.value)
-  serverErrorBag.value = {}
-  fieldsWithErrors.forEach(name => setFieldError(name, undefined))
-}
 
 const applyServerErrors = (errorMap: Record<string, string>) => {
   clearServerErrors()

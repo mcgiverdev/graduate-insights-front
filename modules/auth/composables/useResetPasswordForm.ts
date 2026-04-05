@@ -1,9 +1,9 @@
 import { computed, onUnmounted, ref, watch } from 'vue'
+import { authModuleService } from '../services/AuthService'
 import { navigateTo, useRoute } from '#imports'
 import { useSnackbar } from '@/composables/useSnackbar'
-import { authModuleService } from '../services/AuthService'
 
-const PASSWORD_REGEX = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])(?=\S+$).{8,}$/
+const PASSWORD_REGEX = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])(?=\S+$).{8,}$/
 
 export const useResetPasswordForm = () => {
   const route = useRoute()
@@ -49,7 +49,7 @@ export const useResetPasswordForm = () => {
     },
     {
       label: 'Un carácter especial (!@#$…)',
-      isValid: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword.value),
+      isValid: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(newPassword.value),
     },
     {
       label: 'Sin espacios',
@@ -92,6 +92,7 @@ export const useResetPasswordForm = () => {
 
     if (isEmailMissing.value) {
       error.value = 'No tenemos el correo asociado a la recuperación.'
+
       return
     }
 
@@ -101,11 +102,14 @@ export const useResetPasswordForm = () => {
     resendLoading.value = true
     try {
       const normalizedEmail = email.value.trim().toLowerCase()
+
       email.value = normalizedEmail
+
       const result = await authModuleService.requestPasswordReset(normalizedEmail)
       if (!result.success) {
         error.value = result.message || 'No pudimos reenviar el código. Intenta más tarde.'
         showSnackbar({ text: error.value, color: 'error' })
+
         return
       }
 
@@ -125,37 +129,44 @@ export const useResetPasswordForm = () => {
 
     if (isEmailMissing.value) {
       error.value = 'Debes iniciar el proceso desde "Olvidé mi contraseña".'
+
       return
     }
 
     if (otp.value.length !== 6) {
       error.value = 'Ingresa el código de 6 dígitos que enviamos a tu correo.'
+
       return
     }
 
     if (!newPassword.value) {
       passwordFieldError.value = 'Ingresa tu nueva contraseña.'
+
       return
     }
 
     if (!isPasswordStrong.value) {
       passwordFieldError.value = 'La contraseña debe cumplir todos los requisitos indicados.'
+
       return
     }
 
     if (!confirmPassword.value) {
       confirmFieldError.value = 'Confirma tu nueva contraseña.'
+
       return
     }
 
     if (newPassword.value !== confirmPassword.value) {
       confirmFieldError.value = 'Las contraseñas no coinciden.'
+
       return
     }
 
     loading.value = true
     try {
       const normalizedEmail = email.value.trim().toLowerCase()
+
       email.value = normalizedEmail
 
       const payload = {
@@ -172,6 +183,7 @@ export const useResetPasswordForm = () => {
 
         error.value = result.message || 'No pudimos actualizar tu contraseña.'
         showSnackbar({ text: error.value, color: 'error' })
+
         return
       }
 

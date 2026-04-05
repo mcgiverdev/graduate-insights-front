@@ -5,6 +5,7 @@ export default defineNuxtRouteMiddleware(async to => {
   const { canAccessRoute, role } = useRoles()
   const { fetchUser } = useUser()
   const isSecure = process.client && window.location.protocol === 'https:'
+
   const token = useCookie('accessToken', {
     path: '/',
     secure: isSecure,

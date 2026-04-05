@@ -1,7 +1,7 @@
-import { BaseApiService } from '@/infrastructure/http/BaseApiService'
-import type { ApiEnvelope } from '@/infrastructure/http/types'
 import type { EmailConfig, EmailConfigApiResponse, EmailConfigPayload } from '../types'
 import { toEmailConfig } from '../utils/mappers'
+import { BaseApiService } from '@/infrastructure/http/BaseApiService'
+import type { ApiEnvelope } from '@/infrastructure/http/types'
 
 const BASE_ENDPOINT = '/graduate-insights/v1/api/admin/email-config'
 

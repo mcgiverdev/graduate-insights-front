@@ -30,6 +30,7 @@ const { submitting, serverErrors, saveEventType, clearServerErrors } = useEventT
 
 const isConfirmVisible = ref(false)
 const eventTypeToDelete = ref<EventType | null>(null)
+
 const {
   isFormVisible,
   selectedEventType,

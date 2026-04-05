@@ -1,9 +1,9 @@
 import { ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
-import type { RequestResult } from '@/infrastructure/http/types'
 import { eventService } from '../services/EventService'
 import type { Event, EventFormValues, EventPayload } from '../types'
 import { toPayload } from '../utils/mappers'
+import type { RequestResult } from '@/infrastructure/http/types'
+import { useSnackbar } from '@/composables/useSnackbar'
 
 interface UseEventEditorOptions {
   fetchEvents: () => Promise<void>
@@ -50,6 +50,7 @@ export const useEventEditor = ({
       if (!event) {
         showSnackbar({ text: 'No se encontró el evento seleccionado', color: 'error' })
         isFormVisible.value = false
+
         return
       }
 

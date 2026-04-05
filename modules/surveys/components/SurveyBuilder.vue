@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, toRaw } from 'vue'
+import { useSurveyService } from '../composables/useSurveyService'
+import type { SurveyTemplate } from '../utils/surveyTemplates'
 import QuestionBuilder from './QuestionBuilder.vue'
 import SurveyPreview from './SurveyPreview.vue'
 import SurveyTemplateSelector from './SurveyTemplateSelector.vue'
 import AppDateTimePicker from '@/@core/components/app-form-elements/AppDateTimePicker.vue'
 import { useSnackbar } from '@/composables/useSnackbar'
-import { useSurveyService } from '../composables/useSurveyService'
 import { type CreateSurveyRequest, type Survey, type SurveyQuestion, SurveyStatus, type SurveyTypeOption } from '@/modules/surveys/types'
 import { getCurrentDateISO } from '@/utils/dateUtils'
-import type { SurveyTemplate } from '../utils/surveyTemplates'
 
 interface Props {
   editingSurvey?: Survey | null
@@ -215,8 +215,9 @@ function moveQuestion(from: number, to: number) {
   surveyForm.value.questions = questions
 
   // Mover tambien el panel expandido si es necesario
-  if (expandedPanel.value === from)
+  if (expandedPanel.value === from) {
     expandedPanel.value = to
+  }
   else if (expandedPanel.value !== undefined) {
     if (from < expandedPanel.value && to >= expandedPanel.value)
       expandedPanel.value = expandedPanel.value - 1
@@ -655,7 +656,7 @@ function togglePreview() {
                   <VExpansionPanelText>
                     <QuestionBuilder
                       :question="question"
-                      :inline="true"
+                      inline
                       @update:question="handleQuestionUpdate(index, $event)"
                     />
                   </VExpansionPanelText>

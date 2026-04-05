@@ -119,9 +119,9 @@ function getTrendIcon(trend: string) {
 
 function getTrendColor(trend: string) {
   switch (trend) {
-  case 'up': return 'success'
-  case 'down': return 'error'
-  default: return 'grey'
+    case 'up': return 'success'
+    case 'down': return 'error'
+    default: return 'grey'
   }
 }
 
@@ -414,4 +414,3 @@ onMounted(() => {
   position: relative;
 }
 </style>
-

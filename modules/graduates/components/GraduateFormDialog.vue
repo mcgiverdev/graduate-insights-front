@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { Form, Field } from 'vee-validate'
+import { Field, Form } from 'vee-validate'
 import type { FormContext } from 'vee-validate'
 import { computed, ref, watch } from 'vue'
+import type { Graduate, GraduateFormValues } from '../types'
+import { graduateFormSchema } from '../validation/graduateFormSchema'
+import { toFormValues } from '../utils/mappers'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import AppDateTimePicker from '@/@core/components/app-form-elements/AppDateTimePicker.vue'
 import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import AppFileField from '@/@core/components/app-form-elements/AppFileField.vue'
-import type { Graduate, GraduateFormValues } from '../types'
-import { graduateFormSchema } from '../validation/graduateFormSchema'
-import { toFormValues } from '../utils/mappers'
 
 interface Props {
   modelValue: boolean
@@ -94,10 +94,13 @@ const closeDialog = () => {
           @submit="handleSubmit"
         >
           <VRow>
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="nombres"
                 v-slot="{ field, errorMessage }"
+                name="nombres"
               >
                 <AppTextField
                   :model-value="field.value"
@@ -108,10 +111,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="apellidos"
                 v-slot="{ field, errorMessage }"
+                name="apellidos"
               >
                 <AppTextField
                   :model-value="field.value"
@@ -122,10 +128,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="correo"
                 v-slot="{ field, errorMessage }"
+                name="correo"
               >
                 <AppTextField
                   :model-value="field.value"
@@ -137,10 +146,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="dni"
                 v-slot="{ field, errorMessage }"
+                name="dni"
               >
                 <AppTextField
                   :model-value="field.value"
@@ -162,10 +174,13 @@ const closeDialog = () => {
               </VAlert>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="celular"
                 v-slot="{ field, errorMessage }"
+                name="celular"
               >
                 <AppTextField
                   :model-value="field.value"
@@ -177,10 +192,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="genero"
                 v-slot="{ field, errorMessage }"
+                name="genero"
               >
                 <AppSelect
                   :model-value="field.value"
@@ -194,10 +212,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="fechaNacimiento"
                 v-slot="{ field, errorMessage }"
+                name="fechaNacimiento"
               >
                 <AppDateTimePicker
                   :model-value="field.value"
@@ -215,8 +236,8 @@ const closeDialog = () => {
               md="6"
             >
               <Field
-                name="fechaInicio"
                 v-slot="{ field, errorMessage }"
+                name="fechaInicio"
               >
                 <AppDateTimePicker
                   :model-value="field.value"
@@ -234,8 +255,8 @@ const closeDialog = () => {
               md="6"
             >
               <Field
-                name="fechaFin"
                 v-slot="{ field, errorMessage }"
+                name="fechaFin"
               >
                 <AppDateTimePicker
                   :model-value="field.value"
@@ -252,8 +273,8 @@ const closeDialog = () => {
               cols="12"
             >
               <Field
-                name="cvPath"
                 v-slot="{ field, errorMessage }"
+                name="cvPath"
               >
                 <AppFileField
                   :model-value="field.value"

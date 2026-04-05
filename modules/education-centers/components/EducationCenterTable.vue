@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import type { EducationCenter } from '../types'
+import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 
 interface Props {
   items: EducationCenter[]

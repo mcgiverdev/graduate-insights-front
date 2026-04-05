@@ -1,8 +1,8 @@
 import { ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
-import type { RequestResult } from '@/infrastructure/http/types'
 import { eventTypeService } from '../services/EventTypeService'
 import type { EventTypePayload } from '../types'
+import { useSnackbar } from '@/composables/useSnackbar'
+import type { RequestResult } from '@/infrastructure/http/types'
 
 const fieldNames = ['nombre']
 
@@ -43,6 +43,7 @@ export const useEventTypeForm = () => {
     catch (error: any) {
       if (error?.data?.errors) {
         const mapped: Record<string, string> = {}
+
         Object.entries(error.data.errors).forEach(([field, message]) => {
           const normalized = normalizeFieldName(field)
           if (normalized)

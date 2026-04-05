@@ -1,9 +1,9 @@
 <script setup lang="ts">
-/* eslint-disable import/no-unresolved, indent, padding-line-between-statements, arrow-parens, vue/max-attributes-per-line, vue/singleline-html-element-content-newline */
+/* eslint-disable indent, arrow-parens, vue/max-attributes-per-line, vue/singleline-html-element-content-newline */
 import type { ValidationError } from 'yup'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { departamentoOptions, getDistritos, getProvincias } from '../data/peruGeoData'
 import { useRouter } from 'vue-router'
+import { departamentoOptions, getDistritos, getProvincias } from '../data/peruGeoData'
 import { useGraduateForm } from '../composables/useGraduateForm'
 import { graduateService } from '../services/GraduateService'
 import type {
@@ -16,21 +16,20 @@ import type {
   GraduateWizardComplementaryTrainingItem,
   GraduateWizardDegreeItem,
   GraduateWizardLanguageItem,
-  GraduateWizardWorkTrajectoryItem,
   GraduateWizardValues,
+  GraduateWizardWorkTrajectoryItem,
   LanguageLevel,
   ProfessionalSchoolCatalogItem,
 } from '../types'
 import {
-  graduateWizardStepFourSchema,
   graduateWizardStepFiveSchema,
+  graduateWizardStepFourSchema,
   graduateWizardStepOneSchema,
   graduateWizardStepSixSchema,
   graduateWizardStepThreeSchema,
   graduateWizardStepTwoSchema,
 } from '../validation/graduateWizardSchemas'
 import AppDateTimePicker from '@/@core/components/app-form-elements/AppDateTimePicker.vue'
-import AppFileField from '@/@core/components/app-form-elements/AppFileField.vue'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 
@@ -83,9 +82,21 @@ const universityOptions = ref<CatalogOptionItem[]>([])
 const universitySearch = ref('')
 const universityCreating = ref(false)
 
+const createEmptyDegreeEarly = (): GraduateWizardDegreeItem => ({
+  tipoGradoId: undefined,
+  universidadId: undefined,
+  fechaGrado: '',
+  otroGradoNombre: '',
+  modalidadTitulacionId: undefined,
+  modalidadTitulacionOtro: '',
+})
+
+const degreeDraft = ref<GraduateWizardDegreeItem>(createEmptyDegreeEarly())
+
 const addNewUniversity = async () => {
   const nombre = universitySearch.value.trim()
-  if (!nombre || universityCreating.value) return
+  if (!nombre || universityCreating.value)
+    return
   universityCreating.value = true
   try {
     const created = await graduateService.createUniversity(nombre)
@@ -131,14 +142,7 @@ const learningMethodOptions = [
   { title: 'Nativo', value: 'Nativo' },
 ]
 
-const createEmptyDegree = (): GraduateWizardDegreeItem => ({
-  tipoGradoId: undefined,
-  universidadId: undefined,
-  fechaGrado: '',
-  otroGradoNombre: '',
-  modalidadTitulacionId: undefined,
-  modalidadTitulacionOtro: '',
-})
+const createEmptyDegree = createEmptyDegreeEarly
 
 const createEmptyLanguage = (): GraduateWizardLanguageItem => ({
   idiomaId: undefined,
@@ -175,7 +179,6 @@ const isOtroDegreeType = computed(() =>
   degreeTypeOptions.value.find(item => item.id === degreeDraft.value.tipoGradoId)?.codigo === 'OTRO',
 )
 
-const degreeDraft = ref<GraduateWizardDegreeItem>(createEmptyDegree())
 const languageDraft = ref<GraduateWizardLanguageItem>(createEmptyLanguage())
 const complementaryTrainingDraft = ref<GraduateWizardComplementaryTrainingItem>(createEmptyComplementaryTraining())
 const workTrajectoryDraft = ref<GraduateWizardWorkTrajectoryItem>(createEmptyWorkTrajectory())
@@ -220,7 +223,8 @@ const distritoOptions = computed(() => getDistritos(values.value.departamento ??
 const skipGeoReset = ref(false)
 
 watch(() => values.value.viveEnPeru, (vivePeru) => {
-  if (skipGeoReset.value) return
+  if (skipGeoReset.value)
+    return
   if (!vivePeru) {
     values.value.departamento = ''
     values.value.provincia = ''
@@ -232,13 +236,15 @@ watch(() => values.value.viveEnPeru, (vivePeru) => {
 })
 
 watch(() => values.value.departamento, () => {
-  if (skipGeoReset.value) return
+  if (skipGeoReset.value)
+    return
   values.value.provincia = ''
   values.value.distrito = ''
 })
 
 watch(() => values.value.provincia, () => {
-  if (skipGeoReset.value) return
+  if (skipGeoReset.value)
+    return
   values.value.distrito = ''
 })
 
@@ -474,7 +480,9 @@ const hydrateFromGraduate = (graduate: Graduate) => {
       fechaFin: item.fecha_fin ? item.fecha_fin.split('T')[0] : '',
     }))
 
-  nextTick(() => { skipGeoReset.value = false })
+  nextTick(() => {
+    skipGeoReset.value = false
+  })
 }
 
 const openCreateDegreeDialog = () => {
@@ -497,9 +505,8 @@ const saveDegreeDialog = () => {
     nextValue.modalidadTitulacionOtro = ''
   }
 
-  if (!isOtroDegreeType.value) {
+  if (!isOtroDegreeType.value)
     nextValue.otroGradoNombre = ''
-  }
 
   if (isDegreeDuplicate(nextValue, editingDegreeIndex.value)) {
     formMessage.value = 'Este grado ya fue registrado. Evita duplicar tipo, universidad, fecha y nombre de grado.'
@@ -629,19 +636,26 @@ const removeWorkTrajectory = (index: number) => {
 const showDegreeTitulationFields = computed(() => isTituladoDegreeType(degreeDraft.value.tipoGradoId))
 
 const formatDate = (value?: string | null) => {
-  if (!value) return '-'
+  if (!value)
+    return '-'
   const datePart = value.trim().split(/[T ]/)[0]
-  if (!datePart) return '-'
+  if (!datePart)
+    return '-'
   const [year, month, day] = datePart.split('-')
-  if (!year || !month || !day) return datePart
+  if (!year || !month || !day)
+    return datePart
+
   return `${day}/${month}/${year}`
 }
 
 const formatDateRange = (start?: string | null, end?: string | null) => {
   const s = formatDate(start)
   const e = formatDate(end)
-  if (s === '-' && e === '-') return '-'
-  if (e === '-') return s
+  if (s === '-' && e === '-')
+    return '-'
+  if (e === '-')
+    return s
+
   return `${s} — ${e}`
 }
 
@@ -656,12 +670,11 @@ const degreeRows = computed(() => values.value.grados.map((item, index) => {
     || ''
 
   let tipo = tipoNombre
-  if (isOtro && item.otroGradoNombre?.trim()) {
+  if (isOtro && item.otroGradoNombre?.trim())
     tipo = `${tipoNombre}: ${item.otroGradoNombre.trim()}`
-  }
-  else if (isTitulado && modalidadNombre) {
+
+  else if (isTitulado && modalidadNombre)
     tipo = `${tipoNombre} (${modalidadNombre})`
-  }
 
   const universidad = universityOptions.value.find(o => o.id === item.universidadId)?.nombre || '-'
 
@@ -1079,7 +1092,6 @@ watch(activeTab, () => {
                   :error-messages="getFieldError('nacionalidad')"
                 />
               </VCol>
-
             </VRow>
           </VWindowItem>
 

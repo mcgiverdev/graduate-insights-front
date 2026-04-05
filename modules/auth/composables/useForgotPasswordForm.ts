@@ -1,7 +1,7 @@
 import { ref } from 'vue'
+import { authModuleService } from '../services/AuthService'
 import { navigateTo } from '#imports'
 import { useSnackbar } from '@/composables/useSnackbar'
-import { authModuleService } from '../services/AuthService'
 
 export const useForgotPasswordForm = () => {
   const email = ref('')
@@ -16,10 +16,12 @@ export const useForgotPasswordForm = () => {
 
     if (!email.value) {
       error.value = 'Ingresa el correo con el que te registraste.'
+
       return
     }
 
     loading.value = true
+
     const normalizedEmail = email.value.trim().toLowerCase()
 
     try {
@@ -28,6 +30,7 @@ export const useForgotPasswordForm = () => {
       if (!result.success) {
         error.value = result.message || 'No pudimos enviar el código. Intenta nuevamente.'
         showSnackbar({ text: error.value, color: 'error' })
+
         return
       }
 

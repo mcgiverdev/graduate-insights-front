@@ -161,22 +161,27 @@ export const useGraduateSurveyService = () => {
         const answer = answers[q.question_id]
         const response: SurveyQuestionResponse = { question_id: q.question_id }
 
-        if (q.question_type === 'YES_NO')
+        if (q.question_type === 'YES_NO') {
           response.text_response = String(answer)
+        }
         else if (q.question_type === 'SCALE') {
           if (q.options && q.options.length > 0)
             response.selected_option_ids = answer ? [answer] : []
           else
             response.text_response = String(answer)
         }
-        else if (q.question_type === 'SINGLE_CHOICE')
+        else if (q.question_type === 'SINGLE_CHOICE') {
           response.selected_option_ids = answer ? [answer] : []
-        else if (q.question_type === 'MULTIPLE_CHOICE')
+        }
+        else if (q.question_type === 'MULTIPLE_CHOICE') {
           response.selected_option_ids = Array.isArray(answer) ? answer : []
-        else if (q.question_type === 'NUMBER')
+        }
+        else if (q.question_type === 'NUMBER') {
           response.number_response = Number(answer)
-        else
+        }
+        else {
           response.text_response = String(answer)
+        }
 
         return response
       })

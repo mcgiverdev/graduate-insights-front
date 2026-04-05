@@ -1,5 +1,3 @@
-import { BaseApiService } from '@/infrastructure/http/BaseApiService'
-import type { ApiEnvelope, ListResponse } from '@/infrastructure/http/types'
 import type {
   JobOffer,
   JobOfferApiResponse,
@@ -7,6 +5,8 @@ import type {
   JobOfferPayload,
 } from '../types'
 import { toJobOffer } from '../utils/mappers'
+import { BaseApiService } from '@/infrastructure/http/BaseApiService'
+import type { ApiEnvelope, ListResponse } from '@/infrastructure/http/types'
 
 const BASE_ENDPOINT = '/graduate-insights/v1/api/job-offers'
 
@@ -29,6 +29,7 @@ class JobOfferService extends BaseApiService {
 
   async getById(id: number): Promise<JobOffer | null> {
     const response = await this.get<ApiEnvelope<JobOfferApiResponse>>(`${BASE_ENDPOINT}/${id}`)
+
     return response.data ? toJobOffer(response.data) : null
   }
 

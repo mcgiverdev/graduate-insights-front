@@ -1,5 +1,3 @@
-import { BaseApiService } from '@/infrastructure/http/BaseApiService'
-import type { ApiEnvelope, ListResponse } from '@/infrastructure/http/types'
 import type {
   Director,
   DirectorApiResponse,
@@ -7,6 +5,8 @@ import type {
   DirectorPayload,
 } from '../types'
 import { toDirector } from '../utils/mappers'
+import { BaseApiService } from '@/infrastructure/http/BaseApiService'
+import type { ApiEnvelope, ListResponse } from '@/infrastructure/http/types'
 
 const BASE_ENDPOINT = '/graduate-insights/v1/api/director'
 
@@ -29,6 +29,7 @@ class DirectorService extends BaseApiService {
 
   async getById(id: number): Promise<Director | null> {
     const response = await this.get<ApiEnvelope<DirectorApiResponse>>(`${BASE_ENDPOINT}/${id}`)
+
     return response.data ? toDirector(response.data) : null
   }
 

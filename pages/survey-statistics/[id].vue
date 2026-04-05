@@ -65,12 +65,12 @@ const genderChartData = computed(() => {
   return {
     labels: Object.keys(data).map(key => {
       switch (key) {
-      case 'M': return 'Masculino'
-      case 'F': return 'Femenino'
-      case 'masculino': return 'Masculino'
-      case 'femenino': return 'Femenino'
-      case 'otro': return 'Otro'
-      default: return key.charAt(0).toUpperCase() + key.slice(1)
+        case 'M': return 'Masculino'
+        case 'F': return 'Femenino'
+        case 'masculino': return 'Masculino'
+        case 'femenino': return 'Femenino'
+        case 'otro': return 'Otro'
+        default: return key.charAt(0).toUpperCase() + key.slice(1)
       }
     }),
     datasets: [
@@ -145,7 +145,6 @@ async function handleExport(format: 'csv' | 'excel' | 'pdf' = 'csv') {
     })
   }
 }
-
 
 const surveyMetadata = computed(() => {
   if (!statistics.value)
@@ -338,17 +337,17 @@ useHead({
                 <VChip
                   :color="surveyMetadata.status === 'ACTIVE' ? 'success'
                     : surveyMetadata.status === 'CLOSED' ? 'error'
-                    : surveyMetadata.status === 'DRAFT' ? 'warning'
-                    : surveyMetadata.status === 'PAUSED' ? 'info'
-                    : 'default'"
+                      : surveyMetadata.status === 'DRAFT' ? 'warning'
+                        : surveyMetadata.status === 'PAUSED' ? 'info'
+                          : 'default'"
                   size="small"
                 >
                   {{ surveyMetadata.status === 'ACTIVE' ? 'Activa'
                     : surveyMetadata.status === 'CLOSED' ? 'Cerrada'
-                    : surveyMetadata.status === 'DRAFT' ? 'Borrador'
-                    : surveyMetadata.status === 'PAUSED' ? 'Pausada'
-                    : surveyMetadata.status === 'COMPLETED' ? 'Completada'
-                    : surveyMetadata.status }}
+                      : surveyMetadata.status === 'DRAFT' ? 'Borrador'
+                        : surveyMetadata.status === 'PAUSED' ? 'Pausada'
+                          : surveyMetadata.status === 'COMPLETED' ? 'Completada'
+                            : surveyMetadata.status }}
                 </VChip>
               </div>
             </VCol>
@@ -535,7 +534,6 @@ useHead({
             :statistics="processedStatistics"
           />
         </VWindowItem>
-
       </VWindow>
     </div>
 
@@ -562,4 +560,3 @@ useHead({
     </div>
   </div>
 </template>
-

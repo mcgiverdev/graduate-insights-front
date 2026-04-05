@@ -3,7 +3,6 @@
  * Evita problemas de zona horaria agregando un tiempo específico
  *
  * @param dateString - Fecha en formato ISO (YYYY-MM-DD)
- * @param options - Opciones de formateo (opcional)
  * @returns Fecha formateada o '-' si no hay fecha
  */
 export const formatReadableDate = (dateString: string | null | undefined): string => {
@@ -14,7 +13,7 @@ export const formatReadableDate = (dateString: string | null | undefined): strin
     const date = new Date(dateString)
 
     // Verificar si la fecha es válida
-    if (isNaN(date.getTime()))
+    if (Number.isNaN(date.getTime()))
       return '-'
 
     return new Intl.DateTimeFormat('es-ES', {
@@ -43,7 +42,7 @@ export const formatDateOnly = (dateString: string | null | undefined): string =>
   try {
     const date = new Date(dateString)
 
-    if (isNaN(date.getTime()))
+    if (Number.isNaN(date.getTime()))
       return '-'
 
     return new Intl.DateTimeFormat('es-ES', {
@@ -88,5 +87,5 @@ export function getCurrentDateISO(): string {
 export function isValidDate(dateString: string): boolean {
   const date = new Date(dateString)
 
-  return !isNaN(date.getTime())
+  return !Number.isNaN(date.getTime())
 }

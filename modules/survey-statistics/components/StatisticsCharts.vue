@@ -122,10 +122,10 @@ const employmentChartData = computed(() => {
 
   const labels = Object.keys(data).map(key => {
     switch (key) {
-    case 'empleado': return 'Empleado'
-    case 'desempleado': return 'Desempleado'
-    case 'emprendedor': return 'Emprendedor'
-    default: return key.charAt(0).toUpperCase() + key.slice(1)
+      case 'empleado': return 'Empleado'
+      case 'desempleado': return 'Desempleado'
+      case 'emprendedor': return 'Emprendedor'
+      default: return key.charAt(0).toUpperCase() + key.slice(1)
     }
   })
 
@@ -160,11 +160,11 @@ const salaryChartData = computed(() => {
 
   const labels = Object.keys(data).map(key => {
     switch (key) {
-    case 'menos_1500': return 'Menos de S/1,500'
-    case '1500_3000': return 'S/1,500 - S/3,000'
-    case '3000_5000': return 'S/3,000 - S/5,000'
-    case 'mas_5000': return 'Más de S/5,000'
-    default: return key
+      case 'menos_1500': return 'Menos de S/1,500'
+      case '1500_3000': return 'S/1,500 - S/3,000'
+      case '3000_5000': return 'S/3,000 - S/5,000'
+      case 'mas_5000': return 'Más de S/5,000'
+      default: return key
     }
   })
 
@@ -396,4 +396,3 @@ const monthlyChartData = computed(() => {
     </VRow>
   </div>
 </template>
-

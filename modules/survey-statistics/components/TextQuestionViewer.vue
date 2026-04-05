@@ -2,8 +2,6 @@
 import { ref } from 'vue'
 import TextResponsesDialog from './TextResponsesDialog.vue'
 
-const showAllResponses = ref(false)
-
 interface TextQuestionData {
   question_id: number
   question_text: string
@@ -20,6 +18,8 @@ interface Props {
 }
 
 defineProps<Props>()
+
+const showAllResponses = ref(false)
 
 function getSampleText(samples: string[], maxLength: number = 100): string[] {
   return samples.map(sample => {

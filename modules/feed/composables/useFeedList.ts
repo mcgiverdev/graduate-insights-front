@@ -1,7 +1,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
 import { feedService } from '../services/FeedService'
 import type { FeedFiltersState, FeedItem } from '../types'
+import { useSnackbar } from '@/composables/useSnackbar'
 
 interface LoadOptions {
   page?: number
@@ -13,10 +13,12 @@ const DEFAULT_PAGE_SIZE = 10
 export const useFeedList = () => {
   const items = ref<FeedItem[]>([])
   const loading = ref(false)
+
   const filters = reactive<FeedFiltersState>({
     showEvents: true,
     showJobs: true,
   })
+
   const pagination = reactive({
     currentPage: 1,
     totalPages: 0,
@@ -74,10 +76,8 @@ export const useFeedList = () => {
     return items.value.filter(item => {
       if (item.tipo === 'EVENT' && !filters.showEvents)
         return false
-      if (item.tipo === 'JOB_OFFER' && !filters.showJobs)
-        return false
 
-      return true
+      return !(item.tipo === 'JOB_OFFER' && !filters.showJobs)
     })
   })
 

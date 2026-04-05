@@ -17,7 +17,7 @@ const emit = defineEmits<{
 
 const testEmail = ref(props.defaultEmail)
 
-watch(() => props.modelValue, (isOpen) => {
+watch(() => props.modelValue, isOpen => {
   if (isOpen)
     testEmail.value = props.defaultEmail
 })

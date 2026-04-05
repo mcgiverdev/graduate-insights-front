@@ -31,6 +31,7 @@ const { employerOptions, loadingOptions, loadOptions } = useJobOfferOptions()
 
 const isConfirmVisible = ref(false)
 const jobOfferIdToDelete = ref<number | null>(null)
+
 const {
   isFormVisible,
   selectedJobOffer,

@@ -1,8 +1,8 @@
 import { ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
-import type { RequestResult } from '@/infrastructure/http/types'
 import { educationCenterService } from '../services/EducationCenterService'
 import type { EducationCenterPayload } from '../types'
+import { useSnackbar } from '@/composables/useSnackbar'
+import type { RequestResult } from '@/infrastructure/http/types'
 
 const formFields = ['nombre', 'direccion']
 
@@ -37,21 +37,25 @@ export const useEducationCenterForm = () => {
         await educationCenterService.create(payload)
 
       showSnackbar({ text: educationCenterId !== undefined && educationCenterId !== null ? 'Centro educativo actualizado' : 'Centro educativo creado', color: 'success' })
+
       return { success: true }
     }
     catch (error: any) {
       if (error?.data?.errors) {
         const mapped: Record<string, string> = {}
+
         Object.entries(error.data.errors).forEach(([field, message]) => {
           const normalized = normalizeFieldName(field)
           if (normalized)
             mapped[normalized] = String(message)
         })
         serverErrors.value = mapped
+
         return { success: false, message: error?.data?.message }
       }
 
       showSnackbar({ text: error?.message || 'No se pudo guardar el centro educativo', color: 'error' })
+
       return { success: false, message: error?.message }
     }
     finally {
