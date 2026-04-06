@@ -146,7 +146,6 @@ const handleDialogModelValueUpdate = (val: boolean) => {
       <VDivider />
       <VCardText>
         <Form
-          v-slot="{ errors, meta }"
           :validation-schema="validationSchema"
           :initial-values="initialValues"
           @submit="onSubmit"

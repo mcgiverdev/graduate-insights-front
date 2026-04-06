@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed, onUnmounted, watch } from 'vue'
 import RoleGuard from '@/components/RoleGuard.vue'
 import { ROLES } from '@/composables/useRoles'
 import { useSnackbar } from '@/composables/useSnackbar'
@@ -28,7 +28,10 @@ const {
 
 const isPreviewOpen = computed({
   get: () => previewSurvey.value !== null,
-  set: (val) => { if (!val) closePreview() },
+  set: val => {
+    if (!val)
+      closePreview()
+  },
 })
 
 // Forzar ancho completo (fluid) al entrar en modo editor y restaurar al salir.
@@ -36,7 +39,7 @@ const isPreviewOpen = computed({
 const layoutConfig = useLayoutConfigStore()
 let previousContentWidth = layoutConfig.appContentWidth
 
-watch(currentView, (view) => {
+watch(currentView, view => {
   if (view !== 'list') {
     previousContentWidth = layoutConfig.appContentWidth
     layoutConfig.appContentWidth = 'fluid'
@@ -56,6 +59,7 @@ const { showSnackbar } = useSnackbar()
 
 async function handleGeneralExport(format: 'csv' | 'excel' | 'pdf') {
   const result = await exportGeneralReport(format)
+
   showSnackbar({
     text: result.message || (result.success ? 'Reporte descargado' : 'Error al exportar'),
     color: result.success ? 'success' : 'error',
@@ -82,17 +86,29 @@ async function handleGeneralExport(format: 'csv' | 'excel' | 'pdf') {
                 prepend-icon="tabler-file-analytics"
               >
                 Reporte General
-                <VIcon icon="tabler-chevron-down" class="ms-1" />
+                <VIcon
+                  icon="tabler-chevron-down"
+                  class="ms-1"
+                />
               </VBtn>
             </template>
             <VList>
-              <VListItem prepend-icon="tabler-file-text" @click="handleGeneralExport('csv')">
+              <VListItem
+                prepend-icon="tabler-file-text"
+                @click="handleGeneralExport('csv')"
+              >
                 <VListItemTitle>Exportar CSV</VListItemTitle>
               </VListItem>
-              <VListItem prepend-icon="tabler-file-spreadsheet" @click="handleGeneralExport('excel')">
+              <VListItem
+                prepend-icon="tabler-file-spreadsheet"
+                @click="handleGeneralExport('excel')"
+              >
                 <VListItemTitle>Exportar Excel (.xlsx)</VListItemTitle>
               </VListItem>
-              <VListItem prepend-icon="tabler-file-type-pdf" @click="handleGeneralExport('pdf')">
+              <VListItem
+                prepend-icon="tabler-file-type-pdf"
+                @click="handleGeneralExport('pdf')"
+              >
                 <VListItemTitle>Exportar PDF</VListItemTitle>
               </VListItem>
             </VList>
@@ -147,7 +163,10 @@ async function handleGeneralExport(format: 'csv' | 'excel' | 'pdf') {
     <VCard v-if="previewSurvey">
       <VCardTitle class="d-flex align-center justify-space-between pa-4 pb-2">
         <div class="d-flex align-center gap-2">
-          <VIcon icon="tabler-eye" color="primary" />
+          <VIcon
+            icon="tabler-eye"
+            color="primary"
+          />
           <span>Vista Previa — {{ previewSurvey.title }}</span>
         </div>
         <VBtn
@@ -186,7 +205,6 @@ async function handleGeneralExport(format: 'csv' | 'excel' | 'pdf') {
       </VCardActions>
     </VCard>
   </VDialog>
-
 </template>
 
 <style scoped>

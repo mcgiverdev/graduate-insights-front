@@ -1,8 +1,8 @@
 import { watchDebounced } from '@vueuse/core'
 import { computed, onMounted, ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
 import { graduateService } from '../services/GraduateService'
 import type { Graduate } from '../types'
+import { useSnackbar } from '@/composables/useSnackbar'
 
 // Estado a nivel de módulo — persiste entre navegaciones (mismo patrón que useUser)
 const items = ref<Graduate[]>([])

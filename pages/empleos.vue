@@ -31,6 +31,7 @@ const { graduateOptions, loadingOptions, loadOptions } = useJobOptions()
 
 const isConfirmVisible = ref(false)
 const jobIdToDelete = ref<number | null>(null)
+
 const {
   isFormVisible,
   selectedJob,

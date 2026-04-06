@@ -19,9 +19,9 @@ interface Props {
   statistics: SurveyStatistics | null
 }
 
-const props = defineProps<Props>()
+defineProps<Props>()
 
-const emit = defineEmits<{
+defineEmits<{
   'question-selected': [questionId: number]
 }>()
 
@@ -35,7 +35,7 @@ ChartJS.register(
   ArcElement,
 )
 
-const { current: currentTheme } = useTheme()
+useTheme()
 
 const barChartOptions = computed(() => ({
   responsive: true,
@@ -83,19 +83,19 @@ const doughnutChartOptions = computed(() => getDoughnutChartConfig())
 
 function getChartComponent(chartType: string) {
   switch (chartType) {
-  case 'bar': return Bar
-  case 'doughnut': return Doughnut
-  case 'pie': return Pie
-  default: return Bar
+    case 'bar': return Bar
+    case 'doughnut': return Doughnut
+    case 'pie': return Pie
+    default: return Bar
   }
 }
 
 function getChartOptions(chartType: string) {
   switch (chartType) {
-  case 'bar': return barChartOptions.value
-  case 'doughnut':
-  case 'pie': return doughnutChartOptions.value
-  default: return barChartOptions.value
+    case 'bar': return barChartOptions.value
+    case 'doughnut':
+    case 'pie': return doughnutChartOptions.value
+    default: return barChartOptions.value
   }
 }
 
@@ -495,4 +495,3 @@ function formatOptionName(option: string): string {
     </VRow>
   </div>
 </template>
-

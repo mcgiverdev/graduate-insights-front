@@ -287,4 +287,3 @@ loadDemographics()
   position: relative;
 }
 </style>
-

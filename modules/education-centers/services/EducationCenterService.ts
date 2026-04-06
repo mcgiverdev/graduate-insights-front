@@ -1,5 +1,3 @@
-import { BaseApiService } from '@/infrastructure/http/BaseApiService'
-import type { ApiEnvelope, ListResponse } from '@/infrastructure/http/types'
 import type {
   EducationCenter,
   EducationCenterApiResponse,
@@ -7,6 +5,8 @@ import type {
   EducationCenterPayload,
 } from '../types'
 import { toEducationCenter } from '../utils/mappers'
+import { BaseApiService } from '@/infrastructure/http/BaseApiService'
+import type { ApiEnvelope, ListResponse } from '@/infrastructure/http/types'
 
 const BASE_ENDPOINT = '/graduate-insights/v1/api/education_center'
 
@@ -29,6 +29,7 @@ class EducationCenterService extends BaseApiService {
 
   async getById(id: number): Promise<EducationCenter | null> {
     const response = await this.get<ApiEnvelope<EducationCenterApiResponse>>(`${BASE_ENDPOINT}/${id}`)
+
     return response.data ? toEducationCenter(response.data) : null
   }
 

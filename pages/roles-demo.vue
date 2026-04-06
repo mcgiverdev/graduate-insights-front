@@ -19,7 +19,7 @@ const {
   hasPermission,
 } = useRoles()
 
-const getRoleColor = (role: string) => {
+const getRoleColor = (currentRole: string) => {
   const colors = {
     Graduado: 'success',
     Empleador: 'info',
@@ -27,7 +27,7 @@ const getRoleColor = (role: string) => {
     Administrador: 'error',
   }
 
-  return colors[role] || 'default'
+  return colors[currentRole] || 'default'
 }
 
 const formatPermissionName = (key: string) => {

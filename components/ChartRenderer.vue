@@ -13,6 +13,12 @@ import {
 } from 'chart.js'
 import { Bar, Line, Pie } from 'vue-chartjs'
 
+defineProps<{
+  chartType: 'pie' | 'line' | 'bar'
+  data: any
+  options: any
+}>()
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -24,12 +30,6 @@ ChartJS.register(
   BarElement,
   ArcElement,
 )
-
-defineProps<{
-  chartType: 'pie' | 'line' | 'bar'
-  data: any
-  options: any
-}>()
 </script>
 
 <template>

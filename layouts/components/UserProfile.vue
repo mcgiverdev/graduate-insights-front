@@ -148,7 +148,10 @@ onMounted(() => {
           <VDivider class="my-2" />
 
           <!-- 👉 Logout -->
-          <VListItem class="logout-item" @click="logout">
+          <VListItem
+            class="logout-item"
+            @click="logout"
+          >
             <template #prepend>
               <VIcon
                 class="me-2"

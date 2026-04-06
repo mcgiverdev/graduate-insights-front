@@ -1,5 +1,3 @@
-import { BaseApiService } from '@/infrastructure/http/BaseApiService'
-import type { ApiEnvelope, ListResponse } from '@/infrastructure/http/types'
 import type {
   CatalogOptionItem,
   FacultyCatalogItem,
@@ -11,6 +9,8 @@ import type {
   ProfessionalSchoolCatalogItem,
 } from '../types'
 import { toGraduate } from '../utils/mappers'
+import { BaseApiService } from '@/infrastructure/http/BaseApiService'
+import type { ApiEnvelope, ListResponse } from '@/infrastructure/http/types'
 
 const BASE_ENDPOINT = '/graduate-insights/v1/api/graduate'
 
@@ -23,6 +23,7 @@ const parseCreatedGraduateId = (data: GraduateCreateResponse | null | undefined)
     return null
 
   const numericId = Number(rawId)
+
   return Number.isFinite(numericId) ? numericId : null
 }
 

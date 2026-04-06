@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { VerificationForm } from '@/src/features/auth'
 import { computed, h } from 'vue'
+import { VerificationForm } from '@/src/features/auth'
 import { navigateTo, useRoute } from '#imports'
 import authV1BottomShape from '@images/svg/auth-v1-bottom-shape.svg?raw'
 import authV1TopShape from '@images/svg/auth-v1-top-shape.svg?raw'
@@ -19,6 +19,7 @@ const handleVerified = () => navigateTo('/', { replace: true })
 
 const goToLogin = () => {
   const token = useCookie('accessToken', { path: '/' })
+
   token.value = null
   navigateTo('/login', { replace: true })
 }

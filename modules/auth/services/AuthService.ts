@@ -1,7 +1,3 @@
-import { useRuntimeConfig } from '#imports'
-import { useApi } from '@/composables/useApi'
-import type { ApiError } from '@/composables/useApi'
-import { useUser } from '@/composables/useUser'
 import type {
   LoginResult,
   PasswordChangePayload,
@@ -9,6 +5,10 @@ import type {
   VerificationPayload,
   VerificationResult,
 } from '../types'
+import { useRuntimeConfig } from '#imports'
+import { useApi } from '@/composables/useApi'
+import type { ApiError } from '@/composables/useApi'
+import { useUser } from '@/composables/useUser'
 
 interface LoginResponse {
   success: boolean
@@ -31,6 +31,7 @@ const REGISTER_GRADUATE_ENDPOINT = '/graduate-insights/v1/api/graduate/register'
 
 const updateTokenCookie = (token?: string | null) => {
   const isSecure = process.client && window.location.protocol === 'https:'
+
   const cookie = useCookie('accessToken', {
     maxAge: 60 * 60 * 24,
     path: '/',
@@ -70,6 +71,7 @@ class AuthModuleService {
       if (typeof errors === 'object') {
         const fieldErrors = errors as Record<string, string>
         const firstMessage = Object.values(fieldErrors)[0]
+
         return {
           message: (firstMessage?.length ? firstMessage : fallback) ?? fallback,
           fieldErrors,
@@ -98,8 +100,8 @@ class AuthModuleService {
       return {
         success,
         message: success
-            ? 'Código enviado correctamente. Revisa tu bandeja de correo.'
-            : 'No pudimos enviar el código. Intenta nuevamente en unos minutos.',
+          ? 'Código enviado correctamente. Revisa tu bandeja de correo.'
+          : 'No pudimos enviar el código. Intenta nuevamente en unos minutos.',
       }
     }
     catch (error) {
@@ -158,6 +160,7 @@ class AuthModuleService {
       // Poblar el estado global del usuario para evitar una llamada extra a /auth/me
       // en el guard de autenticación (auth.client.ts)
       const { setUser } = useUser()
+
       setUser(meResponse.data as any)
 
       return { success: true, message: loginData.message || 'Sesión iniciada correctamente' }
@@ -165,6 +168,7 @@ class AuthModuleService {
     catch (error) {
       console.error('Error al obtener información del usuario:', error)
       updateTokenCookie(null)
+
       return { success: false, message: 'Error al obtener información del usuario' }
     }
   }
@@ -247,6 +251,7 @@ class AuthModuleService {
       })
 
       const registerData = response.data
+
       const message = registerData?.message
         || 'Registro exitoso. Revisa tu correo y espera la validación del director.'
 

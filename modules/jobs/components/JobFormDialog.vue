@@ -2,13 +2,13 @@
 import { Field, Form } from 'vee-validate'
 import type { FormContext } from 'vee-validate'
 import { computed, ref, watch } from 'vue'
+import type { Job, JobFormValues } from '../types'
+import { jobFormSchema } from '../validation/jobFormSchema'
+import { toFormValues } from '../utils/mappers'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import AppDateTimePicker from '@/@core/components/app-form-elements/AppDateTimePicker.vue'
 import type { KeyValueOption } from '@/modules/shared/types/keyValue'
-import type { Job, JobFormValues } from '../types'
-import { jobFormSchema } from '../validation/jobFormSchema'
-import { toFormValues } from '../utils/mappers'
 
 interface Props {
   modelValue: boolean
@@ -97,10 +97,13 @@ const closeDialog = () => {
           @submit="handleSubmit"
         >
           <VRow>
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="compania"
                 v-slot="{ field, errorMessage }"
+                name="compania"
               >
                 <AppTextField
                   :model-value="field.value"
@@ -111,10 +114,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="cargo"
                 v-slot="{ field, errorMessage }"
+                name="cargo"
               >
                 <AppTextField
                   :model-value="field.value"
@@ -125,10 +131,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="modalidad"
                 v-slot="{ field, errorMessage }"
+                name="modalidad"
               >
                 <AppSelect
                   :model-value="field.value"
@@ -142,10 +151,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="fechaInicio"
                 v-slot="{ field, errorMessage }"
+                name="fechaInicio"
               >
                 <AppDateTimePicker
                   :model-value="field.value"
@@ -157,10 +169,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="fechaFin"
                 v-slot="{ field, errorMessage }"
+                name="fechaFin"
               >
                 <AppDateTimePicker
                   :model-value="field.value"
@@ -174,8 +189,8 @@ const closeDialog = () => {
 
             <VCol cols="12">
               <Field
-                name="graduateId"
                 v-slot="{ field, errorMessage }"
+                name="graduateId"
               >
                 <AppSelect
                   :model-value="field.value"

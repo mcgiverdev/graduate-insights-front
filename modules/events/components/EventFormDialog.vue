@@ -2,13 +2,13 @@
 import { Field, Form } from 'vee-validate'
 import type { FormContext } from 'vee-validate'
 import { computed, ref, watch } from 'vue'
+import type { Event, EventFormValues } from '../types'
+import { eventFormSchema } from '../validation/eventFormSchema'
+import { toFormValues } from '../utils/mappers'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import AppDateTimePicker from '@/@core/components/app-form-elements/AppDateTimePicker.vue'
 import type { KeyValueOption } from '@/modules/shared/types/keyValue'
-import type { Event, EventFormValues } from '../types'
-import { eventFormSchema } from '../validation/eventFormSchema'
-import { toFormValues } from '../utils/mappers'
 
 interface Props {
   modelValue: boolean
@@ -92,10 +92,13 @@ const closeDialog = () => {
           @submit="handleSubmit"
         >
           <VRow>
-            <VCol cols="12" md="12">
+            <VCol
+              cols="12"
+              md="12"
+            >
               <Field
-                name="nombre"
                 v-slot="{ field, errorMessage }"
+                name="nombre"
               >
                 <AppTextField
                   :model-value="field.value"
@@ -108,8 +111,8 @@ const closeDialog = () => {
 
             <VCol cols="12">
               <Field
-                name="contenido"
                 v-slot="{ field, errorMessage }"
+                name="contenido"
               >
                 <VTextarea
                   :model-value="field.value"
@@ -123,10 +126,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="fechaEvento"
                 v-slot="{ field, errorMessage }"
+                name="fechaEvento"
               >
                 <AppDateTimePicker
                   :model-value="field.value"
@@ -138,10 +144,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="enlaceInscripcion"
                 v-slot="{ field, errorMessage }"
+                name="enlaceInscripcion"
               >
                 <AppTextField
                   :model-value="field.value"
@@ -152,10 +161,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="directorId"
                 v-slot="{ field, errorMessage }"
+                name="directorId"
               >
                 <AppSelect
                   :model-value="field.value"
@@ -170,10 +182,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="eventTypeId"
                 v-slot="{ field, errorMessage }"
+                name="eventTypeId"
               >
                 <AppSelect
                   :model-value="field.value"

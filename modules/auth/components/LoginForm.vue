@@ -21,6 +21,7 @@ const submit = async () => {
 
   if (result.redirectTo) {
     await navigateTo(result.redirectTo, { replace: true })
+
     return
   }
 

@@ -36,10 +36,11 @@ const {
   loadDashboard: loadDirectorDashboard,
   clearFilters: clearDirectorFilters,
 } = useSurveyStatisticsDashboard()
-const { isDirector, isEmployer, isGraduate, role, user } = useRoles()
+
+const { isDirector, isEmployer, isGraduate, user } = useRoles()
+
 const {
   loadGraduateDashboard,
-  graduateDashboardLoading,
   surveyStats,
   pendingSurveys,
   completedSurveys,
@@ -51,6 +52,7 @@ const {
 } = useGraduateDashboard()
 
 const graduateDashboardLoaded = ref(false)
+
 const surveyPreview = computed(() => {
   const upcoming = pendingSurveys.value.slice(0, 3)
   if (upcoming.length >= 3)
@@ -84,6 +86,7 @@ function openJobOffer(link: string) {
     return
 
   const normalized = link.startsWith('http') ? link : `https://${link}`
+
   window.open(normalized, '_blank')
 }
 
@@ -186,7 +189,6 @@ watch(isGraduate, async newIsGraduate => {
 
     <!-- DASHBOARD PARA DIRECTORES -->
     <div v-if="isDirector">
-
       <!-- Estados de Carga y Error -->
       <div
         v-if="loadingDashboard && !dashboardData"
@@ -774,17 +776,26 @@ watch(isGraduate, async newIsGraduate => {
                 ¿Cómo publicar una oferta?
               </h3>
               <VList density="compact">
-                <VListItem prepend-icon="tabler-circle-check" class="px-0">
+                <VListItem
+                  prepend-icon="tabler-circle-check"
+                  class="px-0"
+                >
                   <VListItemTitle class="text-body-2">
                     Ve a "Mis Ofertas" en el menú lateral
                   </VListItemTitle>
                 </VListItem>
-                <VListItem prepend-icon="tabler-circle-check" class="px-0">
+                <VListItem
+                  prepend-icon="tabler-circle-check"
+                  class="px-0"
+                >
                   <VListItemTitle class="text-body-2">
                     Haz clic en "Nueva oferta" y completa el formulario
                   </VListItemTitle>
                 </VListItem>
-                <VListItem prepend-icon="tabler-circle-check" class="px-0">
+                <VListItem
+                  prepend-icon="tabler-circle-check"
+                  class="px-0"
+                >
                   <VListItemTitle class="text-body-2">
                     Los egresados recibirán una notificación automáticamente
                   </VListItemTitle>
@@ -1175,7 +1186,10 @@ watch(isGraduate, async newIsGraduate => {
               cols="12"
               md="4"
             >
-              <VCard class="recommended-offer-card h-100" variant="flat">
+              <VCard
+                class="recommended-offer-card h-100"
+                variant="flat"
+              >
                 <VCardText>
                   <div class="d-flex align-center justify-space-between mb-3">
                     <h3 class="text-h6 mb-0">
@@ -1379,4 +1393,3 @@ watch(isGraduate, async newIsGraduate => {
   background: color-mix(in srgb, var(--v-theme-surface) 98%, #fff);
 }
 </style>
-

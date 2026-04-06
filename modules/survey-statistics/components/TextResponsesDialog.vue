@@ -19,8 +19,10 @@ const page = ref(1)
 const itemsPerPage = 10
 
 const filteredResponses = computed(() => {
-  if (!searchQuery.value.trim()) return props.responses
+  if (!searchQuery.value.trim())
+    return props.responses
   const query = searchQuery.value.toLowerCase()
+
   return props.responses.filter(r => r.toLowerCase().includes(query))
 })
 
@@ -28,10 +30,13 @@ const totalPages = computed(() => Math.ceil(filteredResponses.value.length / ite
 
 const paginatedResponses = computed(() => {
   const start = (page.value - 1) * itemsPerPage
+
   return filteredResponses.value.slice(start, start + itemsPerPage)
 })
 
-watch(searchQuery, () => { page.value = 1 })
+watch(searchQuery, () => {
+  page.value = 1
+})
 
 const close = () => emit('update:modelValue', false)
 </script>

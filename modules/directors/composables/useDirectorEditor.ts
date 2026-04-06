@@ -1,9 +1,9 @@
 import { ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
-import type { RequestResult } from '@/infrastructure/http/types'
 import { directorService } from '../services/DirectorService'
 import type { Director, DirectorFormValues, DirectorPayload } from '../types'
 import { toPayload } from '../utils/mappers'
+import type { RequestResult } from '@/infrastructure/http/types'
+import { useSnackbar } from '@/composables/useSnackbar'
 
 interface UseDirectorEditorOptions {
   fetchDirectors: () => Promise<void>
@@ -33,6 +33,7 @@ export const useDirectorEditor = ({ fetchDirectors, saveDirector, clearServerErr
       if (!director) {
         showSnackbar({ text: 'No se encontró el director seleccionado', color: 'error' })
         isFormVisible.value = false
+
         return
       }
 

@@ -1,7 +1,7 @@
 import { reactive, ref } from 'vue'
+import { profileService } from '../services/ProfileService'
 import { useSnackbar } from '@/composables/useSnackbar'
 import type { RequestResult } from '@/infrastructure/http/types'
-import { profileService } from '../services/ProfileService'
 
 interface PasswordForm {
   newPassword: string
@@ -15,23 +15,26 @@ const createInitialForm = (): PasswordForm => ({
 
 const PASSWORD_REQUIREMENTS = {
   minLength: 8,
-  digit: /[0-9]/,
+  digit: /\d/,
   lower: /[a-z]/,
   upper: /[A-Z]/,
-  special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?]/,
+  special: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
 }
 
 export const usePasswordChange = () => {
   const form = reactive<PasswordForm>(createInitialForm())
+
   const errors = ref<Record<keyof PasswordForm, string | undefined>>({
     newPassword: undefined,
     confirmPassword: undefined,
   })
+
   const submitting = ref(false)
   const { showSnackbar } = useSnackbar()
 
   const reset = () => {
     const initialValues = createInitialForm()
+
     form.newPassword = initialValues.newPassword
     form.confirmPassword = initialValues.confirmPassword
     errors.value = { newPassword: undefined, confirmPassword: undefined }
@@ -71,16 +74,18 @@ export const usePasswordChange = () => {
       await profileService.changePassword(form.newPassword)
       showSnackbar({ text: 'Contraseña actualizada', color: 'success' })
       reset()
+
       return { success: true }
     }
     catch (error: any) {
       const apiErrors = error?.data?.errors
-      if (apiErrors?.newPassword) {
+      if (apiErrors?.newPassword)
         errors.value.newPassword = apiErrors.newPassword
-      }
 
       const message = error?.data?.message || 'No se pudo cambiar la contraseña'
+
       showSnackbar({ text: message, color: 'error' })
+
       return { success: false, message }
     }
     finally {

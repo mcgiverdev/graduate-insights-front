@@ -2,10 +2,10 @@
 import { Field, Form } from 'vee-validate'
 import type { FormContext } from 'vee-validate'
 import { computed, ref, watch } from 'vue'
-import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import { emailConfigFormSchema } from '../validation/emailConfigFormSchema'
 import { toFormValues } from '../utils/mappers'
 import type { EmailConfig, EmailConfigFormValues } from '../types'
+import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 
 interface Props {
   config?: EmailConfig | null
@@ -47,10 +47,13 @@ const handleSubmit = (values: EmailConfigFormValues) => {
     @submit="handleSubmit"
   >
     <VRow>
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <Field
-          name="apiKey"
           v-slot="{ field, errorMessage }"
+          name="apiKey"
         >
           <AppTextField
             :model-value="field.value"
@@ -77,10 +80,13 @@ const handleSubmit = (values: EmailConfigFormValues) => {
         </p>
       </VCol>
 
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <Field
-          name="emailRemitente"
           v-slot="{ field, errorMessage }"
+          name="emailRemitente"
         >
           <AppTextField
             :model-value="field.value"
@@ -92,10 +98,13 @@ const handleSubmit = (values: EmailConfigFormValues) => {
         </Field>
       </VCol>
 
-      <VCol cols="12" md="6">
+      <VCol
+        cols="12"
+        md="6"
+      >
         <Field
-          name="nombreRemitente"
           v-slot="{ field, errorMessage }"
+          name="nombreRemitente"
         >
           <AppTextField
             :model-value="field.value"

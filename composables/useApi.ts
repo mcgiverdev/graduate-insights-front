@@ -22,9 +22,8 @@ export const useApi = async <T = any>(url: string, options: any = {}): Promise<A
 
   const headers = options.headers ? { ...options.headers } : {}
 
-  if (accessToken.value && !headers.Authorization && !headers.authorization) {
+  if (accessToken.value && !headers.Authorization && !headers.authorization)
     headers.Authorization = `Bearer ${accessToken.value}`
-  }
 
   const defaults = {
     baseURL: config.public.apiBaseUrl,
@@ -54,12 +53,11 @@ export const useApi = async <T = any>(url: string, options: any = {}): Promise<A
     if (error.response) {
       const payload = error.response._data
 
-      if (payload?.errors?.length) {
+      if (payload?.errors?.length)
         showSnackbar({ text: payload.errors[0], color: 'error' })
-      }
-      else if (payload?.message) {
+
+      else if (payload?.message)
         showSnackbar({ text: payload.message, color: 'error' })
-      }
 
       const apiError = new Error(error.message || 'Error en la petición') as ApiError
 

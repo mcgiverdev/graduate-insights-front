@@ -40,19 +40,21 @@ export default defineNuxtPlugin(async () => {
     if (!publicRoutes.includes(to.path) && to.name !== 'validar-codigo') {
       try {
         // Solo llamar al API si aún no tenemos el usuario cargado en memoria
-        if (!user.value) {
+        if (!user.value)
           await fetchUser()
-        }
 
         if (!user.value) {
           // fetchUser falló (token inválido o expirado)
           token.value = null
+
           const returnTo = useCookie('returnTo', {
             path: '/',
             secure: isSecure,
             sameSite: isSecure ? 'strict' : 'lax',
           })
+
           returnTo.value = to.fullPath
+
           return '/login'
         }
 

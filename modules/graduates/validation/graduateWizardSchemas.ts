@@ -197,11 +197,12 @@ export const graduateWizardStepTwoSchema = yup.object({
     .test(
       'anio-egreso-after-ingreso',
       'El año de egreso no puede ser anterior al año de ingreso',
-      function (value) {
-        const { anioIngreso } = this.parent
-        if (!value || !anioIngreso) return true
+      (value, ctx) => {
+        const { anioIngreso } = ctx.parent
+        if (!value || !anioIngreso)
+          return true
 
-        return parseInt(value) >= parseInt(anioIngreso)
+        return Number.parseInt(value) >= Number.parseInt(anioIngreso)
       },
     ),
 })

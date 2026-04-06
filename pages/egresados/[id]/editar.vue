@@ -17,7 +17,6 @@ const graduateId = computed(() => {
 
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null
 })
-
 </script>
 
 <template>

@@ -2,10 +2,10 @@
 import { Field, Form } from 'vee-validate'
 import type { FormContext } from 'vee-validate'
 import { computed, ref, watch } from 'vue'
-import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import type { Employer, EmployerFormValues } from '../types'
 import { createEmployerFormSchema } from '../validation/employerFormSchema'
 import { toFormValues } from '../utils/mappers'
+import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 
 interface Props {
   modelValue: boolean
@@ -97,10 +97,13 @@ const closeDialog = () => {
           </div>
 
           <VRow>
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="ruc"
                 v-slot="{ field, errorMessage }"
+                name="ruc"
               >
                 <AppTextField
                   :model-value="field.value"
@@ -112,10 +115,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="razonSocial"
                 v-slot="{ field, errorMessage }"
+                name="razonSocial"
               >
                 <AppTextField
                   :model-value="field.value"
@@ -126,10 +132,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="direccion"
                 v-slot="{ field, errorMessage }"
+                name="direccion"
               >
                 <AppTextField
                   :model-value="field.value"
@@ -142,8 +151,8 @@ const closeDialog = () => {
 
             <VCol cols="12">
               <Field
-                name="resumenEmpresa"
                 v-slot="{ field, errorMessage }"
+                name="resumenEmpresa"
               >
                 <VTextarea
                   :model-value="field.value"
@@ -164,10 +173,13 @@ const closeDialog = () => {
           </div>
 
           <VRow>
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="nombres"
                 v-slot="{ field, errorMessage }"
+                name="nombres"
               >
                 <AppTextField
                   :model-value="field.value"
@@ -178,10 +190,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="apellidos"
                 v-slot="{ field, errorMessage }"
+                name="apellidos"
               >
                 <AppTextField
                   :model-value="field.value"
@@ -192,10 +207,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="correo"
                 v-slot="{ field, errorMessage }"
+                name="correo"
               >
                 <AppTextField
                   :model-value="field.value"
@@ -207,10 +225,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="celular"
                 v-slot="{ field, errorMessage }"
+                name="celular"
               >
                 <AppTextField
                   :model-value="field.value"
@@ -222,10 +243,14 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol v-if="!isEdit || showPasswordField" cols="12" md="6">
+            <VCol
+              v-if="!isEdit || showPasswordField"
+              cols="12"
+              md="6"
+            >
               <Field
-                name="contrasena"
                 v-slot="{ field, errorMessage }"
+                name="contrasena"
               >
                 <AppTextField
                   :model-value="field.value"
@@ -237,7 +262,11 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol v-if="isEdit && !showPasswordField" cols="12" md="6">
+            <VCol
+              v-if="isEdit && !showPasswordField"
+              cols="12"
+              md="6"
+            >
               <VBtn
                 variant="tonal"
                 color="secondary"

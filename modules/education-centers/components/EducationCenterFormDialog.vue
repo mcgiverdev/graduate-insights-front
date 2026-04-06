@@ -2,10 +2,10 @@
 import { Field, Form } from 'vee-validate'
 import type { FormContext } from 'vee-validate'
 import { computed, ref, watch } from 'vue'
-import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import type { EducationCenter, EducationCenterFormValues } from '../types'
 import { educationCenterFormSchema } from '../validation/educationCenterFormSchema'
 import { toFormValues } from '../utils/mappers'
+import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 
 interface Props {
   modelValue: boolean
@@ -84,8 +84,8 @@ const closeDialog = () => {
           @submit="handleSubmit"
         >
           <Field
-            name="nombre"
             v-slot="{ field, errorMessage }"
+            name="nombre"
           >
             <AppTextField
               :model-value="field.value"
@@ -97,8 +97,8 @@ const closeDialog = () => {
           </Field>
 
           <Field
-            name="direccion"
             v-slot="{ field, errorMessage }"
+            name="direccion"
           >
             <AppTextField
               :model-value="field.value"

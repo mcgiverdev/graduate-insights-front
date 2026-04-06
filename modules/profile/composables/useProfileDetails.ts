@@ -1,10 +1,10 @@
 import { computed, reactive, ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
-import { useUser } from '@/composables/useUser'
-import type { RequestResult } from '@/infrastructure/http/types'
 import { profileService } from '../services/ProfileService'
 import type { Profile, ProfileFormValues } from '../types'
 import { toFormValues, toPayload } from '../utils/mappers'
+import { useSnackbar } from '@/composables/useSnackbar'
+import { useUser } from '@/composables/useUser'
+import type { RequestResult } from '@/infrastructure/http/types'
 
 const cloneFormValues = (values: ProfileFormValues) => ({ ...values })
 
@@ -20,6 +20,7 @@ export const useProfileDetails = () => {
 
   const hydrateForm = (profile: Profile | null) => {
     const values = toFormValues(profile)
+
     Object.assign(form, values)
     initialSnapshot.value = cloneFormValues(values)
   }
@@ -28,6 +29,7 @@ export const useProfileDetails = () => {
     loading.value = true
     try {
       const profile = await profileService.fetchOwnProfile()
+
       currentProfile.value = profile
       hydrateForm(profile)
     }
@@ -62,11 +64,13 @@ export const useProfileDetails = () => {
       return { success: false, message: 'Perfil no disponible' }
 
     const existingProfile = currentProfile.value
+
     saving.value = true
     serverErrors.value = {}
 
     try {
       const payload = toPayload(form)
+
       await profileService.updateOwnProfile(payload)
 
       currentProfile.value = {
@@ -83,21 +87,26 @@ export const useProfileDetails = () => {
       hydrateForm(currentProfile.value)
       await fetchUser()
       showSnackbar({ text: 'Perfil actualizado correctamente', color: 'success' })
+
       return { success: true }
     }
     catch (error: any) {
       const apiErrors = error?.data?.errors
       if (apiErrors) {
         const normalized: Record<string, string> = {}
+
         Object.entries(apiErrors).forEach(([field, message]) => {
           normalized[field] = Array.isArray(message) ? message.join(', ') : String(message)
         })
         serverErrors.value = normalized
+
         return { success: false, message: error?.data?.message }
       }
 
       const fallbackMessage = error?.data?.message || 'No se pudo actualizar el perfil'
+
       showSnackbar({ text: fallbackMessage, color: 'error' })
+
       return { success: false, message: fallbackMessage }
     }
     finally {

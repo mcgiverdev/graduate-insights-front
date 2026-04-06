@@ -1,8 +1,8 @@
 import { watchDebounced } from '@vueuse/core'
 import { computed, onMounted, ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
 import { jobService } from '../services/JobService'
 import type { Job } from '../types'
+import { useSnackbar } from '@/composables/useSnackbar'
 
 export const useJobList = () => {
   const items = ref<Job[]>([])

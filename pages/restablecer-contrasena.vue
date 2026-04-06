@@ -20,6 +20,7 @@ const authThemeImg = useGenerateImageVariant(
 )
 
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
+
 const {
   otp,
   newPassword,
@@ -108,7 +109,10 @@ const {
             class="mb-4"
           >
             No encontramos el correo para este proceso. Vuelve a la
-            <NuxtLink class="text-primary" to="/recuperar-contrasena">
+            <NuxtLink
+              class="text-primary"
+              to="/recuperar-contrasena"
+            >
               pantalla de recuperación
             </NuxtLink>
             para solicitar un nuevo código.
@@ -148,7 +152,8 @@ const {
                     <li
                       v-for="check in passwordChecks"
                       :key="check.label"
-                      :class="['password-requirements__item', { 'is-valid': check.isValid }]"
+                      class="password-requirements__item"
+                      :class="[{ 'is-valid': check.isValid }]"
                     >
                       <VIcon
                         size="18"

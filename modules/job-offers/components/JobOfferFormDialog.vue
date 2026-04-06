@@ -2,12 +2,12 @@
 import { Field, Form } from 'vee-validate'
 import type { FormContext } from 'vee-validate'
 import { computed, ref, watch } from 'vue'
-import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
-import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
-import type { KeyValueOption } from '@/modules/shared/types/keyValue'
 import type { JobOffer, JobOfferFormValues } from '../types'
 import { jobOfferFormSchema } from '../validation/jobOfferFormSchema'
 import { toFormValues } from '../utils/mappers'
+import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
+import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
+import type { KeyValueOption } from '@/modules/shared/types/keyValue'
 
 interface Props {
   modelValue: boolean
@@ -90,10 +90,13 @@ const closeDialog = () => {
           @submit="handleSubmit"
         >
           <VRow>
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="titulo"
                 v-slot="{ field, errorMessage }"
+                name="titulo"
               >
                 <AppTextField
                   :model-value="field.value"
@@ -104,10 +107,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="link"
                 v-slot="{ field, errorMessage }"
+                name="link"
               >
                 <AppTextField
                   :model-value="field.value"
@@ -118,10 +124,13 @@ const closeDialog = () => {
               </Field>
             </VCol>
 
-            <VCol cols="12" md="6">
+            <VCol
+              cols="12"
+              md="6"
+            >
               <Field
-                name="employerId"
                 v-slot="{ field, errorMessage }"
+                name="employerId"
               >
                 <AppSelect
                   :model-value="field.value"
@@ -138,8 +147,8 @@ const closeDialog = () => {
 
             <VCol cols="12">
               <Field
-                name="descripcion"
                 v-slot="{ field, errorMessage }"
+                name="descripcion"
               >
                 <VTextarea
                   :model-value="field.value"

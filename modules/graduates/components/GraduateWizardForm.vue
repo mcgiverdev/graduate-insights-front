@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { ValidationError } from 'yup'
 import { computed, onMounted, ref, watch } from 'vue'
-import { departamentoOptions, getDistritos, getProvincias } from '../data/peruGeoData'
 import { useRouter } from 'vue-router'
+import { departamentoOptions, getDistritos, getProvincias } from '../data/peruGeoData'
 import { useGraduateForm } from '../composables/useGraduateForm'
 import { graduateService } from '../services/GraduateService'
 import type {
@@ -81,9 +81,19 @@ const universityOptions = ref<CatalogOptionItem[]>([])
 const universitySearch = ref('')
 const universityCreating = ref(false)
 
+const degreeDraft = ref<GraduateWizardDegreeItem>({
+  tipoGradoId: undefined,
+  universidadId: undefined,
+  fechaGrado: '',
+  otroGradoNombre: '',
+  modalidadTitulacionId: undefined,
+  modalidadTitulacionOtro: '',
+})
+
 const addNewUniversity = async () => {
   const nombre = universitySearch.value.trim()
-  if (!nombre || universityCreating.value) return
+  if (!nombre || universityCreating.value)
+    return
   universityCreating.value = true
   try {
     const created = await graduateService.createUniversity(nombre)
@@ -140,7 +150,6 @@ const createEmptyWorkTrajectory = (): GraduateWizardWorkTrajectoryItem => ({
   fechaFin: '',
 })
 
-const degreeDraft = ref<GraduateWizardDegreeItem>(createEmptyDegree())
 const languageDraft = ref<GraduateWizardLanguageItem>(createEmptyLanguage())
 const complementaryTrainingDraft = ref<GraduateWizardComplementaryTrainingItem>(createEmptyComplementaryTraining())
 const workTrajectoryDraft = ref<GraduateWizardWorkTrajectoryItem>(createEmptyWorkTrajectory())
@@ -185,7 +194,7 @@ const values = ref<GraduateWizardValues>({
 const provinciaOptions = computed(() => getProvincias(values.value.departamento ?? ''))
 const distritoOptions = computed(() => getDistritos(values.value.departamento ?? '', values.value.provincia ?? ''))
 
-watch(() => values.value.viveEnPeru, (vivePeru) => {
+watch(() => values.value.viveEnPeru, vivePeru => {
   if (!vivePeru) {
     values.value.departamento = ''
     values.value.provincia = ''
@@ -221,31 +230,35 @@ const isOtroDegreeType = computed(() =>
 const showDegreeTitulationFields = computed(() => isTituladoDegreeType(degreeDraft.value.tipoGradoId))
 
 const formatDate = (value?: string | null) => {
-  if (!value) return '-'
+  if (!value)
+    return '-'
   const datePart = value.trim().split(/[T ]/)[0]
-  if (!datePart) return '-'
+  if (!datePart)
+    return '-'
   const [year, month, day] = datePart.split('-')
-  if (!year || !month || !day) return datePart
+  if (!year || !month || !day)
+    return datePart
+
   return `${day}/${month}/${year}`
 }
 
 const formatDateRange = (start?: string | null, end?: string | null) => {
   const s = formatDate(start)
   const e = formatDate(end)
-  if (s === '-' && e === '-') return '-'
-  if (e === '-') return s
-  return `${s} — ${e}`
-}
+  if (s === '-' && e === '-')
+    return '-'
+  if (e === '-')
+    return s
 
-const getYearFromDate = (value?: string) => {
-  if (!value) return undefined
-  return value.slice(0, 4)
+  return `${s} — ${e}`
 }
 
 // ── Duplicate checks ──────────────────────────────────────────────────────────
 function isDegreeDuplicate(draft: GraduateWizardDegreeItem, skipIndex: number | null) {
   return values.value.grados.some((item, index) => {
-    if (skipIndex !== null && index === skipIndex) return false
+    if (skipIndex !== null && index === skipIndex)
+      return false
+
     return (item.tipoGradoId || null) === (draft.tipoGradoId || null)
       && (item.universidadId || null) === (draft.universidadId || null)
       && (item.fechaGrado || '') === (draft.fechaGrado || '')
@@ -255,7 +268,9 @@ function isDegreeDuplicate(draft: GraduateWizardDegreeItem, skipIndex: number | 
 
 function isLanguageDuplicate(draft: GraduateWizardLanguageItem, skipIndex: number | null) {
   return values.value.idiomas.some((item, index) => {
-    if (skipIndex !== null && index === skipIndex) return false
+    if (skipIndex !== null && index === skipIndex)
+      return false
+
     return (item.idiomaId || null) === (draft.idiomaId || null)
       && (item.nivel || '') === (draft.nivel || '')
       && (item.fechaInicio || '') === (draft.fechaInicio || '')
@@ -264,7 +279,9 @@ function isLanguageDuplicate(draft: GraduateWizardLanguageItem, skipIndex: numbe
 
 function isComplementaryTrainingDuplicate(draft: GraduateWizardComplementaryTrainingItem, skipIndex: number | null) {
   return values.value.formacionesComplementarias.some((item, index) => {
-    if (skipIndex !== null && index === skipIndex) return false
+    if (skipIndex !== null && index === skipIndex)
+      return false
+
     return normalizeOptionalText(item.nombreCurso) === normalizeOptionalText(draft.nombreCurso)
       && normalizeOptionalText(item.institucion) === normalizeOptionalText(draft.institucion)
       && (item.fechaInicio || '') === (draft.fechaInicio || '')
@@ -273,7 +290,9 @@ function isComplementaryTrainingDuplicate(draft: GraduateWizardComplementaryTrai
 
 function isWorkTrajectoryDuplicate(draft: GraduateWizardWorkTrajectoryItem, skipIndex: number | null) {
   return values.value.trayectoriasLaborales.some((item, index) => {
-    if (skipIndex !== null && index === skipIndex) return false
+    if (skipIndex !== null && index === skipIndex)
+      return false
+
     return normalizeOptionalText(item.empresa) === normalizeOptionalText(draft.empresa)
       && normalizeOptionalText(item.cargo) === normalizeOptionalText(draft.cargo)
       && (item.fechaInicio || '') === (draft.fechaInicio || '')
@@ -281,6 +300,18 @@ function isWorkTrajectoryDuplicate(draft: GraduateWizardWorkTrajectoryItem, skip
 }
 
 // ── Payload builders ──────────────────────────────────────────────────────────
+const buildTitulacionPayload = (item: GraduateWizardDegreeItem) => {
+  if (!isTituladoDegreeType(item.tipoGradoId))
+    return undefined
+  if (!item.modalidadTitulacionId && !item.modalidadTitulacionOtro?.trim())
+    return undefined
+
+  return {
+    modalidad_titulacion_id: item.modalidadTitulacionId || undefined,
+    modalidad_otro: item.modalidadTitulacionOtro?.trim() || undefined,
+  }
+}
+
 const buildDegreesPayload = () => values.value.grados
   .filter(item => Boolean(item.fechaGrado || item.otroGradoNombre || item.tipoGradoId || item.universidadId || item.modalidadTitulacionId))
   .map(item => ({
@@ -288,12 +319,7 @@ const buildDegreesPayload = () => values.value.grados
     universidad_id: item.universidadId || undefined,
     fecha_grado: item.fechaGrado || undefined,
     otro_grado_nombre: isOtroType(item.tipoGradoId) ? item.otroGradoNombre?.trim() || undefined : undefined,
-    titulacion: isTituladoDegreeType(item.tipoGradoId) && (item.modalidadTitulacionId || item.modalidadTitulacionOtro?.trim())
-      ? {
-          modalidad_titulacion_id: item.modalidadTitulacionId || undefined,
-          modalidad_otro: item.modalidadTitulacionOtro?.trim() || undefined,
-        }
-      : undefined,
+    titulacion: buildTitulacionPayload(item),
   }))
 
 const buildLanguagesPayload = () => values.value.idiomas
@@ -392,6 +418,7 @@ const saveDegreeDialog = () => {
 
   if (isDegreeDuplicate(nextValue, editingDegreeIndex.value)) {
     formMessage.value = 'Este grado ya fue registrado. Evita duplicar tipo, universidad, fecha y nombre de grado.'
+
     return
   }
   if (editingDegreeIndex.value === null)
@@ -402,7 +429,9 @@ const saveDegreeDialog = () => {
   degreeDialogOpen.value = false
 }
 
-const removeDegree = (index: number) => { values.value.grados.splice(index, 1) }
+const removeDegree = (index: number) => {
+  values.value.grados.splice(index, 1)
+}
 
 const openCreateLanguageDialog = () => {
   editingLanguageIndex.value = null
@@ -420,6 +449,7 @@ const saveLanguageDialog = () => {
   const nextValue = { ...languageDraft.value }
   if (isLanguageDuplicate(nextValue, editingLanguageIndex.value)) {
     formMessage.value = 'Este idioma ya fue registrado con el mismo nivel y fecha de inicio.'
+
     return
   }
   if (editingLanguageIndex.value === null)
@@ -430,7 +460,9 @@ const saveLanguageDialog = () => {
   languageDialogOpen.value = false
 }
 
-const removeLanguage = (index: number) => { values.value.idiomas.splice(index, 1) }
+const removeLanguage = (index: number) => {
+  values.value.idiomas.splice(index, 1)
+}
 
 const openCreateComplementaryTrainingDialog = () => {
   editingComplementaryTrainingIndex.value = null
@@ -448,6 +480,7 @@ const saveComplementaryTrainingDialog = () => {
   const nextValue = { ...complementaryTrainingDraft.value }
   if (isComplementaryTrainingDuplicate(nextValue, editingComplementaryTrainingIndex.value)) {
     formMessage.value = 'Esta formacion ya fue registrada con el mismo curso, institucion y fecha de inicio.'
+
     return
   }
   if (editingComplementaryTrainingIndex.value === null)
@@ -458,7 +491,9 @@ const saveComplementaryTrainingDialog = () => {
   complementaryTrainingDialogOpen.value = false
 }
 
-const removeComplementaryTraining = (index: number) => { values.value.formacionesComplementarias.splice(index, 1) }
+const removeComplementaryTraining = (index: number) => {
+  values.value.formacionesComplementarias.splice(index, 1)
+}
 
 const openCreateWorkTrajectoryDialog = () => {
   editingWorkTrajectoryIndex.value = null
@@ -476,6 +511,7 @@ const saveWorkTrajectoryDialog = () => {
   const nextValue = { ...workTrajectoryDraft.value }
   if (isWorkTrajectoryDuplicate(nextValue, editingWorkTrajectoryIndex.value)) {
     formMessage.value = 'Esta trayectoria ya fue registrada con la misma empresa, cargo y fecha de inicio.'
+
     return
   }
   if (editingWorkTrajectoryIndex.value === null)
@@ -486,7 +522,9 @@ const saveWorkTrajectoryDialog = () => {
   workTrajectoryDialogOpen.value = false
 }
 
-const removeWorkTrajectory = (index: number) => { values.value.trayectoriasLaborales.splice(index, 1) }
+const removeWorkTrajectory = (index: number) => {
+  values.value.trayectoriasLaborales.splice(index, 1)
+}
 
 // ── Payload ───────────────────────────────────────────────────────────────────
 const wizardPayload = computed<GraduatePayload>(() => {
@@ -526,18 +564,22 @@ const wizardPayload = computed<GraduatePayload>(() => {
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 const activeStepLabel = computed(() => stepItems[currentStep.value]?.title || '')
-const lastStepIndex = computed(() => stepItems.length - 1)
 const canGoBack = computed(() => currentStep.value > 0 && !transitionLoading.value)
 
 const getFieldError = (localField: string, backendField?: string): string | undefined => {
   const localError = localErrors.value[localField]
-  if (localError) return localError
+  if (localError)
+    return localError
+
   return serverErrors.value[backendField ?? localField]
 }
 
 const getSchemaForStep = (stepIndex: number) => {
-  if (stepIndex === 0) return graduateWizardStepOneSchema
-  if (stepIndex === 1) return graduateWizardStepTwoSchema
+  if (stepIndex === 0)
+    return graduateWizardStepOneSchema
+  if (stepIndex === 1)
+    return graduateWizardStepTwoSchema
+
   return null
 }
 
@@ -547,27 +589,32 @@ const validateCurrentStep = async (): Promise<boolean> => {
   clearServerErrors()
 
   const schema = getSchemaForStep(currentStep.value)
-  if (!schema) return true
+  if (!schema)
+    return true
 
   try {
     await schema.validate(values.value, { abortEarly: false })
+
     return true
   }
   catch (error) {
     const validationError = error as ValidationError
     const fieldErrors: Record<string, string> = {}
+
     validationError.inner.forEach(issue => {
       if (issue.path && !fieldErrors[issue.path])
         fieldErrors[issue.path] = issue.message
     })
     localErrors.value = fieldErrors
     stepValidationMessage.value = validationError.inner.find(issue => issue.message)?.message || 'Revisa los campos obligatorios para continuar.'
+
     return false
   }
 }
 
 const goPrevious = () => {
-  if (!canGoBack.value) return
+  if (!canGoBack.value)
+    return
   currentStep.value -= 1
 }
 
@@ -575,7 +622,8 @@ const doSave = async () => {
   transitionLoading.value = true
   try {
     const result = await saveGraduate(wizardPayload.value)
-    if (!result.success || !result.createdGraduateId) return
+    if (!result.success || !result.createdGraduateId)
+      return
     await router.push(`/egresados/${result.createdGraduateId}`)
   }
   finally {
@@ -585,12 +633,15 @@ const doSave = async () => {
 
 // "Siguiente" at step 0, "Registrar y finalizar" at steps 1 and 2
 const goNext = async () => {
-  if (transitionLoading.value) return
+  if (transitionLoading.value)
+    return
   const isValid = await validateCurrentStep()
-  if (!isValid) return
+  if (!isValid)
+    return
 
   if (currentStep.value === 0) {
     currentStep.value += 1
+
     return
   }
 
@@ -599,24 +650,29 @@ const goNext = async () => {
 
 // "Registrar y completar datos académicos" — only shown at step 1, no API call
 const goToAcademic = async () => {
-  if (transitionLoading.value) return
+  if (transitionLoading.value)
+    return
   const isValid = await validateCurrentStep()
-  if (!isValid) return
+  if (!isValid)
+    return
   currentStep.value = 2
 }
 
 const handleStepChange = async (nextStep: number) => {
-  if (transitionLoading.value) return
+  if (transitionLoading.value)
+    return
 
   if (nextStep <= currentStep.value) {
     currentStep.value = nextStep
+
     return
   }
 
   // Only allow clicking ahead one step at a time (with validation)
   if (nextStep === currentStep.value + 1) {
     const isValid = await validateCurrentStep()
-    if (!isValid) return
+    if (!isValid)
+      return
     currentStep.value = nextStep
   }
 }
@@ -626,8 +682,9 @@ watch(currentStep, () => {
   formMessage.value = ''
 })
 
-watch(() => degreeDraft.value.tipoGradoId, (degreeTypeId) => {
-  if (isTituladoDegreeType(degreeTypeId)) return
+watch(() => degreeDraft.value.tipoGradoId, degreeTypeId => {
+  if (isTituladoDegreeType(degreeTypeId))
+    return
   degreeDraft.value.modalidadTitulacionId = undefined
   degreeDraft.value.modalidadTitulacionOtro = ''
 })
@@ -641,6 +698,7 @@ onMounted(async () => {
       graduateService.fetchLanguagesCatalog(),
       graduateService.fetchUniversities(),
     ])
+
     degreeTypeOptions.value = degreeTypes
     titulationModeOptions.value = titulationModes
     languageCatalogOptions.value = languages
@@ -652,13 +710,15 @@ onMounted(async () => {
   try {
     const faculties = await graduateService.fetchFaculties()
     const faculty = faculties[0]
-    if (!faculty) return
+    if (!faculty)
+      return
 
     values.value.facultadId = faculty.id
 
     const schools = await graduateService.fetchProfessionalSchools(faculty.id)
     const school = schools[0]
-    if (school) values.value.escuelaProfesionalId = school.id
+    if (school)
+      values.value.escuelaProfesionalId = school.id
   }
   catch { /* ignore */ }
 })
@@ -680,7 +740,7 @@ onMounted(async () => {
         <VBtn
           variant="tonal"
           color="secondary"
-          :to="'/egresados'"
+          to="/egresados"
         >
           Cancelar
         </VBtn>
@@ -704,7 +764,10 @@ onMounted(async () => {
           <!-- ── Step 0: Datos básicos ─────────────────────────────────────── -->
           <VWindowItem :value="0">
             <VRow>
-              <VCol cols="12" md="6">
+              <VCol
+                cols="12"
+                md="6"
+              >
                 <AppTextField
                   v-model="values.codigoUniversitario"
                   label="Codigo de egresado / universitario *"
@@ -713,7 +776,10 @@ onMounted(async () => {
                 />
               </VCol>
 
-              <VCol cols="12" md="6">
+              <VCol
+                cols="12"
+                md="6"
+              >
                 <AppTextField
                   v-model="values.dni"
                   label="DNI o documento de identidad *"
@@ -722,7 +788,10 @@ onMounted(async () => {
                 />
               </VCol>
 
-              <VCol cols="12" md="6">
+              <VCol
+                cols="12"
+                md="6"
+              >
                 <AppTextField
                   v-model="values.nombres"
                   label="Nombres *"
@@ -731,7 +800,10 @@ onMounted(async () => {
                 />
               </VCol>
 
-              <VCol cols="12" md="6">
+              <VCol
+                cols="12"
+                md="6"
+              >
                 <AppTextField
                   v-model="values.apellidos"
                   label="Apellidos *"
@@ -740,7 +812,10 @@ onMounted(async () => {
                 />
               </VCol>
 
-              <VCol cols="12" md="6">
+              <VCol
+                cols="12"
+                md="6"
+              >
                 <AppDateTimePicker
                   v-model="values.fechaNacimiento"
                   label="Fecha de nacimiento *"
@@ -749,7 +824,10 @@ onMounted(async () => {
                 />
               </VCol>
 
-              <VCol cols="12" md="6">
+              <VCol
+                cols="12"
+                md="6"
+              >
                 <AppSelect
                   v-model="values.sexo"
                   label="Sexo *"
@@ -760,7 +838,10 @@ onMounted(async () => {
                 />
               </VCol>
 
-              <VCol cols="12" md="6">
+              <VCol
+                cols="12"
+                md="6"
+              >
                 <AppSelect
                   v-model="values.estadoCivil"
                   label="Estado civil *"
@@ -769,7 +850,10 @@ onMounted(async () => {
                 />
               </VCol>
 
-              <VCol cols="12" md="6">
+              <VCol
+                cols="12"
+                md="6"
+              >
                 <AppTextField
                   v-model="values.nacionalidad"
                   label="Nacionalidad *"
@@ -778,7 +862,10 @@ onMounted(async () => {
                 />
               </VCol>
 
-              <VCol cols="12" md="6">
+              <VCol
+                cols="12"
+                md="6"
+              >
                 <AppFileField
                   v-model="values.fotografia"
                   label="Subir CV (opcional)"
@@ -788,7 +875,10 @@ onMounted(async () => {
                 />
               </VCol>
 
-              <VCol cols="12" md="6">
+              <VCol
+                cols="12"
+                md="6"
+              >
                 <AppFileField
                   v-model="values.fotoPath"
                   label="Subir fotografia (opcional)"
@@ -802,7 +892,10 @@ onMounted(async () => {
           <!-- ── Step 1: Datos de contacto ────────────────────────────────── -->
           <VWindowItem :value="1">
             <VRow>
-              <VCol cols="12" md="6">
+              <VCol
+                cols="12"
+                md="6"
+              >
                 <AppTextField
                   v-model="values.correoPersonal"
                   label="Correo electronico personal *"
@@ -812,7 +905,10 @@ onMounted(async () => {
                 />
               </VCol>
 
-              <VCol cols="12" md="6">
+              <VCol
+                cols="12"
+                md="6"
+              >
                 <AppTextField
                   v-model="values.correoInstitucional"
                   label="Correo institucional"
@@ -822,7 +918,10 @@ onMounted(async () => {
                 />
               </VCol>
 
-              <VCol cols="12" md="6">
+              <VCol
+                cols="12"
+                md="6"
+              >
                 <AppTextField
                   v-model="values.celular"
                   label="Numero de celular *"
@@ -841,7 +940,10 @@ onMounted(async () => {
               </VCol>
 
               <template v-if="values.viveEnPeru">
-                <VCol cols="12" md="6">
+                <VCol
+                  cols="12"
+                  md="6"
+                >
                   <AppTextField
                     v-model="values.direccionActual"
                     label="Dirección actual"
@@ -850,7 +952,10 @@ onMounted(async () => {
                   />
                 </VCol>
 
-                <VCol cols="12" md="6">
+                <VCol
+                  cols="12"
+                  md="6"
+                >
                   <AppSelect
                     v-model="values.departamento"
                     label="Departamento"
@@ -859,7 +964,10 @@ onMounted(async () => {
                   />
                 </VCol>
 
-                <VCol cols="12" md="6">
+                <VCol
+                  cols="12"
+                  md="6"
+                >
                   <AppSelect
                     v-model="values.provincia"
                     label="Provincia"
@@ -869,7 +977,10 @@ onMounted(async () => {
                   />
                 </VCol>
 
-                <VCol cols="12" md="6">
+                <VCol
+                  cols="12"
+                  md="6"
+                >
                   <AppSelect
                     v-model="values.distrito"
                     label="Distrito"
@@ -881,7 +992,10 @@ onMounted(async () => {
               </template>
 
               <template v-else>
-                <VCol cols="12" md="6">
+                <VCol
+                  cols="12"
+                  md="6"
+                >
                   <AppTextField
                     v-model="values.direccionActual"
                     label="Dirección actual"
@@ -890,7 +1004,10 @@ onMounted(async () => {
                   />
                 </VCol>
 
-                <VCol cols="12" md="6">
+                <VCol
+                  cols="12"
+                  md="6"
+                >
                   <AppTextField
                     v-model="values.paisResidencia"
                     label="País de residencia"
@@ -900,7 +1017,10 @@ onMounted(async () => {
                 </VCol>
               </template>
 
-              <VCol cols="12" md="6">
+              <VCol
+                cols="12"
+                md="6"
+              >
                 <AppTextField
                   v-model="values.linkedin"
                   label="LinkedIn"
@@ -909,7 +1029,10 @@ onMounted(async () => {
                 />
               </VCol>
 
-              <VCol cols="12" md="3">
+              <VCol
+                cols="12"
+                md="3"
+              >
                 <AppTextField
                   v-model="values.anioIngreso"
                   label="Año de ingreso"
@@ -919,7 +1042,10 @@ onMounted(async () => {
                 />
               </VCol>
 
-              <VCol cols="12" md="3">
+              <VCol
+                cols="12"
+                md="3"
+              >
                 <AppTextField
                   v-model="values.anioEgreso"
                   label="Año de egreso"
@@ -963,13 +1089,21 @@ onMounted(async () => {
             >
               <thead>
                 <tr>
-                  <th scope="col">Tipo de grado</th>
-                  <th scope="col">Fecha</th>
-                  <th scope="col">Universidad</th>
+                  <th scope="col">
+                    Tipo de grado
+                  </th>
+                  <th scope="col">
+                    Fecha
+                  </th>
+                  <th scope="col">
+                    Universidad
+                  </th>
                   <th
                     scope="col"
                     class="text-right"
-                  >Acciones</th>
+                  >
+                    Acciones
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -986,13 +1120,17 @@ onMounted(async () => {
                       variant="text"
                       color="primary"
                       @click="openEditDegreeDialog(row.index)"
-                    >Editar</VBtn>
+                    >
+                      Editar
+                    </VBtn>
                     <VBtn
                       size="small"
                       variant="text"
                       color="error"
                       @click="removeDegree(row.index)"
-                    >Eliminar</VBtn>
+                    >
+                      Eliminar
+                    </VBtn>
                   </td>
                 </tr>
               </tbody>
@@ -1030,14 +1168,24 @@ onMounted(async () => {
             >
               <thead>
                 <tr>
-                  <th scope="col">Idioma</th>
-                  <th scope="col">Nivel</th>
-                  <th scope="col">Aprendizaje</th>
-                  <th scope="col">Vigencia</th>
+                  <th scope="col">
+                    Idioma
+                  </th>
+                  <th scope="col">
+                    Nivel
+                  </th>
+                  <th scope="col">
+                    Aprendizaje
+                  </th>
+                  <th scope="col">
+                    Vigencia
+                  </th>
                   <th
                     scope="col"
                     class="text-right"
-                  >Acciones</th>
+                  >
+                    Acciones
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -1055,13 +1203,17 @@ onMounted(async () => {
                       variant="text"
                       color="primary"
                       @click="openEditLanguageDialog(row.index)"
-                    >Editar</VBtn>
+                    >
+                      Editar
+                    </VBtn>
                     <VBtn
                       size="small"
                       variant="text"
                       color="error"
                       @click="removeLanguage(row.index)"
-                    >Eliminar</VBtn>
+                    >
+                      Eliminar
+                    </VBtn>
                   </td>
                 </tr>
               </tbody>
@@ -1099,13 +1251,21 @@ onMounted(async () => {
             >
               <thead>
                 <tr>
-                  <th scope="col">Curso</th>
-                  <th scope="col">Institucion</th>
-                  <th scope="col">Vigencia</th>
+                  <th scope="col">
+                    Curso
+                  </th>
+                  <th scope="col">
+                    Institucion
+                  </th>
+                  <th scope="col">
+                    Vigencia
+                  </th>
                   <th
                     scope="col"
                     class="text-right"
-                  >Acciones</th>
+                  >
+                    Acciones
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -1122,13 +1282,17 @@ onMounted(async () => {
                       variant="text"
                       color="primary"
                       @click="openEditComplementaryTrainingDialog(row.index)"
-                    >Editar</VBtn>
+                    >
+                      Editar
+                    </VBtn>
                     <VBtn
                       size="small"
                       variant="text"
                       color="error"
                       @click="removeComplementaryTraining(row.index)"
-                    >Eliminar</VBtn>
+                    >
+                      Eliminar
+                    </VBtn>
                   </td>
                 </tr>
               </tbody>
@@ -1166,15 +1330,27 @@ onMounted(async () => {
             >
               <thead>
                 <tr>
-                  <th scope="col">Empresa</th>
-                  <th scope="col">Cargo</th>
-                  <th scope="col">Modalidad</th>
-                  <th scope="col">Vigencia</th>
-                  <th scope="col">Estado</th>
+                  <th scope="col">
+                    Empresa
+                  </th>
+                  <th scope="col">
+                    Cargo
+                  </th>
+                  <th scope="col">
+                    Modalidad
+                  </th>
+                  <th scope="col">
+                    Vigencia
+                  </th>
+                  <th scope="col">
+                    Estado
+                  </th>
                   <th
                     scope="col"
                     class="text-right"
-                  >Acciones</th>
+                  >
+                    Acciones
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -1193,13 +1369,17 @@ onMounted(async () => {
                       variant="text"
                       color="primary"
                       @click="openEditWorkTrajectoryDialog(row.index)"
-                    >Editar</VBtn>
+                    >
+                      Editar
+                    </VBtn>
                     <VBtn
                       size="small"
                       variant="text"
                       color="error"
                       @click="removeWorkTrajectory(row.index)"
-                    >Eliminar</VBtn>
+                    >
+                      Eliminar
+                    </VBtn>
                   </td>
                 </tr>
               </tbody>
@@ -1249,7 +1429,10 @@ onMounted(async () => {
                         clearable
                         @update:search="val => universitySearch = val ?? ''"
                       >
-                        <template v-if="universitySearch.trim()" #append>
+                        <template
+                          v-if="universitySearch.trim()"
+                          #append
+                        >
                           <VBtn
                             icon="tabler-plus"
                             size="small"
@@ -1302,11 +1485,15 @@ onMounted(async () => {
                     variant="tonal"
                     color="secondary"
                     @click="degreeDialogOpen = false"
-                  >Cancelar</VBtn>
+                  >
+                    Cancelar
+                  </VBtn>
                   <VBtn
                     color="primary"
                     @click="saveDegreeDialog"
-                  >Guardar</VBtn>
+                  >
+                    Guardar
+                  </VBtn>
                 </VCardActions>
               </VCard>
             </VDialog>
@@ -1381,11 +1568,15 @@ onMounted(async () => {
                     variant="tonal"
                     color="secondary"
                     @click="languageDialogOpen = false"
-                  >Cancelar</VBtn>
+                  >
+                    Cancelar
+                  </VBtn>
                   <VBtn
                     color="primary"
                     @click="saveLanguageDialog"
-                  >Guardar</VBtn>
+                  >
+                    Guardar
+                  </VBtn>
                 </VCardActions>
               </VCard>
             </VDialog>
@@ -1446,11 +1637,15 @@ onMounted(async () => {
                     variant="tonal"
                     color="secondary"
                     @click="complementaryTrainingDialogOpen = false"
-                  >Cancelar</VBtn>
+                  >
+                    Cancelar
+                  </VBtn>
                   <VBtn
                     color="primary"
                     @click="saveComplementaryTrainingDialog"
-                  >Guardar</VBtn>
+                  >
+                    Guardar
+                  </VBtn>
                 </VCardActions>
               </VCard>
             </VDialog>
@@ -1523,11 +1718,15 @@ onMounted(async () => {
                     variant="tonal"
                     color="secondary"
                     @click="workTrajectoryDialogOpen = false"
-                  >Cancelar</VBtn>
+                  >
+                    Cancelar
+                  </VBtn>
                   <VBtn
                     color="primary"
                     @click="saveWorkTrajectoryDialog"
-                  >Guardar</VBtn>
+                  >
+                    Guardar
+                  </VBtn>
                 </VCardActions>
               </VCard>
             </VDialog>

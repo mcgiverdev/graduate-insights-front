@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
 import { useSurveyStatisticsService } from './useSurveyStatisticsService'
+import { useSnackbar } from '@/composables/useSnackbar'
 
 const DEFAULT_GRADUATION_YEARS = [
   { title: 'Todos los años', value: null },

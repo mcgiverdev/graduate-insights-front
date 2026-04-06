@@ -1,7 +1,7 @@
-import { ref, watch, type Ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
+import { type Ref, ref, watch } from 'vue'
 import type { Graduate } from '../types'
 import { graduateService } from '../services/GraduateService'
+import { useSnackbar } from '@/composables/useSnackbar'
 
 export const useGraduateDetail = (graduateId: Ref<number | null>) => {
   const graduate = ref<Graduate | null>(null)
@@ -15,6 +15,7 @@ export const useGraduateDetail = (graduateId: Ref<number | null>) => {
     if (!currentId) {
       graduate.value = null
       notFound.value = true
+
       return
     }
 
@@ -23,6 +24,7 @@ export const useGraduateDetail = (graduateId: Ref<number | null>) => {
 
     try {
       const detail = await graduateService.getById(currentId)
+
       graduate.value = detail
       notFound.value = !detail
     }

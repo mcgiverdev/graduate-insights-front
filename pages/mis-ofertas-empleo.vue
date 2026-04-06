@@ -29,6 +29,7 @@ const { submitting, serverErrors, saveMyJobOffer, clearServerErrors } = useMyJob
 
 const isConfirmVisible = ref(false)
 const jobOfferIdToDelete = ref<number | null>(null)
+
 const {
   isFormVisible,
   selectedJobOffer,

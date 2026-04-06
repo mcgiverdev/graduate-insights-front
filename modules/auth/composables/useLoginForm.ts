@@ -1,7 +1,7 @@
 import { reactive, ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
 import { authModuleService } from '../services/AuthService'
 import type { LoginFormValues, LoginResult } from '../types'
+import { useSnackbar } from '@/composables/useSnackbar'
 
 const DEFAULT_VALUES: LoginFormValues = {
   email: '',
@@ -19,7 +19,9 @@ export const useLoginForm = () => {
     loading.value = true
     try {
       const result = await authModuleService.login(form.email, form.password)
+
       showSnackbar({ text: result.message, color: result.success ? 'success' : 'error' })
+
       return result
     }
     finally {

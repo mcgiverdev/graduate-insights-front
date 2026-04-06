@@ -19,8 +19,8 @@ export const graduateFormSchema = yup.object({
   fechaFin: yup
     .string()
     .optional()
-    .test('is-after-start', 'La fecha de fin debe ser mayor o igual a la fecha de inicio', function (value) {
-      const { fechaInicio } = this.parent
+    .test('is-after-start', 'La fecha de fin debe ser mayor o igual a la fecha de inicio', (value, ctx) => {
+      const { fechaInicio } = ctx.parent
       if (!value || !fechaInicio)
         return true
 

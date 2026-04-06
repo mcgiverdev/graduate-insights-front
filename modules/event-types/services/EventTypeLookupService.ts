@@ -1,7 +1,7 @@
+import type { EventTypeApiResponse } from '../types'
 import { BaseApiService } from '@/infrastructure/http/BaseApiService'
 import type { ApiEnvelope } from '@/infrastructure/http/types'
 import type { KeyValueOption } from '@/modules/shared/types/keyValue'
-import type { EventTypeApiResponse } from '../types'
 
 const BASE_ENDPOINT = '/graduate-insights/v1/api/event_types'
 

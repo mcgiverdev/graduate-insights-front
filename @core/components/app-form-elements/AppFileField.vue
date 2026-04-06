@@ -55,18 +55,6 @@ watch(() => props.modelValue, newValue => {
 const selectedFile = computed(() => currentFileName.value)
 const hasFile = computed(() => Boolean(currentFileName.value))
 
-const fileSize = computed(() => {
-  if (!selectedFile.value)
-    return ''
-  const size = selectedFile.value.size
-  if (size < 1024)
-    return `${size} B`
-  if (size < 1048576)
-    return `${(size / 1024).toFixed(1)} KB`
-
-  return `${(size / 1048576).toFixed(1)} MB`
-})
-
 const isValidFile = (file: File): boolean => {
   // Verificar tamaño
   if (props.maxSize && file.size > props.maxSize * 1024)
@@ -285,7 +273,7 @@ const formatMaxSize = computed(() => {
         <VIcon
           icon="tabler-file"
           size="24"
-          class="mr-2"
+          class="me-2"
         />
         <span class="text-body-1 text-truncate">{{ selectedFile }}</span>
         <VBtn
@@ -293,7 +281,7 @@ const formatMaxSize = computed(() => {
           variant="text"
           size="small"
           color="error"
-          class="ml-auto"
+          class="ms-auto"
           :disabled="isLoading"
           :loading="isLoading"
           @click.stop="removeFile"

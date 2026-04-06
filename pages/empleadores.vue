@@ -30,6 +30,7 @@ const { submitting, serverErrors, saveEmployer, clearServerErrors } = useEmploye
 
 const isConfirmVisible = ref(false)
 const employerIdToDelete = ref<number | null>(null)
+
 const {
   isFormVisible,
   selectedEmployer,

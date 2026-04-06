@@ -5,6 +5,7 @@ const normalizeDateInput = (value?: string | null) => {
     return ''
 
   const [datePart] = value.split('T')
+
   return datePart ?? ''
 }
 

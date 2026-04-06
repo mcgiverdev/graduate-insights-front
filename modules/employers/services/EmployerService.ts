@@ -1,5 +1,3 @@
-import { BaseApiService } from '@/infrastructure/http/BaseApiService'
-import type { ApiEnvelope, ListResponse } from '@/infrastructure/http/types'
 import type {
   Employer,
   EmployerApiResponse,
@@ -7,6 +5,8 @@ import type {
   EmployerPayload,
 } from '../types'
 import { toEmployer } from '../utils/mappers'
+import { BaseApiService } from '@/infrastructure/http/BaseApiService'
+import type { ApiEnvelope, ListResponse } from '@/infrastructure/http/types'
 
 const BASE_ENDPOINT = '/graduate-insights/v1/api/employer'
 
@@ -29,6 +29,7 @@ class EmployerService extends BaseApiService {
 
   async getById(id: number): Promise<Employer | null> {
     const response = await this.get<ApiEnvelope<EmployerApiResponse>>(`${BASE_ENDPOINT}/${id}`)
+
     return response.data ? toEmployer(response.data) : null
   }
 

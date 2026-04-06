@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import type { MyJobOffer } from '../types'
+import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 
 interface Props {
   items: MyJobOffer[]
@@ -42,7 +42,8 @@ const getStatusColor = (estado?: string) => estado === '1' ? 'success' : 'error'
 
 const employerInfo = computed(() => {
   const first = props.items[0]
-  if (!first?.employerName) return null
+  if (!first?.employerName)
+    return null
 
   return {
     name: first.employerName,
@@ -63,13 +64,22 @@ const employerInfo = computed(() => {
   >
     <div class="d-flex flex-wrap gap-x-6 gap-y-1 align-center">
       <span class="font-weight-semibold">{{ employerInfo.name }}</span>
-      <span v-if="employerInfo.ruc" class="text-body-2">
+      <span
+        v-if="employerInfo.ruc"
+        class="text-body-2"
+      >
         <strong>RUC:</strong> {{ employerInfo.ruc }}
       </span>
-      <span v-if="employerInfo.correo" class="text-body-2">
+      <span
+        v-if="employerInfo.correo"
+        class="text-body-2"
+      >
         <strong>Correo:</strong> {{ employerInfo.correo }}
       </span>
-      <span v-if="employerInfo.direccion" class="text-body-2">
+      <span
+        v-if="employerInfo.direccion"
+        class="text-body-2"
+      >
         <strong>Direcci&oacute;n:</strong> {{ employerInfo.direccion }}
       </span>
     </div>
@@ -135,6 +145,7 @@ const employerInfo = computed(() => {
           color="primary"
           :href="item.link"
           target="_blank"
+          rel="noopener noreferrer"
         >
           Ver enlace
         </VBtn>

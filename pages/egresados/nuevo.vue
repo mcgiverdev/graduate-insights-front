@@ -8,7 +8,5 @@ definePageMeta({
 </script>
 
 <template>
-  <GraduateWizardForm
-    :start-step="1"
-  />
+  <GraduateWizardForm :start-step="1" />
 </template>

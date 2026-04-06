@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import { usePasswordChange } from '../composables/usePasswordChange'
+import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 
 const { form, errors, submitting, submit } = usePasswordChange()
 

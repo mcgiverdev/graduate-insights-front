@@ -1,8 +1,8 @@
 import { watchDebounced } from '@vueuse/core'
 import { computed, onMounted, ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
 import { directorService } from '../services/DirectorService'
 import type { Director } from '../types'
+import { useSnackbar } from '@/composables/useSnackbar'
 
 export const useDirectorList = () => {
   const items = ref<Director[]>([])

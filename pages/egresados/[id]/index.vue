@@ -11,7 +11,9 @@ import avatarFemale from '@images/avatars/avatar-4.png'
 const { public: { apiBaseUrl } } = useRuntimeConfig()
 
 const getFileUrl = (path: string | null | undefined): string | null => {
-  if (!path) return null
+  if (!path)
+    return null
+
   return `${apiBaseUrl}/graduate-insights/v1/api/files/download/${path}`
 }
 
@@ -41,36 +43,49 @@ const universities = ref<Array<{ id: number; nombre: string }>>([])
 const faculties = ref<Array<{ id: number; nombre: string }>>([])
 const professionalSchools = ref<Array<{ id: number; facultad_id?: number; facultadId?: number; nombre: string }>>([])
 
+const { graduate, loading, notFound } = useGraduateDetail(graduateId)
+
 const resolvedSchoolName = computed(() => {
-  if (!graduate.value?.escuelaProfesionalId) return '-'
+  if (!graduate.value?.escuelaProfesionalId)
+    return '-'
+
   return professionalSchools.value.find(s => s.id === graduate.value!.escuelaProfesionalId)?.nombre || '-'
 })
 
 const resolvedFacultyName = computed(() => {
-  if (!graduate.value?.escuelaProfesionalId) return '-'
+  if (!graduate.value?.escuelaProfesionalId)
+    return '-'
   const school = professionalSchools.value.find(s => s.id === graduate.value!.escuelaProfesionalId)
-  if (!school) return '-'
+  if (!school)
+    return '-'
   const fId = school.facultad_id ?? school.facultadId
-  if (!fId) return '-'
+  if (!fId)
+    return '-'
+
   return faculties.value.find(f => f.id === fId)?.nombre || '-'
 })
 
-const { graduate, loading, notFound } = useGraduateDetail(graduateId)
-
 const formatDate = (value?: string | null) => {
-  if (!value) return '-'
+  if (!value)
+    return '-'
   const datePart = value.trim().split(/[T ]/)[0]
-  if (!datePart) return '-'
+  if (!datePart)
+    return '-'
   const [year, month, day] = datePart.split('-')
-  if (!year || !month || !day) return datePart
+  if (!year || !month || !day)
+    return datePart
+
   return `${day}/${month}/${year}`
 }
 
 const formatDateRange = (start?: string | null, end?: string | null) => {
   const s = formatDate(start)
   const e = formatDate(end)
-  if (s === '-' && e === '-') return '-'
-  if (e === '-') return s
+  if (s === '-' && e === '-')
+    return '-'
+  if (e === '-')
+    return s
+
   return `${s} — ${e}`
 }
 
@@ -118,12 +133,11 @@ const degreeRows = computed(() => {
 
     // Construir nombre del tipo de grado
     let tipo = tipoNombre
-    if (isOtro && item.otro_grado_nombre?.trim()) {
+    if (isOtro && item.otro_grado_nombre?.trim())
       tipo = `${tipoNombre}: ${item.otro_grado_nombre.trim()}`
-    }
-    else if (isTitulado && modalidadNombre) {
+
+    else if (isTitulado && modalidadNombre)
       tipo = `${tipoNombre} (${modalidadNombre})`
-    }
 
     return {
       id: `${index}-${item.tipo_grado_id || 'na'}`,
@@ -217,7 +231,10 @@ onMounted(async () => {
     </VAlert>
 
     <VRow v-else>
-      <VCol cols="12" md="4">
+      <VCol
+        cols="12"
+        md="4"
+      >
         <VCard>
           <VCardText class="d-flex flex-column align-center text-center gap-4">
             <VAvatar
@@ -258,6 +275,7 @@ onMounted(async () => {
               color="primary"
               :href="cvUrl"
               target="_blank"
+              rel="noopener noreferrer"
               prepend-icon="tabler-file-text"
               class="w-100"
             >
@@ -267,7 +285,10 @@ onMounted(async () => {
         </VCard>
       </VCol>
 
-      <VCol cols="12" md="8">
+      <VCol
+        cols="12"
+        md="8"
+      >
         <VCard>
           <VCardTitle class="d-flex justify-space-between align-center flex-wrap gap-2">
             <span class="text-h6">Ficha informativa del graduado</span>
@@ -362,9 +383,15 @@ onMounted(async () => {
                 <VTable v-else>
                   <thead>
                     <tr>
-                      <th scope="col">Tipo de grado</th>
-                      <th scope="col">Universidad</th>
-                      <th scope="col">Fecha</th>
+                      <th scope="col">
+                        Tipo de grado
+                      </th>
+                      <th scope="col">
+                        Universidad
+                      </th>
+                      <th scope="col">
+                        Fecha
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -392,10 +419,18 @@ onMounted(async () => {
                 <VTable v-else>
                   <thead>
                     <tr>
-                      <th scope="col">Idioma</th>
-                      <th scope="col">Nivel</th>
-                      <th scope="col">Aprendizaje</th>
-                      <th scope="col">Vigencia</th>
+                      <th scope="col">
+                        Idioma
+                      </th>
+                      <th scope="col">
+                        Nivel
+                      </th>
+                      <th scope="col">
+                        Aprendizaje
+                      </th>
+                      <th scope="col">
+                        Vigencia
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -424,9 +459,15 @@ onMounted(async () => {
                 <VTable v-else>
                   <thead>
                     <tr>
-                      <th scope="col">Curso</th>
-                      <th scope="col">Institucion</th>
-                      <th scope="col">Vigencia</th>
+                      <th scope="col">
+                        Curso
+                      </th>
+                      <th scope="col">
+                        Institucion
+                      </th>
+                      <th scope="col">
+                        Vigencia
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -454,11 +495,21 @@ onMounted(async () => {
                 <VTable v-else>
                   <thead>
                     <tr>
-                      <th scope="col">Empresa</th>
-                      <th scope="col">Cargo</th>
-                      <th scope="col">Modalidad</th>
-                      <th scope="col">Vigencia</th>
-                      <th scope="col">Estado</th>
+                      <th scope="col">
+                        Empresa
+                      </th>
+                      <th scope="col">
+                        Cargo
+                      </th>
+                      <th scope="col">
+                        Modalidad
+                      </th>
+                      <th scope="col">
+                        Vigencia
+                      </th>
+                      <th scope="col">
+                        Estado
+                      </th>
                     </tr>
                   </thead>
                   <tbody>

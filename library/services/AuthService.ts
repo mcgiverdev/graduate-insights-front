@@ -28,11 +28,10 @@ class AuthService {
   getAuthHeaders(): Record<string, string> {
     const token = this.getToken()
 
-    return token
-      ? {
-        Authorization: `Bearer ${token}`,
-      }
-      : {}
+    if (!token)
+      return {}
+
+    return { Authorization: `Bearer ${token}` }
   }
 
   isAuthenticated(): boolean {

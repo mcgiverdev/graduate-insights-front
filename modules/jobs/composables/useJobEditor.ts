@@ -1,9 +1,9 @@
 import { ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
-import type { RequestResult } from '@/infrastructure/http/types'
 import { jobService } from '../services/JobService'
 import type { Job, JobFormValues, JobPayload } from '../types'
 import { toPayload } from '../utils/mappers'
+import type { RequestResult } from '@/infrastructure/http/types'
+import { useSnackbar } from '@/composables/useSnackbar'
 
 interface UseJobEditorOptions {
   fetchJobs: () => Promise<void>
@@ -48,6 +48,7 @@ export const useJobEditor = ({
       if (!job) {
         showSnackbar({ text: 'No se encontró el trabajo seleccionado', color: 'error' })
         isFormVisible.value = false
+
         return
       }
 

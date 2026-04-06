@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { useProfileDetails } from '../composables/useProfileDetails'
 import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import AppTextField from '@/@core/components/app-form-elements/AppTextField.vue'
 import { useSnackbar } from '@/composables/useSnackbar'
-import { useProfileDetails } from '../composables/useProfileDetails'
 
 const {
   form,
@@ -54,7 +54,10 @@ onMounted(() => {
 
       <VForm @submit.prevent="handleSubmit">
         <VRow>
-          <VCol cols="12" md="6">
+          <VCol
+            cols="12"
+            md="6"
+          >
             <AppTextField
               v-model="form.nombres"
               label="Nombres"
@@ -62,7 +65,10 @@ onMounted(() => {
               :error-messages="serverErrors.nombres ? [serverErrors.nombres] : []"
             />
           </VCol>
-          <VCol cols="12" md="6">
+          <VCol
+            cols="12"
+            md="6"
+          >
             <AppTextField
               v-model="form.apellidos"
               label="Apellidos"
@@ -71,7 +77,10 @@ onMounted(() => {
             />
           </VCol>
 
-          <VCol cols="12" md="6">
+          <VCol
+            cols="12"
+            md="6"
+          >
             <AppTextField
               v-model="form.correo"
               label="Correo electrónico"
@@ -81,7 +90,10 @@ onMounted(() => {
             />
           </VCol>
 
-          <VCol cols="12" md="6">
+          <VCol
+            cols="12"
+            md="6"
+          >
             <AppTextField
               v-model="form.celular"
               label="Celular"
@@ -90,7 +102,10 @@ onMounted(() => {
             />
           </VCol>
 
-          <VCol cols="12" md="6">
+          <VCol
+            cols="12"
+            md="6"
+          >
             <AppTextField
               v-model="form.dni"
               label="DNI"
@@ -100,7 +115,10 @@ onMounted(() => {
             />
           </VCol>
 
-          <VCol cols="12" md="6">
+          <VCol
+            cols="12"
+            md="6"
+          >
             <AppSelect
               v-model="form.genero"
               label="Género"
@@ -109,7 +127,10 @@ onMounted(() => {
             />
           </VCol>
 
-          <VCol cols="12" md="6">
+          <VCol
+            cols="12"
+            md="6"
+          >
             <AppTextField
               v-model="form.fechaNacimiento"
               label="Fecha de nacimiento"

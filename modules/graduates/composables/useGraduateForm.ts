@@ -1,7 +1,7 @@
 import { ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
 import { graduateService } from '../services/GraduateService'
 import type { GraduatePayload } from '../types'
+import { useSnackbar } from '@/composables/useSnackbar'
 
 export interface GraduateSaveResult {
   success: boolean

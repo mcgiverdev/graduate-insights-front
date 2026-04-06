@@ -26,10 +26,12 @@ function filterItems(items: any[]): any[] {
       const filteredChildren = filterItems(item.children)
       if (filteredChildren.length > 0)
         acc.push({ ...item, children: filteredChildren })
+
       return acc
     }
 
     acc.push(item)
+
     return acc
   }, [])
 }
@@ -37,6 +39,7 @@ function filterItems(items: any[]): any[] {
 const filteredNavItems = computed(() => {
   if (!role.value)
     return []
+
   return filterItems(navItems)
 })
 </script>

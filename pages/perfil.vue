@@ -13,16 +13,23 @@ const { user, avatarUrl } = useUser()
 const activeTab = ref('perfil')
 
 const genderLabel = computed(() => {
-  if (user.value?.genero === 'M') return 'Masculino'
-  if (user.value?.genero === 'F') return 'Femenino'
+  if (user.value?.genero === 'M')
+    return 'Masculino'
+  if (user.value?.genero === 'F')
+    return 'Femenino'
+
   return 'No especificado'
 })
 
 const roleIcon = computed(() => {
   const role = user.value?.role?.toLowerCase() || ''
-  if (role.includes('director')) return 'tabler-shield-check'
-  if (role.includes('employer') || role.includes('empleador')) return 'tabler-building'
-  if (role.includes('graduate') || role.includes('graduado')) return 'tabler-school'
+  if (role.includes('director'))
+    return 'tabler-shield-check'
+  if (role.includes('employer') || role.includes('empleador'))
+    return 'tabler-building'
+  if (role.includes('graduate') || role.includes('graduado'))
+    return 'tabler-school'
+
   return 'tabler-user'
 })
 </script>
@@ -30,7 +37,10 @@ const roleIcon = computed(() => {
 <template>
   <div>
     <!-- Banner + Avatar + Info -->
-    <VCard class="mb-6 profile-header-card" elevation="0">
+    <VCard
+      class="mb-6 profile-header-card"
+      elevation="0"
+    >
       <!-- Banner -->
       <div class="profile-banner">
         <div class="profile-banner-circle profile-banner-circle--1" />
@@ -67,15 +77,24 @@ const roleIcon = computed(() => {
             </h5>
             <div class="d-flex flex-wrap gap-4 text-body-2 text-medium-emphasis">
               <span class="d-flex align-center gap-1">
-                <VIcon :icon="roleIcon" size="16" />
+                <VIcon
+                  :icon="roleIcon"
+                  size="16"
+                />
                 {{ user?.role || '—' }}
               </span>
               <span class="d-flex align-center gap-1">
-                <VIcon icon="tabler-mail" size="16" />
+                <VIcon
+                  icon="tabler-mail"
+                  size="16"
+                />
                 {{ user?.email || '—' }}
               </span>
               <span class="d-flex align-center gap-1">
-                <VIcon icon="tabler-gender-bigender" size="16" />
+                <VIcon
+                  icon="tabler-gender-bigender"
+                  size="16"
+                />
                 {{ genderLabel }}
               </span>
             </div>
@@ -99,10 +118,16 @@ const roleIcon = computed(() => {
         class="profile-tabs px-4"
         color="primary"
       >
-        <VTab value="perfil" prepend-icon="tabler-user">
+        <VTab
+          value="perfil"
+          prepend-icon="tabler-user"
+        >
           Mi Perfil
         </VTab>
-        <VTab value="seguridad" prepend-icon="tabler-lock">
+        <VTab
+          value="seguridad"
+          prepend-icon="tabler-lock"
+        >
           Contraseña
         </VTab>
       </VTabs>
@@ -112,7 +137,10 @@ const roleIcon = computed(() => {
     <VWindow v-model="activeTab">
       <VWindowItem value="perfil">
         <VRow class="gy-6">
-          <VCol cols="12" lg="4">
+          <VCol
+            cols="12"
+            lg="4"
+          >
             <!-- Info card -->
             <VCard elevation="0">
               <VCardItem>
@@ -121,10 +149,18 @@ const roleIcon = computed(() => {
                 </VCardTitle>
               </VCardItem>
               <VCardText class="pt-0">
-                <VList lines="one" density="compact" class="pa-0">
+                <VList
+                  lines="one"
+                  density="compact"
+                  class="pa-0"
+                >
                   <VListItem class="px-0">
                     <template #prepend>
-                      <VIcon icon="tabler-user" size="18" class="me-3 text-medium-emphasis" />
+                      <VIcon
+                        icon="tabler-user"
+                        size="18"
+                        class="me-3 text-medium-emphasis"
+                      />
                     </template>
                     <VListItemTitle>
                       <span class="text-medium-emphasis me-2">Nombre:</span>
@@ -134,7 +170,11 @@ const roleIcon = computed(() => {
 
                   <VListItem class="px-0">
                     <template #prepend>
-                      <VIcon icon="tabler-mail" size="18" class="me-3 text-medium-emphasis" />
+                      <VIcon
+                        icon="tabler-mail"
+                        size="18"
+                        class="me-3 text-medium-emphasis"
+                      />
                     </template>
                     <VListItemTitle>
                       <span class="text-medium-emphasis me-2">Correo:</span>
@@ -144,7 +184,11 @@ const roleIcon = computed(() => {
 
                   <VListItem class="px-0">
                     <template #prepend>
-                      <VIcon :icon="roleIcon" size="18" class="me-3 text-medium-emphasis" />
+                      <VIcon
+                        :icon="roleIcon"
+                        size="18"
+                        class="me-3 text-medium-emphasis"
+                      />
                     </template>
                     <VListItemTitle>
                       <span class="text-medium-emphasis me-2">Rol:</span>
@@ -154,7 +198,11 @@ const roleIcon = computed(() => {
 
                   <VListItem class="px-0">
                     <template #prepend>
-                      <VIcon icon="tabler-gender-bigender" size="18" class="me-3 text-medium-emphasis" />
+                      <VIcon
+                        icon="tabler-gender-bigender"
+                        size="18"
+                        class="me-3 text-medium-emphasis"
+                      />
                     </template>
                     <VListItemTitle>
                       <span class="text-medium-emphasis me-2">Género:</span>
@@ -164,11 +212,19 @@ const roleIcon = computed(() => {
 
                   <VListItem class="px-0">
                     <template #prepend>
-                      <VIcon icon="tabler-circle-check" size="18" class="me-3 text-medium-emphasis" />
+                      <VIcon
+                        icon="tabler-circle-check"
+                        size="18"
+                        class="me-3 text-medium-emphasis"
+                      />
                     </template>
                     <VListItemTitle>
                       <span class="text-medium-emphasis me-2">Estado:</span>
-                      <VChip color="success" size="x-small" variant="tonal">
+                      <VChip
+                        color="success"
+                        size="x-small"
+                        variant="tonal"
+                      >
                         Activo
                       </VChip>
                     </VListItemTitle>
@@ -178,7 +234,10 @@ const roleIcon = computed(() => {
             </VCard>
           </VCol>
 
-          <VCol cols="12" lg="8">
+          <VCol
+            cols="12"
+            lg="8"
+          >
             <ProfileDetailsForm />
           </VCol>
         </VRow>
@@ -187,12 +246,26 @@ const roleIcon = computed(() => {
       <VWindowItem value="seguridad">
         <VRow class="gy-6">
           <!-- Security info -->
-          <VCol cols="12" md="5">
-            <VCard elevation="0" height="100%">
+          <VCol
+            cols="12"
+            md="5"
+          >
+            <VCard
+              elevation="0"
+              height="100%"
+            >
               <VCardItem>
                 <template #prepend>
-                  <VAvatar color="primary" variant="tonal" size="42" class="me-2">
-                    <VIcon icon="tabler-shield-lock" size="22" />
+                  <VAvatar
+                    color="primary"
+                    variant="tonal"
+                    size="42"
+                    class="me-2"
+                  >
+                    <VIcon
+                      icon="tabler-shield-lock"
+                      size="22"
+                    />
                   </VAvatar>
                 </template>
                 <VCardTitle>Seguridad de cuenta</VCardTitle>
@@ -206,30 +279,61 @@ const roleIcon = computed(() => {
                 <p class="text-body-2 font-weight-semibold mb-3">
                   Tu contraseña debe tener:
                 </p>
-                <VList density="compact" class="pa-0 security-tips-list">
+                <VList
+                  density="compact"
+                  class="pa-0 security-tips-list"
+                >
                   <VListItem class="px-0 py-1">
                     <template #prepend>
-                      <VIcon icon="tabler-check" size="16" color="success" class="me-2" />
+                      <VIcon
+                        icon="tabler-check"
+                        size="16"
+                        color="success"
+                        class="me-2"
+                      />
                     </template>
-                    <VListItemTitle class="text-body-2">Al menos 8 caracteres</VListItemTitle>
+                    <VListItemTitle class="text-body-2">
+                      Al menos 8 caracteres
+                    </VListItemTitle>
                   </VListItem>
                   <VListItem class="px-0 py-1">
                     <template #prepend>
-                      <VIcon icon="tabler-check" size="16" color="success" class="me-2" />
+                      <VIcon
+                        icon="tabler-check"
+                        size="16"
+                        color="success"
+                        class="me-2"
+                      />
                     </template>
-                    <VListItemTitle class="text-body-2">Al menos una letra mayúscula</VListItemTitle>
+                    <VListItemTitle class="text-body-2">
+                      Al menos una letra mayúscula
+                    </VListItemTitle>
                   </VListItem>
                   <VListItem class="px-0 py-1">
                     <template #prepend>
-                      <VIcon icon="tabler-check" size="16" color="success" class="me-2" />
+                      <VIcon
+                        icon="tabler-check"
+                        size="16"
+                        color="success"
+                        class="me-2"
+                      />
                     </template>
-                    <VListItemTitle class="text-body-2">Al menos un número</VListItemTitle>
+                    <VListItemTitle class="text-body-2">
+                      Al menos un número
+                    </VListItemTitle>
                   </VListItem>
                   <VListItem class="px-0 py-1">
                     <template #prepend>
-                      <VIcon icon="tabler-check" size="16" color="success" class="me-2" />
+                      <VIcon
+                        icon="tabler-check"
+                        size="16"
+                        color="success"
+                        class="me-2"
+                      />
                     </template>
-                    <VListItemTitle class="text-body-2">Al menos un carácter especial</VListItemTitle>
+                    <VListItemTitle class="text-body-2">
+                      Al menos un carácter especial
+                    </VListItemTitle>
                   </VListItem>
                 </VList>
               </VCardText>
@@ -237,7 +341,10 @@ const roleIcon = computed(() => {
           </VCol>
 
           <!-- Password form -->
-          <VCol cols="12" md="7">
+          <VCol
+            cols="12"
+            md="7"
+          >
             <PasswordChangeCard />
           </VCol>
         </VRow>

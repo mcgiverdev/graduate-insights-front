@@ -39,14 +39,6 @@ const questionTypeOptions = [
   { title: 'Telefono', value: QuestionType.PHONE, description: 'Numero de telefono' },
 ]
 
-// Validaciones
-const isValidQuestion = computed(() => {
-  const hasText = questionForm.value.question_text.trim() !== ''
-  const hasOptionsIfNeeded = !needsOptions.value || questionForm.value.options.length > 0
-
-  return hasText && hasOptionsIfNeeded
-})
-
 // Verificar si el tipo de pregunta necesita opciones
 const needsOptions = computed(() => {
   return [
@@ -55,6 +47,14 @@ const needsOptions = computed(() => {
     QuestionType.SINGLE_CHOICE,
     QuestionType.MULTIPLE_CHOICE,
   ].includes(questionForm.value.question_type)
+})
+
+// Validaciones
+const isValidQuestion = computed(() => {
+  const hasText = questionForm.value.question_text.trim() !== ''
+  const hasOptionsIfNeeded = !needsOptions.value || questionForm.value.options.length > 0
+
+  return hasText && hasOptionsIfNeeded
 })
 
 // Auto-poblar opciones por defecto para YES_NO y SCALE cuando están vacías
@@ -104,7 +104,7 @@ watch(() => questionForm.value.question_type, (newType, oldType) => {
 })
 
 // En modo inline, emitir cambios al padre cuando el formulario cambia
-watch(questionForm, (newVal) => {
+watch(questionForm, newVal => {
   if (props.inline) {
     emit('update:question', {
       question_text: newVal.question_text,
@@ -118,7 +118,7 @@ watch(questionForm, (newVal) => {
 // Watch para actualizar cuando la prop question cambie externamente (p.ej. al reordenar preguntas).
 // Se omite la re-inicialización si los valores ya coinciden con el estado local para evitar el loop:
 // usuario escribe → emit → padre actualiza questions[i] → prop cambia → Watch reinicializa → bug
-watch(() => props.question, (newQuestion) => {
+watch(() => props.question, newQuestion => {
   if (!newQuestion)
     return
 
@@ -127,6 +127,7 @@ watch(() => props.question, (newQuestion) => {
   const sameText = newQuestion.question_text === f.question_text
   const sameType = newQuestion.question_type === f.question_type
   const sameRequired = newQuestion.required === f.required
+
   const sameOptions
     = newQuestion.options.length === f.options.length
     && newQuestion.options.every((opt, i) =>

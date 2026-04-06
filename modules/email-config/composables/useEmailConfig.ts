@@ -1,8 +1,8 @@
 import { onMounted, ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
 import { emailConfigService } from '../services/EmailConfigService'
 import { toPayload } from '../utils/mappers'
 import type { EmailConfig, EmailConfigFormValues } from '../types'
+import { useSnackbar } from '@/composables/useSnackbar'
 
 export const useEmailConfig = () => {
   const { showSnackbar } = useSnackbar()

@@ -71,7 +71,6 @@ const {
       </VCard>
     </template>
   </RoleGuard>
-
 </template>
 
 <style scoped>

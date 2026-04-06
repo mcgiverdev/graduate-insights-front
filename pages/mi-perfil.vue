@@ -20,11 +20,11 @@ const loading = ref(true)
 const graduate = ref<Graduate | null>(null)
 const loadError = ref(false)
 
-const fetchMyProfile = async (_id: number): Promise<Graduate | null> => {
+const fetchMyProfile = async (_: number): Promise<Graduate | null> => {
   return graduateService.fetchMyProfile()
 }
 
-const saveMyProfile = async (payload: GraduatePayload, _id: number) => {
+const saveMyProfile = async (payload: GraduatePayload, _: number) => {
   try {
     await graduateService.updateMyProfile(payload)
     showSnackbar({ text: 'Perfil actualizado correctamente', color: 'success' })

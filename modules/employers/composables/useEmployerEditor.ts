@@ -1,9 +1,9 @@
 import { ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
-import type { RequestResult } from '@/infrastructure/http/types'
 import { employerService } from '../services/EmployerService'
 import type { Employer, EmployerFormValues, EmployerPayload } from '../types'
 import { toPayload } from '../utils/mappers'
+import type { RequestResult } from '@/infrastructure/http/types'
+import { useSnackbar } from '@/composables/useSnackbar'
 
 interface UseEmployerEditorOptions {
   fetchEmployers: () => Promise<void>
@@ -33,6 +33,7 @@ export const useEmployerEditor = ({ fetchEmployers, saveEmployer, clearServerErr
       if (!employer) {
         showSnackbar({ text: 'No se encontró el empleador seleccionado', color: 'error' })
         isFormVisible.value = false
+
         return
       }
 

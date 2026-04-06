@@ -1,8 +1,8 @@
 import { watchDebounced } from '@vueuse/core'
 import { computed, onMounted, ref } from 'vue'
-import { useSnackbar } from '@/composables/useSnackbar'
 import { eventService } from '../services/EventService'
 import type { Event } from '../types'
+import { useSnackbar } from '@/composables/useSnackbar'
 
 export const useEventList = () => {
   const items = ref<Event[]>([])

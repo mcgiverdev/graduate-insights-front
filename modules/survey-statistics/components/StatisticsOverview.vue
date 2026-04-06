@@ -180,4 +180,3 @@ function translateStatus(status: string): string {
     </VCardText>
   </VCard>
 </template>
-

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { nextTick, ref, watch } from 'vue'
-import { VForm } from 'vuetify/components'
+
+type VForm = any
 
 interface Emit {
   (e: 'update:isDialogOpen', value: boolean): void

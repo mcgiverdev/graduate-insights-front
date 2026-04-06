@@ -1,5 +1,3 @@
-import { BaseApiService } from '@/infrastructure/http/BaseApiService'
-import type { ApiEnvelope, ListResponse } from '@/infrastructure/http/types'
 import type {
   Event,
   EventApiResponse,
@@ -7,6 +5,8 @@ import type {
   EventPayload,
 } from '../types'
 import { toEvent } from '../utils/mappers'
+import { BaseApiService } from '@/infrastructure/http/BaseApiService'
+import type { ApiEnvelope, ListResponse } from '@/infrastructure/http/types'
 
 const BASE_ENDPOINT = '/graduate-insights/v1/api/event'
 
@@ -29,6 +29,7 @@ class EventService extends BaseApiService {
 
   async getById(id: number): Promise<Event | null> {
     const response = await this.get<ApiEnvelope<EventApiResponse>>(`${BASE_ENDPOINT}/${id}`)
+
     return response.data ? toEvent(response.data) : null
   }
 
