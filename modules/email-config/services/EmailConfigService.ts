@@ -12,12 +12,12 @@ class EmailConfigService extends BaseApiService {
     return response.data ? toEmailConfig(response.data) : null
   }
 
-  async saveConfig(payload: EmailConfigPayload): Promise<EmailConfig> {
-    const response = await this.put<ApiEnvelope<EmailConfigApiResponse>>(BASE_ENDPOINT, {
+  async saveConfig(payload: EmailConfigPayload): Promise<EmailConfig | null> {
+    await this.put<void>(BASE_ENDPOINT, {
       body: payload,
     })
 
-    return toEmailConfig(response.data)
+    return this.fetchConfig()
   }
 
   async sendTestEmail(email: string): Promise<void> {
