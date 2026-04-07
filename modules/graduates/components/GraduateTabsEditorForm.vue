@@ -1251,7 +1251,7 @@ watch(activeTab, () => {
             <VRow>
               <VCol cols="12" md="6">
                 <AppTextField
-                  v-if="sectionEdit"
+                  v-if="sectionReadOnly('resumen-academico')"
                   :model-value="facultadNombre"
                   label="Facultad"
                   readonly
@@ -1269,7 +1269,7 @@ watch(activeTab, () => {
 
               <VCol cols="12" md="6">
                 <AppTextField
-                  v-if="sectionEdit"
+                  v-if="sectionReadOnly('resumen-academico')"
                   :model-value="escuelaNombre"
                   label="Escuela profesional"
                   readonly
