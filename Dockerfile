@@ -39,7 +39,7 @@ COPY . .
 # Configurar variables de entorno para el build
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 ENV NODE_ENV=production
-ARG NUXT_PUBLIC_API_BASE_URL=http://localhost:8080
+ARG NUXT_PUBLIC_API_BASE_URL=__NUXT_API_PLACEHOLDER__
 ARG NUXT_APP_BASE_URL=/
 ENV NUXT_PUBLIC_API_BASE_URL=${NUXT_PUBLIC_API_BASE_URL}
 ENV NUXT_APP_BASE_URL=${NUXT_APP_BASE_URL}
@@ -75,6 +75,10 @@ COPY --from=builder /app/.output/public /usr/share/nginx/html
 # Copiar configuración de Nginx para SPA
 COPY infrastructure/nginx/default.conf /etc/nginx/conf.d/default.conf
 
+# Copiar entrypoint para runtime URL substitution
+COPY infrastructure/docker/entrypoint.sh /docker-entrypoint.d/99-runtime-env.sh
+RUN chmod +x /docker-entrypoint.d/99-runtime-env.sh
+
 # Exponer el puerto
 EXPOSE 80
 
@@ -82,5 +86,5 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:80/ || exit 1
 
-# Comando para iniciar nginx
+# Entrypoint: nginx's default entrypoint runs /docker-entrypoint.d/*.sh then starts nginx
 CMD ["nginx", "-g", "daemon off;"]
