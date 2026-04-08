@@ -178,8 +178,8 @@ const values = ref<GraduateWizardValues>({
   paisResidencia: '',
   linkedin: '',
 
-  facultadId: undefined,
-  escuelaProfesionalId: undefined,
+  facultadId: 1,
+  escuelaProfesionalId: 1,
   anioIngreso: '',
   anioEgreso: '',
   fechaIngreso: '',

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, ref, watch } from 'vue'
-import AppSelect from '@/@core/components/app-form-elements/AppSelect.vue'
 import { useGraduateDashboard } from '@/src/features/graduate-dashboard'
 import { useRoles } from '@/composables/useRoles'
 import { StatisticsButton, useSurveyStatisticsDashboard } from '@/src/features/survey-statistics'
@@ -24,8 +23,6 @@ useHead({
 const {
   dashboardData,
   loadingDashboard,
-  filters,
-  graduationYears,
   chartOptions,
   pieChartOptions,
   formatChartData,
@@ -34,7 +31,6 @@ const {
   getSurveyStatusColor,
   getSurveyTypeIcon,
   loadDashboard: loadDirectorDashboard,
-  clearFilters: clearDirectorFilters,
 } = useSurveyStatisticsDashboard()
 
 const { isDirector, isEmployer, isGraduate, user } = useRoles()
@@ -121,19 +117,15 @@ const dashboardSubtitle = computed(() => {
   return 'Bienvenido al sistema Egresys'
 })
 
-async function loadDashboard(useFilters = false) {
+async function loadDashboard() {
   if (isDirector.value)
-    await loadDirectorDashboard(useFilters)
-}
-
-async function clearFilters() {
-  await clearDirectorFilters()
+    await loadDirectorDashboard(false)
 }
 
 // Watch para cargar dashboard cuando el rol se resuelve
 watch(isDirector, newIsDirector => {
   if (newIsDirector)
-    loadDashboard(false) // Cargar sin filtros al inicio
+    loadDashboard()
 }, { immediate: true })
 
 watch(isGraduate, async newIsGraduate => {
@@ -160,17 +152,6 @@ watch(isGraduate, async newIsGraduate => {
         v-if="isDirector"
         class="d-flex align-center gap-3"
       >
-        <AppSelect
-          v-model="filters.graduation_year"
-          :items="graduationYears"
-          label="Año de graduación"
-          density="compact"
-          hide-details
-          clearable
-          style="min-width: 180px"
-          @update:model-value="() => loadDashboard(true)"
-          @click:clear="clearFilters"
-        />
         <VBtn
           :loading="loadingDashboard"
           color="primary"

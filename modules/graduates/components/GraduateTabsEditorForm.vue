@@ -206,8 +206,8 @@ const values = ref<GraduateWizardValues>({
   linkedin: '',
   portafolio: '',
 
-  facultadId: undefined,
-  escuelaProfesionalId: undefined,
+  facultadId: 1,
+  escuelaProfesionalId: 1,
   fechaIngreso: '',
   fechaEgreso: '',
   grados: [],
@@ -344,17 +344,20 @@ const normalizeDateValue = (value?: string | null) => {
   if (!value)
     return ''
 
+  // Si ya es un año de 4 dígitos, retornarlo directamente
   if (/^\d{4}$/.test(value))
-    return `${value}-01-01`
+    return value
 
-  return value.split('T')[0]
+  // Si es una fecha completa (yyyy-mm-dd o con T), extraer solo el año
+  return value.slice(0, 4)
 }
 
 const getYearFromDate = (value?: string) => {
-  if (!value)
+  if (!value || !value.trim())
     return undefined
 
-  return value.slice(0, 4)
+  const year = value.trim().slice(0, 4)
+  return /^\d{4}$/.test(year) ? year : undefined
 }
 
 const wizardPayload = computed<GraduatePayload>(() => {
@@ -386,7 +389,6 @@ const wizardPayload = computed<GraduatePayload>(() => {
     escuela_profesional_id: values.value.escuelaProfesionalId || undefined,
     anio_ingreso: getYearFromDate(values.value.fechaIngreso),
     anio_egreso: getYearFromDate(values.value.fechaEgreso),
-    contrasena: values.value.dni.trim(),
     foto_path: values.value.fotografia || undefined,
   }
 
@@ -439,7 +441,7 @@ const hydrateFromGraduate = (graduate: Graduate) => {
   values.value.paisResidencia = graduate.paisResidencia || ''
   values.value.linkedin = graduate.linkedin || ''
   values.value.portafolio = graduate.portafolio || ''
-  values.value.escuelaProfesionalId = graduate.escuelaProfesionalId || undefined
+  values.value.escuelaProfesionalId = graduate.escuelaProfesionalId || 1
   values.value.fechaIngreso = normalizeDateValue(graduate.anioIngreso)
   values.value.fechaEgreso = normalizeDateValue(graduate.anioEgreso)
   values.value.fotografia = graduate.fotoPath || ''
@@ -865,7 +867,8 @@ const submitSection = async () => {
   if (loadingData.value || saving.value)
     return
 
-  const valid = await validateAllBeforeSave()
+  const tabIndex = tabItems.findIndex(t => t.value === editingSection.value)
+  const valid = tabIndex >= 0 ? await validateTab(tabIndex) : true
   if (!valid)
     return
 
@@ -1251,57 +1254,41 @@ watch(activeTab, () => {
             <VRow>
               <VCol cols="12" md="6">
                 <AppTextField
-                  v-if="sectionReadOnly('resumen-academico')"
                   :model-value="facultadNombre"
                   label="Facultad"
                   readonly
-                />
-                <AppSelect
-                  v-else
-                  v-model="values.facultadId"
-                  label="Facultad"
-                  :items="facultyOptions"
-                  item-title="nombre"
-                  item-value="id"
-                  :error-messages="getFieldError('facultadId', 'facultad')"
                 />
               </VCol>
 
               <VCol cols="12" md="6">
                 <AppTextField
-                  v-if="sectionReadOnly('resumen-academico')"
                   :model-value="escuelaNombre"
                   label="Escuela profesional"
                   readonly
                 />
-                <AppSelect
-                  v-else
-                  v-model="values.escuelaProfesionalId"
-                  label="Escuela profesional"
-                  :items="professionalSchoolOptions"
-                  item-title="nombre"
-                  item-value="id"
-                  :error-messages="getFieldError('escuelaProfesionalId', 'escuelaProfesional')"
-                />
               </VCol>
 
               <VCol cols="12" md="6">
-                <AppDateTimePicker
+                <AppTextField
                   v-model="values.fechaIngreso"
-                  label="Fecha de ingreso"
-                  :config="{ dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true }"
-                  :disabled="sectionReadOnly('resumen-academico')"
+                  label="Año de ingreso *"
+                  placeholder="Ej: 2018"
+                  maxlength="4"
+                  :readonly="sectionReadOnly('resumen-academico')"
                   :error-messages="getFieldError('fechaIngreso', 'anioIngreso')"
+                  @keypress="(e: KeyboardEvent) => { if (!/\d/.test(e.key)) e.preventDefault() }"
                 />
               </VCol>
 
               <VCol cols="12" md="6">
-                <AppDateTimePicker
+                <AppTextField
                   v-model="values.fechaEgreso"
-                  label="Fecha de egreso"
-                  :config="{ dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true, minDate: values.fechaIngreso || undefined }"
-                  :disabled="sectionReadOnly('resumen-academico')"
+                  label="Año de egreso *"
+                  placeholder="Ej: 2023"
+                  maxlength="4"
+                  :readonly="sectionReadOnly('resumen-academico')"
                   :error-messages="getFieldError('fechaEgreso', 'anioEgreso')"
+                  @keypress="(e: KeyboardEvent) => { if (!/\d/.test(e.key)) e.preventDefault() }"
                 />
               </VCol>
             </VRow>

@@ -498,8 +498,16 @@ async function exportSurveyData(surveyId: number, format: 'csv' | 'excel' | 'pdf
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
 
+    const now = new Date()
+    const ts = now.getFullYear().toString()
+      + String(now.getMonth() + 1).padStart(2, '0')
+      + String(now.getDate()).padStart(2, '0')
+      + String(now.getHours()).padStart(2, '0')
+      + String(now.getMinutes()).padStart(2, '0')
+      + String(now.getSeconds()).padStart(2, '0')
+
     link.href = url
-    link.download = `reporte_encuesta_${surveyId}.${ext}`
+    link.download = `reporte_encuesta_${surveyId}_${ts}.${ext}`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -545,8 +553,16 @@ async function exportGeneralReport(format: 'csv' | 'excel' | 'pdf' = 'csv') {
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
 
+    const now = new Date()
+    const ts = now.getFullYear().toString()
+      + String(now.getMonth() + 1).padStart(2, '0')
+      + String(now.getDate()).padStart(2, '0')
+      + String(now.getHours()).padStart(2, '0')
+      + String(now.getMinutes()).padStart(2, '0')
+      + String(now.getSeconds()).padStart(2, '0')
+
     link.href = url
-    link.download = `reporte_general_encuestas.${ext}`
+    link.download = `reporte_general_encuestas_${ts}.${ext}`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
