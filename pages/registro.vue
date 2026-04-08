@@ -100,7 +100,7 @@ const onSubmit = async () => {
       >
         <VCardText>
           <h4 class="text-h4 mb-1">
-            Crea tu cuenta de egresado ✨
+            Crea tu cuenta de egresado
           </h4>
           <p class="mb-0">
             Regístrate con tus datos personales para iniciar el proceso de validación.
@@ -179,7 +179,7 @@ const onSubmit = async () => {
               <VCol cols="12">
                 <AppTextField
                   v-model="form.correo"
-                  label="Correo institucional"
+                  label="Correo electrónico"
                   type="email"
                   placeholder="usuario@ejemplo.com"
                   :error="Boolean(errors.correo)"

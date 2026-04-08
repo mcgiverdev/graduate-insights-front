@@ -212,19 +212,27 @@ export const graduateWizardStepThreeSchema = yup.object({
   escuelaProfesionalId: yup.number().integer().positive().required('La escuela profesional es obligatoria'),
   fechaIngreso: yup
     .string()
-    .required('La fecha de ingreso es obligatoria'),
+    .required('El año de ingreso es obligatorio')
+    .matches(/^\d{4}$/, 'Ingrese un año válido (4 dígitos)')
+    .test('valid-year', 'El año debe estar entre 1900 y el año actual', value => {
+      if (!value) return true
+      const year = parseInt(value)
+      return year >= 1900 && year <= new Date().getFullYear()
+    }),
   fechaEgreso: yup
     .string()
-    .required('La fecha de egreso es obligatoria')
-    .test('is-after-ingreso', 'La fecha de egreso debe ser mayor o igual a la fecha de ingreso', (value, context) => {
-      if (!value)
-        return true
-
+    .required('El año de egreso es obligatorio')
+    .matches(/^\d{4}$/, 'Ingrese un año válido (4 dígitos)')
+    .test('valid-year', 'El año debe estar entre 1900 y el año actual', value => {
+      if (!value) return true
+      const year = parseInt(value)
+      return year >= 1900 && year <= new Date().getFullYear()
+    })
+    .test('is-after-ingreso', 'El año de egreso debe ser mayor o igual al año de ingreso', (value, context) => {
+      if (!value) return true
       const ingreso = context.parent.fechaIngreso
-      if (!ingreso)
-        return true
-
-      return new Date(value) >= new Date(ingreso)
+      if (!ingreso || !/^\d{4}$/.test(ingreso)) return true
+      return parseInt(value) >= parseInt(ingreso)
     }),
   grados: yup.array().of(degreeCollectionItemSchema).optional(),
   idiomas: yup.array().of(languageCollectionItemSchema).optional(),

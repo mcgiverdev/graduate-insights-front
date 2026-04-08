@@ -276,66 +276,9 @@ const roleIcon = computed(() => {
                   Una contraseña segura protege tu cuenta de accesos no autorizados. Te recomendamos cambiarla periódicamente.
                 </p>
 
-                <p class="text-body-2 font-weight-semibold mb-3">
-                  Tu contraseña debe tener:
+                <p class="text-body-2 text-medium-emphasis">
+                  Los requisitos se mostrarán en tiempo real mientras escribes tu nueva contraseña.
                 </p>
-                <VList
-                  density="compact"
-                  class="pa-0 security-tips-list"
-                >
-                  <VListItem class="px-0 py-1">
-                    <template #prepend>
-                      <VIcon
-                        icon="tabler-check"
-                        size="16"
-                        color="success"
-                        class="me-2"
-                      />
-                    </template>
-                    <VListItemTitle class="text-body-2">
-                      Al menos 8 caracteres
-                    </VListItemTitle>
-                  </VListItem>
-                  <VListItem class="px-0 py-1">
-                    <template #prepend>
-                      <VIcon
-                        icon="tabler-check"
-                        size="16"
-                        color="success"
-                        class="me-2"
-                      />
-                    </template>
-                    <VListItemTitle class="text-body-2">
-                      Al menos una letra mayúscula
-                    </VListItemTitle>
-                  </VListItem>
-                  <VListItem class="px-0 py-1">
-                    <template #prepend>
-                      <VIcon
-                        icon="tabler-check"
-                        size="16"
-                        color="success"
-                        class="me-2"
-                      />
-                    </template>
-                    <VListItemTitle class="text-body-2">
-                      Al menos un número
-                    </VListItemTitle>
-                  </VListItem>
-                  <VListItem class="px-0 py-1">
-                    <template #prepend>
-                      <VIcon
-                        icon="tabler-check"
-                        size="16"
-                        color="success"
-                        class="me-2"
-                      />
-                    </template>
-                    <VListItemTitle class="text-body-2">
-                      Al menos un carácter especial
-                    </VListItemTitle>
-                  </VListItem>
-                </VList>
               </VCardText>
             </VCard>
           </VCol>

@@ -1,4 +1,4 @@
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { profileService } from '../services/ProfileService'
 import { useSnackbar } from '@/composables/useSnackbar'
 import type { RequestResult } from '@/infrastructure/http/types'
@@ -28,6 +28,14 @@ export const usePasswordChange = () => {
     newPassword: undefined,
     confirmPassword: undefined,
   })
+
+  const requirements = computed(() => ({
+    minLength: form.newPassword.length >= PASSWORD_REQUIREMENTS.minLength,
+    digit: PASSWORD_REQUIREMENTS.digit.test(form.newPassword),
+    lower: PASSWORD_REQUIREMENTS.lower.test(form.newPassword),
+    upper: PASSWORD_REQUIREMENTS.upper.test(form.newPassword),
+    special: PASSWORD_REQUIREMENTS.special.test(form.newPassword),
+  }))
 
   const submitting = ref(false)
   const { showSnackbar } = useSnackbar()
@@ -96,6 +104,7 @@ export const usePasswordChange = () => {
   return {
     form,
     errors,
+    requirements,
     submitting,
     submit,
     reset,
