@@ -182,7 +182,7 @@ export interface GraduatePayload {
   idiomas?: GraduateLanguagePayload[]
   formaciones_complementarias?: GraduateComplementaryTrainingPayload[]
   trayectorias_laborales?: GraduateWorkTrajectoryPayload[]
-  contrasena: string
+  contrasena?: string
   cv_path?: string
   foto_path?: string
 }
