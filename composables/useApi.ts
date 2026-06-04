@@ -20,7 +20,10 @@ export const useApi = async <T = any>(url: string, options: any = {}): Promise<A
   const { handleAuthError } = useAuthService()
   const { showSnackbar } = useSnackbar()
 
-  const headers = options.headers ? { ...options.headers } : {}
+  // silentError: el caller maneja el mensaje de error (evita snackbar duplicado)
+  const { silentError = false, ...fetchOptions } = options
+
+  const headers = fetchOptions.headers ? { ...fetchOptions.headers } : {}
 
   if (accessToken.value && !headers.Authorization && !headers.authorization)
     headers.Authorization = `Bearer ${accessToken.value}`
@@ -30,7 +33,7 @@ export const useApi = async <T = any>(url: string, options: any = {}): Promise<A
     credentials: 'include' as RequestCredentials,
   }
 
-  const params = defu({ ...options, headers }, defaults)
+  const params = defu({ ...fetchOptions, headers }, defaults)
 
   try {
     const response = await $fetch.raw<T>(url, params)
@@ -53,11 +56,13 @@ export const useApi = async <T = any>(url: string, options: any = {}): Promise<A
     if (error.response) {
       const payload = error.response._data
 
-      if (payload?.errors?.length)
-        showSnackbar({ text: payload.errors[0], color: 'error' })
+      if (!silentError) {
+        if (payload?.errors?.length)
+          showSnackbar({ text: payload.errors[0], color: 'error' })
 
-      else if (payload?.message)
-        showSnackbar({ text: payload.message, color: 'error' })
+        else if (payload?.message)
+          showSnackbar({ text: payload.message, color: 'error' })
+      }
 
       const apiError = new Error(error.message || 'Error en la petición') as ApiError
 
@@ -67,7 +72,8 @@ export const useApi = async <T = any>(url: string, options: any = {}): Promise<A
     }
 
     // Sin respuesta del servidor (red caída, CORS, timeout, etc.)
-    showSnackbar({ text: 'Ocurrió un problema. Vuelva a intentarlo en unos minutos.', color: 'error' })
+    if (!silentError)
+      showSnackbar({ text: 'Ocurrió un problema. Vuelva a intentarlo en unos minutos.', color: 'error' })
     throw error
   }
 }

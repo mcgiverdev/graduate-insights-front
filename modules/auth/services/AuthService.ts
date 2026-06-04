@@ -125,6 +125,7 @@ class AuthModuleService {
       response = await useApi<LoginResponse>(LOGIN_ENDPOINT, {
         method: 'POST',
         body: { email, password },
+        silentError: true,
       })
     }
     catch (error) {
@@ -248,6 +249,7 @@ class AuthModuleService {
       const response = await useApi<ApiResponseWrapper<null>>(REGISTER_GRADUATE_ENDPOINT, {
         method: 'POST',
         body: payload,
+        silentError: true,
       })
 
       const registerData = response.data

@@ -6,6 +6,7 @@ import authV1BottomShape from '@images/svg/auth-v1-bottom-shape.svg?raw'
 import authV1TopShape from '@images/svg/auth-v1-top-shape.svg?raw'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
+import { useSnackbar } from '@/composables/useSnackbar'
 
 definePageMeta({
   layout: 'blank',
@@ -13,9 +14,26 @@ definePageMeta({
 })
 
 const route = useRoute()
+const { showSnackbar } = useSnackbar()
 const email = computed(() => route.query.email?.toString() || '')
 
-const handleVerified = () => navigateTo('/', { replace: true })
+const handleVerified = () => {
+  const token = useCookie('accessToken', { path: '/' })
+
+  // Usuario ya autenticado (logueado pero sin verificar): ya puede entrar.
+  if (token.value) {
+    navigateTo('/', { replace: true })
+
+    return
+  }
+
+  // Egresado recien registrado: verifico su correo pero falta la aprobacion del director.
+  showSnackbar({
+    text: 'Correo verificado. Tu cuenta se habilitara cuando el director apruebe tu registro.',
+    color: 'info',
+  })
+  navigateTo('/login', { replace: true })
+}
 
 const goToLogin = () => {
   const token = useCookie('accessToken', { path: '/' })
